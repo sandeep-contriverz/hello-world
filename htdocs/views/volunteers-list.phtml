@@ -1,0 +1,138 @@
+<script type="text/javascript">
+$("document").ready(function(){
+	$(".volunteer").on("click", function(){
+		var id = $(this).attr('id').slice(10);
+		location.href="index.php?action=volunteer&id=" + id;
+	});
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(/ /g, '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		} 
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		if(field == 'volunteer_name'){
+			field = 'last_name';
+		}
+		if(field == 'volunteer_areas'){
+			field = 'areas';
+		}
+		location.href="index.php?action=volunteers&field="+field+"&sort="+fieldsort;
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?print=true&' + postString, '');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?export=true&' + postString, '');
+	});
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Volunteers</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="volunteer" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Volunteer" class="btn-small" /></form>
+	</div>
+	
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="volunteers" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['volunteers']['filters']['quick']) ? $_SESSION['volunteers']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+			
+</div>	
+
+<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+	
+<div class="dataTable" style="height: auto;">
+	<div class="titleBar">
+		<form id="filter-form" action="index.php" style="padding: 4px 3px 0 4px;"><input type="hidden" name="action" value="volunteers">
+			<div style="float: right;">
+			<input type="submit" class="btn-small" id="export-list" name="export_list" value="Export" />
+			<input type="submit" class="btn-small" id="print-list" name="export_list" value="Print" />
+			</div>
+			<?= $volunteer->displayEnumSelect('filters[status]', 'status', $filters['status'], 'Status') ?>
+			<? /*241016 = $volunteer->displayAreaSelect('area', array(
+					"eagle_scout" => "Eagle Scout", 
+					"family_event" => "Family Event", 
+					"data_entry" => "Data Entry", 
+					"care_coordination" => "Care Coordination",
+					"special_projects" => "Special Projects",
+					"parent_mentor" => "Parent Mentor"
+				), $filters['area'], 'Volunteer Area') ?> 
+			<select id="area" name="filters[area]" class="area">
+				<?php if(!empty($volunteering_type)) { //211016
+					foreach($volunteering_type->settings as $type) {
+						//$replace = str_replace(' ', '_', strtolower($type['name']));
+						if(!empty($data['volunteering_type']))
+						$saved_types = explode(',', $data['volunteering_type']);
+						if(strtolower($type['name']) != 'other') {
+							if(!empty($saved_types) 
+						&& !in_array($type['id'], $saved_types)) {
+								continue;
+							}
+						}
+						echo '<option value="'.$type['id'].'">'.$type['name'].'</option>';
+					}
+				} ?>
+			</select>
+			<?php */ //echo "<pre>";print_r($volunteering_type->settings);die;?>
+			<?= $volunteer->displayAreaSelect('area', $volunteering_type, $filters['area'], 'Volunteer Area') ?> 
+			<input type="submit" value="Filter" class="btn-small" />  <input type="submit" name="clearFilters" value="Clear" class="btn-small" />
+		</form>
+	</div>
+ <?  if(is_array($volunteers)) : ?>	
+
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=($sorts['last_name'] ? '_' . strtolower($sorts['last_name']) : '')?>">Volunteer Name</th>
+			<th <?/*class="sort sorting<?=($sorts['areas'] ? '_' . strtolower($sorts['areas']) : '')?>" */?> >Volunteer Areas</th>
+			<th class="sort sorting<?=($sorts['phone'] ? '_' . strtolower($sorts['phone']) : '')?>">Phone</th>
+			<th class="sort sorting<?=($sorts['email'] ? '_' . strtolower($sorts['email']) : '')?>">Email</th>
+			<th class="sort sorting<?=($sorts['status'] ? '_' . strtolower($sorts['status']) : '')?>">Status</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; ?>
+	<? foreach($volunteers as $volunteer) : ?>
+	
+		<tr id="volunteer_<?=$volunteer['id']?>" class="volunteer <?=$row?>">
+			<td><?=ucfirst(strtolower($volunteer['last_name'])) . ', ' . ucwords(strtolower($volunteer['first_name']))?></td>
+			<td><?=preg_replace("/,+/", '<br />', $volunteer['areas'])?></td>
+			<td><?=$volunteer['phone']?></td>
+			<td><?=($volunteer['email'] ? '<a href="mailto:' . $volunteer['email'] . '" title="' . $volunteer['email'] . '">Email</a>' : '')?></td>
+			<td><?=$volunteer['status']?></td>
+		</tr>
+		
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+		
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalVolunteers ?> volunteers
+	</div>
+	<div style="float: right;" id="gridPages">
+		<a href="index.php?action=volunteers">First</a>			
+		<?= ($pageNumber > 1 ? '<a href="index.php?action=volunteers' . (isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] . (isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') : '') . '&page= ' . ($pageNumber - 1) . '">&lt; Prev</a>' : '')?>			
+		Page <?= $pageNumber ?> of <?= $numPages ?>			
+		<?= ($pageNumber < $numPages ? '<a href="index.php?action=volunteers' . (isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] . (isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') : '') . '&page= ' . ($pageNumber + 1) . '">Next &gt;</a>' : '')?>			
+		<a href="index.php?action=volunteers<?=(isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] : ''); ?><?=(isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') ?>&page=<?= $numPages ?>">Last</a>		
+	</div>
+</div>
+<? else : ?>
+<p><br /><em>No result found.</em></p>
+<? endif; ?>

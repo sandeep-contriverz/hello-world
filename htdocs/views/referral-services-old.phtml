@@ -1,0 +1,157 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).on('click', '.setting-panel .btn-small', function(){
+		if($(this).val() == 'Edit'){
+			$(this).val('Save'); // Change button value
+			parentDiv = $(this).parents('div.setting-panel');
+			ulElement = parentDiv.find('ul');
+			ulElement.show('fast');
+			liElements = parentDiv.find('li');
+			liElements.each(function(index){
+				tmp = $(this).text();
+				tmpId = $(this).attr('id').replace('rs','');
+				curClass = $(this).attr('class');
+				curIndex = index;
+				$(this).html('<input name="rs[' + tmpId + ']" value="' + tmp + '" class="setting" />');
+			});
+			liElements.last().after('<li class="' + (curClass == 'odd' ? 'even' : 'odd') + '" id="rs0_0"><input name="rs[0]" value="" class="setting" /></li>');
+		} else {
+			btn = $(this);
+			parentDiv = btn.parents('div.setting-panel');
+			ulElement = parentDiv.find('ul');
+			// Create a JSON string and post to model
+			// Create a new list of settings
+			parentId = parentDiv.attr('id').replace('r','');
+			json = '{"id":"' + parentId + '","services":[';
+			liElements = parentDiv.find('li');
+			addSeparator = false;
+			liElements.each(function(index){
+				tmpInput = $(this).find('input');
+				tmpId = $(this).attr('id').split('_')[1];
+				tmpVal = tmpInput.val();
+				if(tmpId || tmpVal){
+					json += (addSeparator ? ',' : '') + '{"id" : "' + tmpId + '", "value" : "' + tmpVal + '"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			$.post('index.php', { 'action' : 'referral-services', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					btn.val('Edit'); // Change button value
+					liElements.remove();
+					ulElement = parentDiv.find('ul');
+					var curClass = 'odd';
+					var items = [];
+  					$.each(data, function(key, val) {    				
+  						if(curClass == 'odd'){
+    						curClass = 'even';
+    					} else {
+    						curClass = 'odd';
+    					}
+    					$('<li class="' + curClass + '" id="rs' + parentId + '_' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+  					});
+					ulElement.hide('slow');
+  				}
+			});
+			//jsonObj = $.parseJSON( json );
+			//alert(json);
+		}
+	});
+	$(document).on('click', '.setting-panel-setting .btn-small', function(){
+		if($(this).val() == 'Edit'){
+			$(this).val('Save'); // Change button value
+			parentDiv = $(this).parents('div.setting-panel-setting');
+			ulElement = parentDiv.find('ul');
+			ulElement.show('fast');
+			liElements = parentDiv.find('li');
+			liElements.each(function(index){
+				tmp = $(this).text();
+				tmpId = $(this).attr('id').replace('setting','');
+				curClass = $(this).attr('class');
+				curIndex = index;
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" class="setting" />');
+			});
+			liElements.last().after('<li class="' + (curClass == 'odd' ? 'even' : 'odd') + '" id="setting0"><input name="settings[0]" value="" class="setting" /></li>');
+		} else {
+			btn = $(this);
+			parentDiv = btn.parents('div.setting-panel-setting');
+			ulElement = parentDiv.find('ul');
+			// Create a JSON string and post to model
+			// Create a new list of settings
+			json = '{"id":"' + parentDiv.attr('id') + '","settings":[';
+			liElements = parentDiv.find('li');
+			addSeparator = false;
+			liElements.each(function(index){
+				tmpInput = $(this).find('input');
+				tmpId = $(this).attr('id').replace('setting','');
+				tmpVal = tmpInput.val();
+				if(tmpId || tmpVal){
+					json += (addSeparator ? ',' : '') + '{"id" : "' + tmpId + '", "value" : "' + tmpVal + '"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					location.reload();
+  				}
+			});
+		}
+	});
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Referral/Service Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="settings" /><input type="submit" value="System Settings" class="btn-small" /></form>			
+	</div>
+</div>
+
+<div>
+
+<div id="#referred_to" class="setting-panel-setting">
+	<div class="titleBar" style="height: 40px; padding: 2px 4px;"><input type="button" class="btn-small" style="margin: 2px 0px 3px 4px" value="Edit" /><div class="caption" style="text-indent: 0px !important; font-size: 8pt !important; line-height: 13px !important;">Referral List</div></div>
+	<ul class="hide">
+<? if(is_array($referred_to->settings)) : ?>
+<? $count = 1; ?>
+<? foreach($referred_to->settings as $setting) : ?>
+		<? if($setting) : ?>
+		<li class="<?= $count % 2 ? 'odd' : 'even' ?>" id="setting<?= $setting['id'] ?>"><?= $setting['name'] ?></li>
+		<? endif; ?>
+<? $count++; ?>
+<? endforeach ?>
+<? endif; ?>
+	</ul>
+</div>
+
+<? $referredToId = null; $closeList = false; ?>
+<? if(is_array($referralServices)) : ?>
+	<? foreach($referralServices as $referralService) : ?>
+
+		<? if($referralService['referred_to_id'] != $referredToId) : ?>
+			<? if(!is_null($referredToId)) : ?> 
+					</ul>
+				</div>
+			<? endif ?>
+			<? 
+			$referredToId = $referralService['referred_to_id'];
+			$count = 1;
+			?>
+			<div id="r<?=$referralService['referred_to_id']?>" class="setting-panel">
+				<div class="titleBar" style="height: 40px; padding: 2px 4px;"><input type="button" class="btn-small" style="margin: 2px 0px 3px 4px" value="Edit" /><div class="caption" style="text-indent: 0px !important; font-size: 8pt !important; line-height: 13px !important;"><?= $referralService['referred_to'] ?></div></div>
+				<ul class="hide">
+		<? endif ?>
+			<li class="<?= $count % 2 ? 'odd' : 'even' ?>" id="rs<?=$referralService['referred_to_id']?>_<?=$referralService['service_id']?>"><?= $referralService['service'] ?></li>
+			<? $count++; ?>
+
+	<? endforeach ?>
+
+		</ul>
+	</div>
+
+<? endif ?>
+
+</div>
+
+<div style="clear:left">&nbsp;</div>

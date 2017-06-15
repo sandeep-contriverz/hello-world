@@ -1,0 +1,135 @@
+<div id="child-developmental-screening" style="display: none">
+	<div class="titleBar" style="padding: 0 10px;"><span class="caption" style="">Child Developmental Screening</span></div>
+	<form id="developmental-screening-form" class="developmental-screening-form" action="/index.php" method="get">
+		<input type="hidden" name="action" value="child-developmental-screening" />
+		<input type="hidden" id="child-id" name="developmentScreening[child_id]" value="<?= $child_id ?>" />
+		<input type="hidden" id="id" name="developmentScreening[id]" value="<?= (isset($developmentalScreening) ? $developmentalScreening['id'] : '') ?>" />
+		<div style="padding: 10px">
+		<table id="screening-form-table">
+			<tbody>
+				<tr>
+					<td class="label">Screening Type</td>
+					<td>
+						<select name="developmentScreening[type]" placeholder="ASQ Type">
+							<option></option>
+							<option>ASQ</option>
+							<option>ASQ SE</option>
+						</select>
+					</td>
+					<td class="label">Screening Interval</td>
+					<td>
+						<select name="developmentScreening[asq_month]" placeholder="ASQ Month">
+							<option></option>
+							<?
+							for($m = 2; $m <= 60; $m+=2){
+							echo '<option>' . $m . '</option>';
+							}
+							?>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Date Completed</td>
+					<td>
+						<input name="developmentScreening[date_sent]" />
+					</td>
+					<td class="label">Date Scored</td>
+					<td>
+						<input name="developmentScreening[date_scored]" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">ASQ Online</td>
+					<td>
+						<input name="developmentScreening[asq_online]" />
+					</td>
+					<td class="label">Fax to Doctor</td>
+					<td>
+						<input name="developmentScreening[date_sent_provider]" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Score</td>
+					<td>
+						<select name="developmentScreening[score]" placeholder="Score">
+							<option></option>
+							<option>White</option>
+							<option>Grey</option>
+							<option>Black</option>
+						</select>
+					</td>
+					<td class="label">&nbsp</td>
+					<td>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td class="label" rowspan="3" valign="top">ASQ 3</td>
+					<td rowspan="3" valign="top">
+						<table id="asq3-table">
+							<tr>
+								<td>&nbsp;</td>
+								<td>White</td>
+								<td>Grey</td>
+								<td>Black</td>
+							</tr>
+							<tr>
+								<td>Communication</td>
+								<td align="center"><input name="developmentScreening[communication]" type="radio" value="white"></td>
+								<td align="center"><input name="developmentScreening[communication]" type="radio" value="grey"></td>
+								<td align="center"><input name="developmentScreening[communication]" type="radio" value="black"></td>
+							</tr>
+							<tr>
+								<td>Fine Motor</td>
+								<td align="center"><input name="developmentScreening[fine_motor]" type="radio" value="white"></td>
+								<td align="center"><input name="developmentScreening[fine_motor]" type="radio" value="grey"></td>
+								<td align="center"><input name="developmentScreening[fine_motor]" type="radio" value="black"></td>
+							</tr>
+							<tr>
+								<td>Gross Motor</td>
+								<td align="center"><input name="developmentScreening[gross_motor]" type="radio" value="white"></td>
+								<td align="center"><input name="developmentScreening[gross_motor]" type="radio" value="grey"></td>
+								<td align="center"><input name="developmentScreening[gross_motor]" type="radio" value="black"></td>
+							</tr>
+							<tr>
+								<td>Problem Solving</td>
+								<td align="center"><input name="developmentScreening[problem_solving]" type="radio" value="white"></td>
+								<td align="center"><input name="developmentScreening[problem_solving]" type="radio" value="grey"></td>
+								<td align="center"><input name="developmentScreening[problem_solving]" type="radio" value="black"></td>
+							</tr>
+							<tr>
+								<td>Personal Social</td>
+								<td align="center"><input name="developmentScreening[personal_social]" type="radio" value="white"></td>
+								<td align="center"><input name="developmentScreening[personal_social]" type="radio" value="grey"></td>
+								<td align="center"><input name="developmentScreening[personal_social]" type="radio" value="black"></td>
+							</tr>
+						</table>
+					</td>
+					<td class="label">ASQ-SE</td>
+					<td>
+						<input name="developmentScreening[asq_se_score]">
+					</td>
+				</tr>
+				<tr>
+					<td class="label" valign="top">Attachment</td>
+					<td valign="top">
+						<input name="developmentScreening[pdf]">
+					</td>
+				</tr>
+				<tr>
+					<td class="label" valign="top">Notes</td>
+					<td valign="top">
+						<textarea name="developmentScreening[notes]" cols="20" rows="6"></textarea>
+					</td>
+				</tr>
+
+				<tr>
+					<td colspan="4" style="text-align: right;">
+						<input type="submit" class="btn-small save-developmental-screening" name="save" value="Add" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</div>
+	</form>
+</div>

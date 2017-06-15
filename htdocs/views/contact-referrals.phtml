@@ -1,0 +1,101 @@
+					<div class="title"><h2><?=$referralType?> Referrals</h2></div>
+					<form action="index.php" method="get" id="form-referral" style="margin-top: 12px;">
+					<div id="add-referral-fields">
+						<?= $issues->displaySelect('issue_id', '','Issue') ?>
+						<div style="display:inline-block;">
+							<input type="hidden" class="autosuggest-value referral-referred-to" name="referred_to_id" />
+							<input type="hidden" class="autosuggest-type referral-referred-type" name="referred_to_type" />
+							<input
+								class="autosuggest-input rounded"
+								placeholder="Type referral name"
+								data-query-string="action=referral-services&search="
+								autocomplete="off" />
+							<div class="autosuggest-selection-container"></div>
+						</div>
+						<?= $service->displaySelect('service_id', '', 'Service', '', '', 'referral-service') ?>
+						<input type="hidden" name="based_screening" value="0" />
+						<!--div style="display: inline-block; width:7%;line-height: 12px; vertical-align: middle;"></div--> 
+						
+						<?= $referral_outcome->displaySelect('outcomes', 'Outcome', 'Outcome', '', false, NULL, true) //191016 ?>
+						<input type="submit" id="add-referral" name="save" value="Add" class="btn-small" />
+					</div>
+					
+					<table class="display infoTable" style="margin-top: 4px;" border="0" cellspacing="0" cellpadding="0" id="table-referral">
+
+						<thead>
+						<tr>
+							<th style="padding-right: 0px;">&nbsp;</th>
+							<th style="">Issue</th>
+							<th style="padding-right: 0px;">Referral Name</th>
+							<th style="padding-right: 0px;">Service</th>
+							<th style="padding-right: 0px;">Outcome</th>
+						</tr>
+						</thead>
+
+						<tbody>
+
+						<? $row = 'odd'; ?>
+						<? $referralCount = 0; ?>
+						<? if(is_array($referrals)) : ?>
+						<? foreach ($referrals as $key => $referral) : ?>
+						<tr id="referralRow_<?= $referral['id'] ?>" class="clickable <?=$row?> <?=($referralCount >= 5 ? 'hidden extra' : '')?>">
+							<td style="white-space: nowrap;">
+								<div class="toggleArrow" style="height: 24px;"></div>
+								<?= ($referral['hmg_worker'] ? $referral['hmg_worker'] : 'Unknown') ?><br />
+								<?= $referral['referral_date_formatted'] ?>
+							</td>
+							<td>
+							
+							<?= $referral['issue'] ?></td>
+							<td><?php
+							if( $referral['referred_to_type']  == 'info'){
+							    echo $setting->getValue($referral['referred_to_id']);
+							}
+							else{
+							$siteSeprate = '';
+							if($referral['site_name']){
+								$siteSeprate = ': '.$referral['site_name'];
+							}
+							
+							echo $referral['organization_name'].$siteSeprate;
+							}
+							?>
+							
+							</td>
+							<td><?= $referral['service'] ?></td>
+							<td><?= $setting->getSettingById($referral['outcomes']) ?></td>
+						</tr>
+
+						<tr id="referralRow_details_<?= $referral['id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="4">
+								<table style="width: 100%; border: none;">
+									<tr>
+										<td style="border: none;"><b>Gaps:</b> <?= $gaps->getValue($referral['gap']) ?></td>
+										<td style="border: none;"><b>Barriers:</b> <?= $barriers->getValue($referral['barrier']) ?></td>
+										<td style="border: none;"><b>Based on Screening:</b> <input type="checkbox" disabled <?= ($referral['based_screening'] ? ' checked' : '') ?> /></td>
+										<td style="border: none; width: 60px;">&nbsp;</td>
+									</tr>
+									<tr>
+										<td colspan="3" style="border: none;">
+											<b>Notes:</b> <?= $referral['notes'] ?>
+										</td>
+										<td style="width: 60px; text-align: center; border: none;">
+											<input type="button" class="btn-small edit-referral" id="edit_<?= $referral['id'] ?>" value="Edit" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? $referralCount++; ?>
+						<? endforeach; ?>
+						<? endif; ?>
+						</tbody>
+					</table>
+					</form>
+					<? if($referralCount > 5) : ?>
+					<a href="#" class="show-all-referrals">Show All <?=$referralCount?> Referrals</a>
+					<? endif; ?>

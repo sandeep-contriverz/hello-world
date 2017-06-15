@@ -1,0 +1,119 @@
+<?php 
+//echo "<pre>";print_r($_SERVER);die;
+function buildUrl($new) {
+	$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+	$url = $scheme.'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	if(empty($scheme) && isset($_SERVER['REQUEST_SCHEME'])) {
+		$url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	}
+
+	$url_parts = parse_url($url);
+	parse_str($url_parts['query'], $params);
+
+	$params[$new] = true;     // Overwrite if exists
+	// Note that this will url_encode all values
+	$url_parts['query'] = http_build_query($params);
+
+	// If not
+	return $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'] . '?' . $url_parts['query'];
+}
+$urlPrint  = buildUrl('print');
+$urlExport = buildUrl('export');
+
+?>
+
+
+<div style="width: 100%; margin-bottom: 5px; clear: both;">
+<?
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+echo "<b style='color: #464646'>";
+if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) echo implode(', ' , $this->drillheading).", ";
+if(!empty($this->subvalue)){
+    if( is_numeric($this->subvalue))
+    {   
+        echo $setting->getValue($this->subvalue);
+    }
+    else{
+        if($this->subvalue =='Totals'){
+            echo "Totals"; 
+
+        }
+        else{
+            $ert = explode(',',$this->subvalue);
+
+            $sdf = '';
+            foreach( $ert as $er){
+                $sdf .= $setting->getValue($er).' & '; 
+            }
+            echo substr($sdf,0,-2);
+        }
+    }
+}
+else{ 
+    echo 'Uncoded'; 
+} 
+echo "</b><br>";
+echo $filteredByLabel . $filteredBy;
+?>
+</div>
+
+<div>
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">		
+			<th class="sort sorting<?=(isset($sorts['event_name']) && $sorts['event_name'] ? '_' . strtolower($sorts['event_name']) : '')?>">Event_name</th>
+			<th class="sort sorting<?=(isset($sorts['organization_name']) && $sorts['organization_name'] ? '_' . strtolower($sorts['organization_name']) : '')?>">Organization</th>
+			<th class="sort sorting<?=(isset($sorts['site']) && $sorts['site'] ? '_' . strtolower($sorts['site']) : '')?>">Site</th>
+			<th class="sort sorting<?=(isset($sorts['outreach_type']) && $sorts['outreach_type'] ? '_' . strtolower($sorts['outreach_type']) : '')?>">Outreach Type</th>
+			<th class="sort sorting<?=(isset($sorts['event_type']) && $sorts['event_type'] ? '_' . strtolower($sorts['event_type']) : '')?>">Event_type</th>
+			<th class="sort sorting<?=(isset($sorts['hmgworker']) && $sorts['hmgworker'] ? '_' . strtolower($sorts['hmgworker']) : '')?>">HMG Worker</th>		
+	</tr>
+	</thead>
+	<tbody>
+<? $row = 'odd'; ?>
+
+<? $organizationObj = $organization; ?>
+	<? foreach($organizations as $organization) : ?>
+
+		<tr id="organization_<?=$organization['organization_sites_id']?>_<?=$pos?>" class="organization <?=$row?>">
+			<td><?=$organization['event_name']?></td>
+			<td><?=$organization['organization_name']?></td>
+			<td><?=isset($organization['site']) ? $organization['site'] : ''?></td>
+			<td><?= $organization['outreach_type']?></td>			
+			<td><?=$organization['event_type'] ?></td>
+			<td><?=$organization['hmgworker']?></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+		
+	<? endforeach; ?>
+	</tbody>
+</table>
+<br />
+
+

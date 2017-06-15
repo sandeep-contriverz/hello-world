@@ -1,0 +1,14 @@
+		<div class="infoText start-end-container">
+
+<? if(is_array($startEnds)) : ?>
+<? foreach($startEnds as $startEnd) : ?>
+	<div class="edit-start-end" data-id="<?= $startEnd['id'] ?>" data-family-id="<?= $startEnd['parent_id'] ?>" data-start-date="<?= $startEnd['start_date'] ?>" data-end-date="<?= $startEnd['end_date'] ?>" data-reason="<?= addslashes($startEnd['reason']) ?>">
+		<div style="float: right;"><a href="#" class="remove-start-end" data-id="<?=$startEnd['id']?>">[X]</a></div>
+		<b>Start:</b> <?= ($startEnd['formatted_start_date'] && $startEnd['start_date'] != '0000-00-00' ? $startEnd['formatted_start_date'] : 'Unkown') ?> 
+	<br>&nbsp;&nbsp;<b>End:</b> <?= ($startEnd['formatted_end_date'] && $startEnd['end_date'] != '0000-00-00' ? $startEnd['formatted_end_date'] : 'Current') ?><br />
+		<b> Reason: </b><?= $startEnd['reason'] ?>
+  <br>           
+	</div>
+<? endforeach; ?>
+<? endif; ?>
+</div>                        

@@ -1,0 +1,75 @@
+<?
+$permission = (!empty($_SESSION['user']['permission']) ? $_SESSION['user']['permission'] : 'Read Only');
+
+switch($permission){
+	
+	case 'Admin':
+
+$nav='
+<div class="firstColumn">
+		<div class="inner">
+			<div id="leftNav">
+			<div class="top"></div>
+			<div class="inside">
+				<a href="index.php?action=follow-ups" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('follow-ups')) ? 'on' : '') . '">Family Follow-up</a>
+				<a href="index.php?action=families" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('families', 'family', 'child')) ? 'on' : '') . '">Families</a> 
+				<a href="index.php?action=organization-follow-ups" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('organization-follow-ups')) ? 'on' : '') . '">Organization Follow-up</a>
+				<a href="index.php?action=organizations" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('organizations', 'organization', 'contact')) ? 'on' : '') . '">Organizations</a>
+				<!--a href="index.php?action=providers" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'providers' ? 'on' : '') . '">Providers</a-->
+				<a href="index.php?action=volunteers" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'volunteers' ? 'on' : '') . '">Volunteers</a>
+				<a href="index.php?action=reports" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'reports' ? 'on' : '') . '">Reports</a>
+				<a href="index.php?action=counts" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'counts' ? 'on' : '') . '">Counts</a>
+				<a href="index.php?action=settings" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'settings' ? 'on' : '') . '">Settings</a>
+				<a href="index.php?action=city" class ="'.(isset($_REQUEST['action']) && $_REQUEST['action'] == 'city' ? 'on' : '').'">City</a>
+				<a href="index.php?action=logout" class="last">Log Out</a>
+			</div>
+			<div class="bottom"></div>
+			</div>
+		</div>
+</div>';
+
+	break;
+
+	case 'Edit':
+
+$nav='
+<div class="firstColumn">
+		<div class="inner">
+			<div id="leftNav">
+			<div class="top"></div>
+			<div class="inside"> 
+				<a href="index.php?action=follow-ups" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('families', 'family', 'follow-ups')) ? 'on' : '') . '">Family Follow-up</a>
+				<a href="index.php?action=families" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('families', 'family', 'child')) ? 'on' : '') . '">Families</a>
+				<a href="index.php?action=organization-follow-ups" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('organization-follow-ups')) ? 'on' : '') . '">Organization Follow-up</a>
+				<a href="index.php?action=organizations" class="' . (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('organizations', 'organization', 'contact')) ? 'on' : '') . '">Organizations</a>
+				<!--a href="index.php?action=providers" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'providers' ? 'on' : '') . '">Providers</a-->
+				<a href="index.php?action=volunteers" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'volunteers' ? 'on' : '') . '">Volunteers</a>
+				<a href="index.php?action=reports" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'reports' ? 'on' : '') . '">Reports</a>
+				<a href="index.php?action=counts" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'counts' ? 'on' : '') . '">Counts</a>
+				<a href="index.php?action=logout" class="last">Log Out</a>
+			</div>
+			<div class="bottom"></div>
+			</div>
+		</div>
+</div>';
+
+	break;
+
+	case 'Read Only':
+	default:
+
+$nav='
+<div class="firstColumn">
+		<div class="inner">
+			<div id="leftNav">
+			<div class="top"></div>
+			<div class="inside"> 
+				<a href="index.php?action=counts" class="' . (isset($_REQUEST['action']) && $_REQUEST['action'] == 'counts' ? 'on' : '') . '">Counts</a>
+				<a href="index.php?action=logout" class="last">Log Out</a>
+			</div>
+			<div class="bottom"></div>
+			</div>
+		</div>
+</div>';
+
+}

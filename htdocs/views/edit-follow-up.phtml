@@ -1,0 +1,108 @@
+<? use Hmg\Models\User; ?>
+
+					<tr id="followUpRow_<?= $followUp['id'] ?>" class="<?=$rowClass?>">
+							<td>
+							<? $user = new User();
+                             
+                    echo ($followUp['hmg_worker']? $user->getById($followUp['hmg_worker']) : 'Unknown');
+							?><br />
+								<?= ($followUp['referral_date_formatted'] != '00/00/00' ? $followUp['referral_date_formatted'] : '') ?>
+							<td>
+								<input type="hidden"
+									class="autosuggest-value edit-follow-up-referred-to"
+									name="<?= 'followUp[' . $followUp['id'] . '][referred_to_id]' ?>"
+									value="<?= $followUp['referred_to_id'] ?>" />
+									<input type="hidden"
+									class="autosuggest-type edit-follow-up-referred-to"
+									name="<?= 'followUp[' . $followUp['id'] . '][referred_to_type]' ?>"
+									value="<?= $followUp['referred_to_type'] ?>" />
+								<?php
+								
+								if( $followUp['referred_to_type']  == 'info'){
+									  ?>
+									  <input
+									class="autosuggest-input rounded"
+				    				placeholder="Type referral name"
+				    				value="<?= $setting->getValue($followUp['referred_to_id']) ?>"
+									data-query-string="action=referral-services&search="
+									autocomplete="off" />
+									  <?php
+							    
+							}
+							else{ 
+									$siteSeprate = '';
+									if($followUp['site_name']){
+									$siteSeprate = ': '.$followUp['site_name'];
+									}
+									
+									?>
+								<input
+									class="autosuggest-input rounded"
+				    				placeholder="Type referral name"
+				    				value="<?= $followUp['organization_name'].$siteSeprate . ($followUp['referred_to_disabled'] ? ' (Inactive)' : '') ?>"
+									data-query-string="action=referral-services&search="
+									autocomplete="off" />
+									<?php } ?>
+								<div class="autosuggest-selection-container"></div>
+							</td>
+							<td><?= $referralServices->displayServiceSelect('followUp[' . $followUp['id'] . '][service_id]', $followUp['service_id'], 'Service','', '', 'edit-follow-up-service', true, false) ?></td>
+							<td><?= $followUpTask->displaySelect('followUp[' . $followUp['id'] . '][follow_up_task_id]', $followUp['follow_up_task_id'], 'Follow Up Reason') ?></td>
+							<td style="width: auto;">
+
+								<input type="text" class="date" style="width: 55px !important;" id="follow-up-date" name="followUp[<?= $followUp['id'] ?>][follow_up_date]" value="<?= ($followUp['follow_up_date_formatted'] != '00/00/00' ? $followUp['follow_up_date_formatted'] : '') ?>" placeholder = "Date" />
+							</td>
+							<td style="text-align: center;">
+								<input type="hidden" name="followUp[<?= $followUp['id'] ?>][done]" value="0" />
+								<input type="checkbox" id="followUp[<?= $followUp['id'] ?>][done]" class="done-check-box" name="followUp[<?= $followUp['id'] ?>][done]" value="1"<?= ($followUp['done'] ? ' checked' : '') ?> />
+							</td>
+						</tr>
+
+						<tr id="followUpRow_details_<?= $followUp['id'] ?>" class="<?=$rowClass?>">
+							<td>&nbsp;</td>
+							<td colspan="5" style="border-top: 1px solid #ccc; padding-top: 10px;">
+								<table style="width: 100%; border: none;">
+									<tr>
+										<td style="width: 85px; border: none; text-align: right; white-space: nowrap;">
+											<b>HMG Worker:</b>
+										</td>
+										<td style="width: 240px; border: none; white-space: nowrap;">
+<?= $family->displayHmgWorkerSelect('followUp[' . $followUp['id'] . '][hmg_worker]', ($followUp['hmg_worker'] ? $followUp['hmg_worker'] : 'unknown'), ' ', '', 'setting',false , true) ?>
+										</td>
+										<td style="width: 85px; border: none; text-align: right; white-space: nowrap;">
+											<b>Task Result:</b>
+										</td>
+										<td style="border: none; white-space: nowrap;">
+											<?= $follow_up_task_result->displaySelect("followUp[" . $followUp['id'] . "][result]", ($followUp['result'] ? $followUp['result'] : ''), 'Task Result', '', false, 'select', false) ?>
+										</td>
+										<td style="width: 60px; text-align: right; border: none;">&nbsp;</td>
+									</tr>
+									<tr>
+										<td style="width: 85px; border: none; text-align: right; white-space: nowrap;">
+											<b>Referral Date:</b>
+										</td>
+										<td style="width: 240px; border: none; white-space: nowrap;">
+											<input type="text" class="date" id="referral-date" name="followUp[<?= $followUp['id'] ?>][referral_date]" value="<?= ($followUp['referral_date_formatted'] != '00/00/00' ? $followUp['referral_date_formatted'] : '') ?>" placeholder = "Referral Date" />
+										</td>
+										<td style="width: 85px; border: none; text-align: right; white-space: nowrap;">
+											<b>Done:</b>
+										</td>
+										<td style="border: none;">
+											<input type="hidden" name="followUp[<?= $followUp['id'] ?>][done]" value="0" />
+											<input type="checkbox" id="followUp[<?= $followUp['id'] ?>][done]" name="followUp[<?= $followUp['id'] ?>][done]" value="1" class="edit-done-checkbox"<?= ($followUp['done'] ? ' checked' : '') ?> />
+										</td>
+									</tr>
+									<tr>
+										<td style="border: none;" colspan="5">
+											<div style="float: right;">
+												<input type="button" id="save_<?= $followUp['id'] ?>" class="btn-small save-follow-up" value="Save" />
+												<br />
+												<input type="button" id="delete_<?= $followUp['id'] ?>" style="margin-top: 3px;" class="btn-small delete-follow-up" value="Delete" />
+												<br />
+												<input type="button" class="btn-small cancel-edit-follow-up" style="margin-top: 3px;" id="cancel_<?= $followUp['id'] ?>" value="Cancel" />
+											</div>
+											<div style="margin-right: 10px; float: left;"><b>Notes:</b></div> <textarea id="followUp[<?= $followUp['id'] ?>][notes]" name="followUp[<?= $followUp['id'] ?>][notes]" cols="110" rows="3" style="vertical-align: text-top;"><?= $followUp['notes'] ?></textarea>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>

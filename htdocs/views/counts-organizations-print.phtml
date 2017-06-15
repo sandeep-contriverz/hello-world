@@ -1,0 +1,257 @@
+<script>
+$(function(){
+	$('th.sort').click(function(){
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+		}
+		else {
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+		} 
+	    var table = $(this).parents('table').eq(0)
+	    var lastRow = table.find('tr:last');
+	    lastRowLabel = lastRow.find('td:first').text();
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	    	lastRow.remove();
+	    }
+	    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+	    this.asc = !this.asc
+	    if (this.asc){rows = rows.reverse()}
+	    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	   		table.append(lastRow);
+	   	}
+	   	// Fix odd/event class on sorted elements
+	   	rowClass = 'even';
+	   	table.find('tr:gt(0)').each(function(index){
+	   		curRow = $(this);
+	   		curRow.attr('class', rowClass);
+	   		if(rowClass == 'even'){
+	   			rowClass = 'odd';
+	   		} else {
+	   			rowClass = 'even';
+	   		}
+	   	});
+	});
+	function comparer(index) {
+	    return function(a, b) {
+	        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+	        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+	    }
+	}
+	function getCellValue(row, index){ return $(row).children('td').eq(index).html() }
+});
+</script>
+
+<? 
+
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+
+$is_drill_active = false;
+?>
+
+<?= $headerHtml ?>
+<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+
+
+<div id="counts-column1">
+
+<table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Number of Organization</th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($statusCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		
+		<td class="center">
+		
+		<?= $row['cnt'] ?>
+		
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+<br/>
+<table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Type of Organization</th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($typeCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		<td class="center">
+		
+		<?= $row['cnt'] ?>
+		
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+
+</div>
+
+<div id="counts-column2">
+    
+       <table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Partnership Level</th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($partCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		<td class="center">
+		<?php if(!$is_drill_active) { ?>
+		<?= $row['cnt'] ?>
+		<?php } else { ?>
+			<a class="familyLinks" href="index.php?action=counts&drillheading=Number of Families&type=familyDrill&status=<?php echo $row['status']; ?>&drillName=<?php echo $row['status']; ?>"><?= $row['cnt'] ?></a>
+		<?php } ?>
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+    <br/>
+    <table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Signed MOU's</th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($mouCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		<td class="center">
+		<?php if(!$is_drill_active) { ?>
+		<?= $row['cnt'] ?>
+		<?php } else { ?>
+			<a class="familyLinks" href="index.php?action=counts&drillheading=Number of Families&type=familyDrill&status=<?php echo $row['status']; ?>&drillName=<?php echo $row['status']; ?>"><?= $row['cnt'] ?></a>
+		<?php } ?>
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+    <br/>
+       <table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Resource Database </th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($resCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		<td class="center">
+		<?php if(!$is_drill_active) { ?>
+		<?= $row['cnt'] ?>
+		<?php } else { ?>
+			<a class="familyLinks" href="index.php?action=counts&drillheading=Number of Families&type=familyDrill&status=<?php echo $row['status']; ?>&drillName=<?php echo $row['status']; ?>"><?= $row['cnt'] ?></a>
+		<?php } ?>
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+</div>
+
+<div id="counts-column3">
+<table class="display">
+	<thead>
+        <tr class="count-hdr">
+            <th class="sort sorting_asc">Mode of Initial Contact</th>
+            <th class="sort sorting_asc">Count</th>
+            <th class="center">Pct%</th>
+        </tr>
+	</thead>
+	<tbody>
+        <? $class = 'odd'; ?>
+        <? foreach($modeCounts as $row): ?>
+        <? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['status']) ? ( $row['status']!='Totals')?$setting->getValue($row['status']):$row['status'] : 'Uncoded') ?></td>
+		<td class="center">
+		<?php if(!$is_drill_active) { ?>
+		<?= $row['cnt'] ?>
+		<?php } else { ?>
+			<a class="familyLinks" href="index.php?action=counts&drillheading=Number of Families&type=familyDrill&status=<?php echo $row['status']; ?>&drillName=<?php echo $row['status']; ?>"><?= $row['cnt'] ?></a>
+		<?php } ?>
+		</td>
+		
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+</div>
+
+<? include_once(VIEW_PATH . '/counts-advanced-search.phtml');
+

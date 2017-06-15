@@ -1,0 +1,104 @@
+<?php
+
+$csv = "Counts: Outreach Events Demographics\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+
+
+$csv .= 'Event Type,Count,Pct%' . "\n";
+foreach($typeCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Outreach Type,Count,Pct%' . "\n";
+foreach($outreachTypeCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Events By County,Count,Pct%' . "\n";
+foreach($countyCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Time Of Day,Count,Pct%' . "\n";
+foreach($dayCounts as $row){
+    if(!empty( $row['status'] )){
+    if( is_numeric( $row['status'] ))
+    {   
+        $csv .= $setting->getValue( $row['status'] );
+    }
+    else{
+        if( $row['status'] =='Totals'){
+            $csv .= "Totals"; 
+
+        }
+        else{
+            $ert = explode(',', $row['status']);
+
+            $sdf = '';
+            foreach( $ert as $er){
+                $sdf .= $setting->getValue($er).' & '; 
+            }
+            $csv .= substr($sdf,0,-2);
+        }
+    }
+}
+else{ 
+    $csv .= 'Uncoded'; 
+}
+	$csv .=  ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+
+
+
+
+echo $csv;
+
+

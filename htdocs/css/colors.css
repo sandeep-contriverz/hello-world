@@ -1,0 +1,138 @@
+#leftNav .inside a:before {
+    color: #f1585c;
+}
+
+#leftNav .inside a.on:before, 
+#leftNav .inside a:hover:before {
+    color: #6fc1c0;
+}
+
+.caption {
+    color: #000;
+}
+
+.caption a {
+    color: #000;
+    font-size: 11pt !important;
+    text-decoration: none;
+}
+
+.caption a:hover {
+    color: #f1585c !important;
+}
+
+.titleBar {
+    border: none;
+    background: #add8e6;
+}
+
+h1.colored {
+    color:#6fc1c0;
+}
+.ui-datepicker {
+    background-color: #F1F1F1;
+    border: 2px solid #6fc1c0;
+}
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    color: #6fc1c0;
+}
+.ui-datepicker-today .ui-state-highlight {
+    color: #6fc1c0;
+}
+
+table.display thead th, table.display tfoot th {
+    background-color: #add8e6 !important;
+    border-bottom: 1px solid #a09a9f;
+    border-top: 1px solid #998997;
+    border-left: 1px solid #998997;
+    color: #464646;
+}
+
+.btn-background {
+    background: #f1f1f1;
+}
+
+.infoTable th.smallHeader {
+    background-color: #add8e6 !important;
+}
+
+table.display tr.even.row_selected td {
+    background-color: #6fc1c0 !important;}
+
+table.display tr.odd.row_selected td {
+    background-color: #6fc1c0 !important;
+}
+
+.noteTitle {
+    background: #add8e6;
+    color: #464646;
+    border: 1px solid silver;
+}
+
+.infoHdrButton {
+    background: #add8e6;
+}
+
+.infoHdrButton h2:before {
+  color: #6fc1c0;
+}
+
+.infoHdrButton h2.down:before {
+  color: #6fc1c0;
+}
+
+.infoTable .toggleArrow:before, .toggleArrow:before {
+  color: #6fc1c0;
+}
+
+.infoTable .toggleArrow.on:before, .toggleArrow.on:before {
+    color: #6fc1c0;
+}
+
+.show-hide-all {
+    background: #add8e6;
+}
+
+#grid tbody tr.even:hover, #grid tbody tr.odd:hover {
+    background-color: #add8e6;
+    cursor: pointer;
+}
+
+#advanced-search .search-form, 
+#counts-advanced-search .search-form, 
+.developmental-screening-form,
+div.providerName,
+div.providerData2, 
+div.resourceName,
+div#addNewProvider, 
+div#addNewResource,
+.pageTitleBar {
+    background-color: #F1F1F1; 
+}
+
+div#providerList a:hover, div#providerList a.hover,
+div#searchList a:hover, div#searchList a.hover,
+div.autosuggest-selection-container a.hover  {
+    background-color: #add8e6 !important;
+}
+
+.infoBody {
+    border: none !important;
+}
+
+a {
+    color: #f1585c;
+}
+
+.sorting_asc:before {
+  color: #6fc1c0;
+}
+
+.sorting_desc:before {
+  color: #6fc1c0;
+}
+
+.sorting:before {
+  color: #888;
+}

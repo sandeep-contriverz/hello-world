@@ -1,0 +1,80 @@
+<?
+$csv = "Counts: Central Access Point\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Families Assigned,Active,Inactive,Inquiry(Open),Inquiry(Closed),Total,Pct%' . "\n";
+foreach($statusByWorkerCounts as $row){
+	$total = $row['Active'] + $row['Inactive'] + $row['Open Inquiry'] + $row['Closed Inquiry'];
+	$percent = 0;
+	$csv .= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') . ',';
+	$csv .= ($row['Active'] ? $row["Active"] : 0) . ',';
+	$csv .= ($row['Inactive'] ? $row["Inactive"] : 0) . ',';
+	$csv .= ($row['Open Inquiry'] ? $row["Open Inquiry"] : 0) . ',';
+	$csv .= ($row['Closed Inquiry'] ? $row["Closed Inquiry"] : 0) . ',';
+	$csv .= ($row['total'] ? $row["total"] : 0) . ',';
+	$csv .= ($row['percent'] ? $row["percent"] : 0) . "\n";
+}
+
+$csv .= "\n" . 'Special Tasks,Connected,Give Screening Results,Relay Information,Research,Update Family Information,Verify Receipt of Screening,Other,Total' . "\n";
+foreach($tasksByWorkerCounts as $row){
+	$csv .= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') . ',';
+	$csv .= $row['Connected'] . ',';
+	$csv .= $row['Give Screening Results'] . ',';
+	$csv .= $row['Relay Information'] . ',';
+	$csv .= $row['Research'] . ',';
+	$csv .= $row['Update Family Information'] . ',';
+	$csv .= $row['Verify Receipt of Screening'] . ',';
+	$csv .= $row['Other'] . ',';
+	$csv .= $row['Total'] . "\n";
+}
+
+$csv .= "\n" . 'Family By Level,Level 1,Level 2,Level 3' . "\n";
+foreach($workerCCLevelCounts as $row){
+	$csv .= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') . ',';
+	$csv .= ($row['Level1'] ? $row["Level1"] : 0)  . ',';
+	$csv .= ($row['Level2'] ? $row["Level2"] : 0) . ',';
+	$csv .= ($row['Level3'] ? $row["Level3"] : 0) . "\n";
+}
+
+echo $csv;
+?>
+
+

@@ -1,0 +1,1579 @@
+
+<style>
+a.btn-small { background: #ccc none repeat scroll 0 0 !important; border: 2px outset #998997 !important; border-radius: 7px; color: #555 !important; cursor: pointer; font: bold 12px/12px arial,helvetica,san-serif !important; padding: 2px 5px; }
+</style>
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no'
+	});
+
+	$(document).on('click', '.edit_chnotes', function(e){
+		$(this).parents('div.edit_notes').after('<div><textarea style="width: 80%; height: 70px;" name="child_notes" id="child_notes">'+$(this).parents('div.edit_notes').find('span.chnotes_text').text()+'</textarea><br><a href="javascript:;" class="update_ch_notes btn-small">Update</a></div>');
+		$(this).parents('div.edit_notes').hide();
+	});
+
+	$(document).on('click', '.delete_chnotes', function(e){
+		if(confirm('Are you sure to delete this note')) {
+			//ajax call delete note
+			var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+			var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+			var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '" }';
+			$.ajax({
+				type		: "POST",
+				data		: { 'action' : 'child', 'delete_note' : 'true', 'json' : json },
+				url			: 'index.php',
+				dataType	: 'json',
+				beforeSend	: function() {},
+				error		: function() {},
+				success		: function( result ) {
+					if(result && result.msg == 'deleted') {
+						$('#childRow_details_'+cid).find('.edit_notes').remove();
+					}
+				}
+			});
+		}
+	});
+
+	$(document).on('click', '.update_ch_notes', function(e){
+		//ajax call to save notes
+		var note  = $.trim($('#child_notes').val());
+		var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+		var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+		var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '", "note" : "' + note + '" }';
+		$.ajax({
+			type		: "POST",
+			data		: { 'action' : 'child', 'save' : 'true', 'json' : json },
+			url			: 'index.php',
+			dataType	: 'json',
+			beforeSend	: function() {},
+			error		: function() {},
+			success		: function( result ) {
+				if(result && result.msg == 'updated') {
+					$('#childRow_details_'+cid).find('span.chnotes_text').text($.trim($('#child_notes').val()));
+					$('#childRow_details_'+cid).find('span.chnotes_text').parents('div.edit_notes').show();
+					$('#childRow_details_'+cid).find('.update_ch_notes').parent().remove();
+				}
+			}
+		});
+	});
+
+	$('.infoColumn').on('click', '.infoHdrButton', function(e){
+		h2 = $(this).find('h2');
+		if(h2.length){
+			h2.toggleClass('down');
+			sib = $(this).next();
+			sib.slideToggle(500);
+		}
+	});
+	$('.child-name').on('click', function(e){
+		e.stopPropagation();
+		location.href = $(this).attr('href');
+	});
+	$('#note').on('keydown', function(e){
+		if(e.keyCode == 13){
+			$('#add-note').click();
+		}
+	});
+	$('#add-note').on('click', function(){
+		note = $('#note').val().replace(/"/g, '\\"').replace(/\n/g, '\\n');
+		family_id = $('#family-id').val();
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		if(family_id && hmg_worker && note){
+			json = '{ "family_id" : "' + family_id + '", "hmg_worker" : "' + hmg_worker + '", "note" : "' + note + '" }';
+			$.post('index.php', { 'action' : 'note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					newNote = data[0];
+					$('<div class="noteText-family">' + newNote.note + '</div>').insertAfter($('#add-note-form'));
+					$('<div class="noteTitle" data-id="' + newNote.id + '"><div class="toggleArrow"></div>' + newNote.hmg_worker + ' - ' + newNote.formatted_date + '</div>').insertAfter($('#add-note-form'));
+					$("#note").val('');
+  				}
+			});
+		}
+	});
+	$(".family-note-container").on('mouseover', '.noteTitle', function(e){
+		e.preventDefault();
+		$(this).css({ 'cursor' : 'pointer'});
+	});
+	var tH;
+	$(".family-note-container").on('click', '.noteTitle', function(e){
+		if(tH){
+			return false;
+		}
+		ele = $(this);
+		tH = setTimeout(function(){
+			if(ele.find('.toggleArrow').length >= 1){
+				ele.find('.toggleArrow').toggleClass('on');
+				noteElement = ele.next('.noteText-family');
+				noteText = noteElement.text();
+				noteElement.text(noteText);
+				noteElement.toggle();
+				tH = null;
+			}
+    	}, 300);
+	});
+	$(".family-note-container").on('dblclick', '.noteTitle', function(e){
+		if(tH){
+    		clearTimeout(tH);
+    		tH = null;
+    	}
+		ele = $(this);
+		noteId = ele.data('id');
+		if(ele.find('.toggleArrow').length >= 1){
+			var arrow = ele.find('.toggleArrow');
+			var arrowOn = arrow.hasClass('on');
+			noteElement = ele.next('.noteText-family');
+			noteText = noteElement.text();
+			noteElement.html('<div style="float: right; width: 52px; text-align: center;"><input type="button" class="btn-small saveNote" value="Save" data-id="' + noteId + '" /><input type="button" class="btn-small deleteNote" style="margin-top:2px;" value="Delete" data-id="' + noteId + '" /></div><textarea cols="5" rows="5" class="edit-note" name="note" style="width: 160px; height: 40px; line-height: 16px; padding: 3px;">' + noteText + '</textarea>');
+			if(!arrowOn){
+				arrow.toggleClass('on');
+				noteElement.toggle();
+			}
+		}
+	});
+	$(".family-note-container").on('click', '.saveNote', function(e){
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		noteInput = noteContainer.find('textarea');
+		noteRaw = noteInput.val();
+		note = noteRaw.replace(/\n/g, '\\n');
+		family_id = $('#family-id').val();
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		if(family_id && hmg_worker && note){
+			var json = {
+				family_id : family_id,
+				 hmg_worker : hmg_worker,
+				 id : noteId,
+				 note : note
+			};
+			$.post('index.php', { 'action' : 'note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					// toggle note form
+					noteInput.text(noteRaw);
+					noteContainer.prev().click();
+  				}
+			});
+		}
+	});
+	$(".family-note-container").on('click', '.deleteNote', function(e){
+		confirmDelete = confirm("Are you sure you want to delete this note permanently?");
+		if(!confirmDelete){ return false; }
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		$.post('index.php', { 'action' : 'note', 'delete' : 'true', 'id' : noteId }, function(data){
+			// remove from view
+			noteContainer.prev().remove();
+			noteContainer.remove();
+		});
+	});
+	var showAll = false;
+	$(".family-note-container").on('click', '.show-hide-all', function(e){
+		e.preventDefault();
+		if(! showAll){
+			$(this).parent('.family-note-container').find('.toggleArrow').addClass('on');
+			$(this).parent('.family-note-container').find('.noteText-family').show();
+			$(this).text('- Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = true;
+		} else {
+			$(this).parent('.family-note-container').find('.toggleArrow').removeClass('on');
+			$(this).parent('.family-note-container').find('.noteText-family').hide();
+			$(this).text('+ Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = false;
+		}
+	});
+	$('#referralDiv').on('click','#add-referral', function(e){
+		e.preventDefault();
+		family_id = $('#family-id').val();
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		if(family_id){
+			referral = 'action=family-referral&family_id=' + family_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				$('#add-referral-fields').find('*').serialize() + '&save=true';
+			$.post('index.php', referral, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#referralDiv').html(data);
+  				}
+			}).done(function(){
+				request = 'action=family-follow-up&family_id=' + family_id  + '&get-list=true';
+				$.post('index.php', request, function(data){
+					if(! $.isEmptyObject(data)){
+						$('#followUpDiv').html(data);
+	  				}
+				});
+			});
+		}
+	});
+    $("#referralDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#referralDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		request = 'action=family-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+    });
+	$("#referralDiv").on('click', ".edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		request = 'action=family-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".cancel-edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		request = 'action=family-referral&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".save-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=family-referral&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".delete-referral", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this referral?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=family-referral&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".show-all-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-referrals').addClass('hide-extra-referrals');
+		$(this).text("Hide extra referrals.");
+
+	});
+	$("#referralDiv").on('click', ".hide-extra-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-referrals').addClass('show-all-referrals');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " referrals.");
+
+	});
+	$("#referralDiv").on('change', '.referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = $('.referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			console.log(data);
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#referralDiv").on('change', '.edit-referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$('#followUpDiv').on('click','#add-follow-up', function(e){
+		e.preventDefault();
+		family_id = $('#family-id').val();
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		followUpTable = $("#table-follow-up");
+		tbody = followUpTable.find('tbody:first');
+		firstRow = followUpTable.find('tbody tr');
+		firstRowClass = firstRow.attr('class');
+		rowClass = firstRowClass=='odd'?'even':'odd';
+		formElements = $('#add-follow-up-fields').find('*').not('.done');
+		if(family_id){
+			request = 'action=family-follow-up&family_id=' + family_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				formElements.serialize() +
+				'&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+					$('.date').datepicker();
+  				}
+			});
+		}
+	});
+    $("#followUpDiv").on('click', ".clickable", function(e){
+    	// If this get activated when the edit form is showing then it isn't replacing the values like a cancel edit does.
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#followUpDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		request = 'action=family-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', true);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+    });
+	$("#followUpDiv").on('click', ".edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker').text();
+		request = 'action=family-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".cancel-edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.addClass('clickable');
+		rowClass = row.attr('class');
+		request = 'action=family-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".edit-done-checkbox", function(e){
+		e.stopPropagation;
+		// Update the date input with today's value
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		followUpRow = $('#followUpRow_' + id);
+		if($(this).prop('checked')){
+			dateObj = new Date();
+			todaysDate = pad(2, (dateObj.getMonth() + 1).toString(), 0) + '/' + pad(2, dateObj.getDate().toString(), 0) + '/' + dateObj.getFullYear().toString().substring(2);
+
+			//console.log(todaysDate);
+			followUpRow.find('input.date').val(todaysDate);
+		}
+
+	});
+	$("#followUpDiv").on('click', ".done-check-box", function(e){
+		e.stopPropagation;
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		doneField = $(this).prev();
+		doneValue = $(this).is(':checked') ? '1' : '0';
+		saveId = '#save_' + id;
+		saveBtn = $(saveId);
+		if(saveBtn.length){
+			detailRow = $('#followUpRow_details_' + id);
+			if(doneValue === '1'){
+				detailRow.find('input:checkbox').prop('checked', true);
+			} else {
+				detailRow.find('input:checkbox').prop('checked', false);
+			}
+			saveBtn.trigger('click');
+		} else {
+			if(doneValue === '1'){
+				formFields = $(this).serialize();
+			} else {
+				formFields = doneField.serialize();
+			}
+			formFields += '&' + escape('followUp[' + id + '][follow_up_date]') + '=<?=date('Y-m-d')?>';
+			parentRowEle = $(this).parent('td').parent('tr');
+			rowClass = parentRowEle.attr('class');
+			id = parentRowEle.attr('id').split('_')[1];
+			request = 'action=family-follow-up&id=' + id + '&' + formFields + '&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+				}
+			});
+		}
+	});
+	$("#followUpDiv").on('click', ".save-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		rowInputs = $('#followUpRow_' + id + ' :input');
+		detailRowInputs = $('#followUpRow_details_' + id + ' :input');
+		row.addClass('clickable');
+		rowClass = row.attr('class');
+		request = 'action=family-follow-up&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".delete-follow-up", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this follow-up?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		request = 'action=family-follow-up&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".show-all-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-follow-ups').addClass('hide-extra-follow-ups');
+		$(this).text("Hide extra follow ups.");
+
+	});
+	$("#followUpDiv").on('click', ".hide-extra-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-follow-ups').addClass('show-all-follow-ups');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " follow ups.");
+
+	});
+	$("#followUpDiv").on('change', '.follow-up-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = $('.follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('change', '.edit-follow-up-referred-to', function(e){
+		e.stopPropagation();
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('click', '.edit-follow-up-service', function(e){
+		e.stopPropagation();
+	});
+
+	$("#providerTable").on('click', '.providerName', function(){
+		$(this).parent('tr').next().toggleClass('hidden');
+		$(this).toggleClass('down');
+	});
+	$("#providerDiv").on('click focus', "#providerListSearch", function(e){
+		$(document).unbind('keydown');
+		$(this).select();
+	});
+	$("#providerDiv").on('keyup', "#providerListSearch", function(e){
+		if(e.which == 40){
+			// Move focus to first element in Div
+			var providerList = $("#providerDiv #providerList");
+			var firstItem = providerList.find('a:first-child');
+			firstItem.addClass('hover').focus();
+			// Disable scrolling while in the auto-suggest
+            $(document).keydown(function(e) {
+                e.preventDefault();
+            });
+		} else {
+			var searchValue = $(this).val();
+			postString = 'action=providers&search=' + searchValue;
+			$.post(
+				'index.php', postString, function(data){
+				if(! $.isEmptyObject(data)){
+					providerList = $('#providerList');
+					providerList.find('a').remove(); // resets the list
+					curClass = '';
+					$.each(data, function(key, val) {
+						if(curClass == 'odd'){
+							curClass = 'even';
+						} else {
+							curClass = 'odd';
+						}
+						$('<a href="#" class="pitem ' + curClass + '" id="select-provider-' + val.id + '">' + val.name + '</a>').appendTo(providerList);
+					});
+					if(searchValue){
+						$('#providerList').show();
+					} else {
+						$('#providerList').hide();
+					}
+				} else {
+					$('#providerList').hide();
+				}
+			});
+		}
+	});
+    $('#providerDiv').on('keyup', '.pitem', function(event){
+	    var keyCode = event.which;
+	    var currentNode = $(this);
+	    switch(keyCode){
+	        case 40:
+	            nextNode = currentNode.next();
+	            if(nextNode){
+	                currentNode.removeClass('hover');
+	                nextNode.focus().addClass('hover');
+	                if(currentNode.attr('id') == $('#providerList a:last-child').attr('id')){
+	                    $('#providerList').hide();
+	                    $('#providerListSearch').focus();
+	                }
+	                //console.log(currentNode.attr('id') + '=' + $(suggestDiv + ' a:first-child').attr('id'));
+	            }
+	            break;
+	        case 38:
+	            prevNode = currentNode.prev();
+	            if(prevNode){
+	                currentNode.removeClass('hover');
+	                prevNode.focus().addClass('hover');
+	                if(currentNode.attr('id') == $('#providerList a:first-child').attr('id')){
+	                    $('#providerList').hide();
+	                    $('#providerListSearch').focus();
+	                }
+	                //console.log(currentNode.attr('id') + '=' + $(suggestDiv + ' a:first-child').attr('id'));
+	            }
+	            break;
+	        case 13:
+	        case 9:
+	        	$(this).click();
+	        	break;
+	        default:
+        }
+    });
+	$("#providerDiv").on('click', "#providerList a", function(e){
+		e.preventDefault();
+		var provider_id = $(this).attr('id').replace('select-provider-', '');
+		var provider = $(this).text();
+		$('#providerListSearch').val(provider);
+		$('#addProvider').attr('data-id', provider_id);
+		$('#providerList').hide();
+		$('#providerListSearch').focus();
+	});
+	$("#providerDiv").on('click', "#addProvider", function(e){
+		provider_id = $(this).attr('data-id');
+		family_id = $('#family-id').val();
+
+		postString = 'action=family-provider&family_id=' + family_id + '&provider_id=' + provider_id + '&save=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', "#editList", function(e){
+		family_id = $('#family-id').val();
+		postString = 'action=family-provider&family_id=' + family_id + '&list=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', "#saveList", function(e){
+		family_id = $('#family-id').val();
+		var data = $("#providerDiv").find('input[type=hidden], input[type=checkbox]').serialize();
+		postString = 'action=family-provider&family_id=' + family_id + '&' + data;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', ".cancelList", function(e){
+		e.preventDefault();
+		family_id = $('#family-id').val();
+		postString = 'action=family-provider&family_id=' + family_id;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+    $("#providerDiv").on('dblclick', ".clickable", function(e){
+		family_id = $('#family-id').val();
+		id = $(this).data('provider-id');
+		var myContainer = $('#provider' + id);
+		postString = 'action=provider&id=' + id + '&family_id=' + family_id + '&edit-provider-family=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			myContainer.replaceWith(data);
+		});
+    });
+	$("#providerDiv").on('click', ".editProvider", function(e){
+		e.preventDefault();
+		family_id = $('#family-id').val();
+	    id = $(this).data('provider-id');
+	    
+	    var myContainer = $('#provider' + id);
+            if(this.value == 'Edit'){
+		this.value = 'Save';
+		$(this).parent().append('<input type="button" value="Cancel" class="btn-small editProvider"/>');
+		var chk1 = '';
+		var chk2 = '';
+		var sfu = myContainer.find('#sfu').text();
+        	var ptf = myContainer.find('#ptf').text();
+
+		    var granted = myContainer.find('#granted').text();
+
+         	    var revoked = myContainer.find('#revoked').text();
+                var type = myContainer.find('#type').text();
+		
+		if(sfu.trim() == 'Yes')
+		    var chk1 = "checked";
+		else
+		    var chk2 = "checked";
+		myContainer.find('.sfu').html(' <div class="infoText"><span class=" infoLabel">Send follow-up:&nbsp;&nbsp;</span>Yes<input class="editable" type="radio" value="yes" name="send_follow_up'+ id+'" '+chk1  +'/> No<input id=   class="editable" type="radio" name="send_follow_up'+id+'"value="no" '+chk2 + ' /></div>')
+
+                
+		if(ptf.trim() == 'Yes'){
+		    chk1 = "checked";
+                    chk2 = '';
+		}
+		else{
+		     chk2 = "checked";
+                    chk1 = ''; 
+		}
+
+        myContainer.find('.ptf').html(' <div class="infoText"><span class=" infoLabel">Fax Permission:&nbsp;&nbsp;</span>Yes<input class="editable" type="radio" value="yes" name="fax_permission'+ id+'" '+chk1  +'   /> No<input id=   class="editable" type="radio" name="fax_permission'+id+'"value="no" '+chk2 + ' /></div>')
+
+		
+
+            myContainer.find('.granted').html('Granted:<input  name="date_permission_granted"  class="date" placeholder="Date Granted" value="'+granted  +'" size="15"/><br>Revoked: <input  name="date_permission_revoked"  class="date" placeholder="Date Revoked"  value="'+revoked  +'" size="15"/>');
+        
+
+        myContainer.find('.perms').html(myContainer.find('.perms').data('perms'));
+		myContainer.find('select option[value="'+type+'"]').prop('selected',true);
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+
+		return true;
+	    }else if(this.value == 'Cancel') {
+	        $(this).hide();
+	        $(this).prev().val('Edit');
+
+		postString = 'action=family-provider&family_id=' + family_id;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+
+	        return true;	
+            }
+
+            
+	    var perms = myContainer.find('input:radio');
+   	    var dates = myContainer.find('.date');
+        var permission_type = myContainer.find('select option:selected').text();
+
+	    var fax_perm = false ;
+	    var send_fup = false ; 
+            if(perms[2].checked)
+		fax_perm = true; 
+
+	    if(perms[0].checked)
+		send_fup = true ;
+
+
+
+	    var familyProviderData = 'fax_permission='+fax_perm+'&send_follow_up='+send_fup+'&date_permission_granted='+dates[0].value+'&date_permission_revoked='+dates[1].value+'&permission_type='+permission_type;
+
+		 postString = 'action=family-provider&family_id=' + family_id + '&provider_id=' + id + '&' + familyProviderData + '&update=true';
+		 $.post('index.php', postString, function(data){
+
+		 }).done(function(data){
+		 		$("#providerContent").html(data);
+		
+		 });
+
+	});
+
+
+
+	$("#providerDiv").on('click', ".saveProvider", function(e){
+		e.preventDefault();
+		id = $(this).data('provider-id');
+		var myContainer = $('#provider' + id);
+		family_id = $('#family-id').val();
+		var providerData = $(myContainer).find('input, select, textarea').not("input[type=radio]").serialize();
+		var familyProviderData = $(myContainer).find("input[type=radio]").serialize();
+
+		// Save provider data
+		postString = 'action=provider&' + providerData + '&save=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			// Save fax permission
+			postString = 'action=family-provider&family_id=' + family_id + '&provider_id=' + id + '&' + familyProviderData + '&update=true';
+			$.post('index.php', postString, function(data){
+
+			}).done(function(data){
+				$("#providerContent").html(data);
+			});
+		});
+	});
+	$("#providerDiv").on('click', ".cancelEditProvider", function(e){
+		e.preventDefault();
+		family_id = $('#family-id').val();
+		postString = 'action=family-provider&family_id=' + family_id;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', ".removeProvider", function(e){
+		e.preventDefault();
+		var confirmDelete = confirm('Are you sure you want to remove this provider?');
+		if(confirmDelete){
+			family_id = $('#family-id').val();
+			provider_id = $(this).data('provider-id');
+			postString = 'action=family-provider&family_id=' + family_id + '&provider_id=' + provider_id + '&delete=true';
+			$.post('index.php', postString, function(data){
+
+			}).done(function(data){
+				$("#providerContent").html(data);
+			});
+		}
+	});
+	$(".infoTable").on('click', 'select', function(e){
+		e.stopPropagation();
+	});
+	$("#attachment-container").on('click', '.remove-file', function(e){
+		e.preventDefault();
+		var family_id = '<?=$data['id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this file?');
+		if(confirmDelete){
+			$.post('index.php', "action=family-attachments&attachmentId=" + $(this).data('id'), function(data){
+				if(! $.isEmptyObject(data)){
+					reloadAttachments(data.family_id, true);
+				}
+			});
+		}
+	});
+	$("#attachments").on('click', '.toggleArrow', function(e){
+		e.preventDefault();
+		$(this).toggleClass('on');
+		$('.file-name').toggle();
+		$('#file-upload-window').toggle();
+	});
+	$(".start-end-container").on('click', '.remove-start-end', function(e){
+		e.preventDefault();
+	    var id = '<?=$data['id']?>';
+	    console.log(id);
+		var confirmDelete = confirm('Are you sure you want to remove this record?');
+		if(confirmDelete){
+			$.post('index.php', "action=family-start-end&delete=true&id=" + $(this).data('id'), function(data){
+				$(".start-end-container").html(data);
+			});
+		}
+	});
+
+    	$(".start-end-container2").on('click', '.remove-start-end', function(e){
+		e.preventDefault();
+		var id = '<?=$data['id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this record?');
+		if(confirmDelete){
+			$.post('index.php', "action=family-start-end&type=share&delete=true&id=" + $(this).data('id'), function(data){
+				$(".start-end-container2").html(data);
+			});
+		}
+	});
+
+    
+	function displayStartEndReasonSelect(selected){
+		htmlSelect = $('<div><?= $reason_file_closed->displaySelect('reason', '', 'Reason for ending', '', false, 'reason startend', false) ?></div>');
+		options = htmlSelect.find('option');
+		options.each(function(index){
+			option = $(this);
+			if(option.val() == selected){
+				option.attr('selected', 'selected');
+			}
+		});
+		return htmlSelect.html();
+	}
+	$("#program-information").on('click', '.add-start-end', function(e){
+		e.preventDefault();
+//		$(this).toggle();
+        var family_id = $(this).data('family-id');
+		var reason = '';
+                var type = $(this).data('type');
+
+
+
+
+        if(type == 'share')
+            		$(".sharing-container").append('<div class="add-start-end-container" ><input type="text" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" /><input type="text" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-family-id="' + family_id + '" class="btn-small save-start-end" data-type="share" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-family-id="' + family_id + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+
+        else             
+            $(".start-end-container").append('<div class="add-start-end-container"><input type="text" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" /><input type="text" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-family-id="' + family_id + '" class="btn-small save-start-end" data-type="" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-family-id="' + family_id + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+        
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+	});
+	$("#program-information").on('click', '.edit-start-end', function(e){
+		e.preventDefault();
+		var id = $(this).data('id');
+		var family_id = $(this).data('family-id');
+		var start_date = $(this).data('start-date');
+		var end_date = $(this).data('end-date');
+		var reason = $(this).data('reason');
+
+
+
+		$(this).replaceWith('<div class="editing-start-end" data-id="' + id + '" data-family-id="' + family_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date + '" data-reason="' + reason + '"><input type="text" id="start_date_' + id + '" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" value="' + start_date + '" /><input type="text" id="end_date_' + id + '" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" value="' + end_date + '" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-id="' + id + '" data-family-id="' + family_id + '" class="btn-small save-start-end" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-id="' + id + '" data-family-id="' + family_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date +'" data-reason="' + reason + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+	});
+    
+    	$("#program-information").on('click', '.edit-start-end2', function(e){
+		e.preventDefault();
+		var id = $(this).data('id');
+		var family_id = $(this).data('family-id');
+		var start_date = $(this).data('start-date');
+		var end_date = $(this).data('end-date');
+		var reason = $(this).data('reason');
+
+
+
+		$(this).replaceWith('<div class="editing-start-end" data-type="share" data-id="' + id + '" data-family-id="' + family_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date + '" data-reason="' + reason + '"><input type="text" id="start_date_' + id + '" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" value="' + start_date + '" /><input type="text" id="end_date_' + id + '" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" value="' + end_date + '" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-id="' + id + '" data-family-id="' + family_id + '" class="btn-small save-start-end" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-id="' + id + '" data-family-id="' + family_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date +'" data-reason="' + reason + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+	});
+
+	$("#program-information").on('click', '.save-start-end', function(e){
+		e.preventDefault();
+		var family_id = $(this).data('family-id');
+		var id = $(this).data('id');
+        var type = $(this).data('type');
+
+		var request = 'action=family-start-end' + (id ? '&id=' + id : '') + (type ? '&type=' + type : '')+'&family_id=' + family_id + '&' + $('.startend').serialize() + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+                if(!type) 
+				$(".start-end-container").html(data);
+                else
+            	$(".sharing-container").html(data);                                   
+            }
+        });
+		
+	});
+	$("#program-information").on('click', '.cancel-save-start-end', function(e){
+		e.preventDefault();
+		var id = $(this).data('id');
+		var family_id = $(this).data('family-id');
+		var start_date = $(this).data('start-date');
+		var end_date = $(this).data('end-date');
+		var reason = $(this).data('reason');
+		var parent = $(this).parent();
+		var isAdd = parent.hasClass('add-start-end-container');
+		if(isAdd){
+			parent.remove();
+//			$('#program-information .add-start-end').toggle();
+		} else {
+			var newHtml = '<div class="edit-start-end" data-id="' + id + '" data-family-id="' + family_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date + '" data-reason="' + reason + '"><div style="float: right;"><a href="#" class="remove-start-end" data-id="' + id + '">[X]</a></div>Start: ' + start_date + '&nbsp;&nbsp;End: ' + end_date + '<br>' + reason + '</div>';
+			parent.replaceWith(newHtml);
+		}
+	});
+	$('.date').datepicker();
+var sdSingleClickTimer = null;
+    $("#screeningDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	if(sdSingleClickTimer){
+    		clearTimeout(sdSingleClickTimer);
+    	}
+    	sdSingleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#screeningDiv").on('dblclick', ".clickable", function(e){
+    	if(sdSingleClickTimer){
+    		clearTimeout(sdSingleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		request = 'action=family-screening&id=' + id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('#edit_' + id).parent().trigger('click');
+				$('.date').datepicker();
+			}
+		});
+    });
+	$('#screeningDiv').on('click', '#add-new-screening', function(e){
+		family_id = "<?= $data['id'] ?>";
+		request = 'action=family-screening&family_id=' + family_id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('.date').datepicker();
+				$.fancybox.open(
+					'#child-developmental-screening', 
+					{
+						padding : '0px', scrolling : 'no'
+					}
+				);
+			}
+		});
+		return false;
+	});
+	$("#child-developmental-screening").on('click', '.save-developmental-screening', function(e){
+		e.preventDefault();
+		postString = $('#developmental-screening-form').serialize() + '&save=true';
+		$.post('index.php', postString, function(data){
+			if(! $.isEmptyObject(data)){
+				var iframe = $("#child-developmental-screening").find('iframe').contents();
+				iframe.find('input[name=id]').val(data.id);
+				iframe.find('input[name=type]').val('screening');
+				iframe.find('form').submit();
+			}
+		}).done(function(data){
+			setTimeout(function(){
+				postString = $('#developmental-screening-form').serialize() + '&get-list=true';
+				$.post('index.php', postString, function(data){
+				}).done(function(data){
+					if(! $.isEmptyObject(data)){
+						$('#screeningDiv').html(data);
+					}
+					$.fancybox.close();
+				});
+			}, 500);
+		});
+	});
+	$('#screeningDiv').on('click', '.edit-screening', function(e){
+		id = $(this).attr('id').split('_')[1];
+		request = 'action=family-screening&id=' + id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('#edit_' + id).parent().trigger('click');
+				$('.date').datepicker();
+			}
+		});
+		return false;
+	});
+	$("#child-developmental-screening").on('click', '.remove-file', function(e){
+		e.preventDefault();
+		var screening_id = '<?=$data['id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this file?');
+		if(confirmDelete){
+			$.post('index.php', "action=family-screening-attachments&attachmentId=" + $(this).data('id'), function(data){
+				if(! $.isEmptyObject(data)){
+					reloadAttachments(data.screening_id)
+				}
+			});
+		}
+
+	});
+	$("#child-developmental-screening").on('click', '.delete-developmental-screening', function(e){
+		e.preventDefault();
+		postString = $('#developmental-screening-form').serialize() + '&delete=true';
+		$.post('index.php', postString, function(data){
+		}).done(function(data){
+			if(! $.isEmptyObject(data)){
+				postString = $('#developmental-screening-form').serialize() + '&get-list=true';
+				$.post('index.php', postString, function(data){
+				}).done(function(data){
+					if(! $.isEmptyObject(data)){
+						$('#screeningDiv').html(data);
+					}
+					$.fancybox.close();
+				});
+			}
+		});
+	});
+	$("#child-developmental-screening").on('click', '.clear-developmental-screenings', function(e){
+		e.preventDefault();
+		$("#child-developmental-screening").find('input[type=radio]').attr('checked', false);
+	});
+	$('.date').datepicker();
+});
+
+
+
+function reloadAttachments(id, showFiles) {
+	var request = 'action=family-attachments';
+	request += '&id=' + id;
+	request += '&get-attachments=1';
+	$.post('index.php', request, function(data){
+		if(! $.isEmptyObject(data)){
+			$('#attachment-container').html(data);
+			if (showFiles) {
+				$('.file-name').toggle();
+			}
+		} else {
+			$('#attachment-container').empty();
+		}
+	});
+}
+</script>
+<script type="text/javascript" src="js/autosuggestReferral.js"></script>
+<div class="pageTitleBar">
+	<h1>Families</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="family" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Family" class="btn-small" /></form>
+	</div>
+
+	<div style="float: right;">
+	<a href="#advanced-search" class="fancybox" style="font-size: 10px !important; line-height: 10px; font-weight: bold; display: inline-block; padding-top: 7px; text-align: center;">Advanced<br /> Search</a>
+	</div>
+
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="families" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['families']['filters']['quick']) ? $_SESSION['families']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+</div>
+
+<div class="infoMain">
+
+	<div class="titleBar">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<form action="index.php" style="display: inline-block;">
+				<input type="hidden" name="action" value="family"  />
+				<input type="hidden" id="family-id" name="id" value="<?= $data['id'] ?>" />
+				<input type="hidden" name="action" value="family" />
+				<input type="hidden" name="pos" value="<?=$pos?>" />
+				<input type="submit" name="edit" value="Edit Family" class="btn-small" />
+			</form>
+			<form action="index.php" style="display: inline-block;">
+				<input type="hidden" name="action" value="families" />
+				<input type="hidden" name="field" value="<?=$field?>" />
+				<input type="hidden" name="sort" value="<?=$sort?>" />
+				<input type="submit" value="Families List" class="btn-small" />
+			</form>
+			<? if(isset($_SESSION['totalFamilies']) && ($pos - 1) >= 0) : ?>
+				<form action="index.php" style="display: inline-block;">
+					<input type="hidden" name="action" value="family" />
+					<input type="hidden" name="id" value="<?= $data['id'] ?>" />
+					<input type="hidden" name="pos" value="<?= ($pos - 1) ?>" />
+					<input type="submit" name ="prev" value=" " class="prev" />
+				</form>
+			<? endif ?>
+			<? if(isset($_SESSION['totalFamilies']) && ($pos + 1) < $_SESSION['totalFamilies']) : ?>
+				<form action="index.php" style="display: inline-block;">
+					<input type="hidden" name="action" value="family" />
+					<input type="hidden" name="id" value="<?= $data['id'] ?>" />
+					<input type="hidden" name="pos" value="<?= ($pos + 1) ?>" />
+					<input type="submit" name="next" value=" " class="next" />
+				</form>
+			<? endif ?>
+		</div>
+		<div class="caption">
+			<?=($data['first_name_1'] ? $data['first_name_1'] . ' ' . $data['last_name_1'] : '')?>
+			(<?= $data['id'] ?>)
+		</div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+	<form id="familyForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="family" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+	</form>
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px; width: 830px; border-right: 1px solid #CACBCE; float: left;">
+
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+							<td class="infoTitle borderRight" style="width: 50%;"><h2>Primary Contact</h2></td>
+							<td class="infoTitle" style="padding-left: 12px;"><h2>Secondary Contact</h2></td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Name:</span>
+								<?= $data['first_name_1'] ?> <?= $data['last_name_1'] ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Name:</span>
+								<?= $data['first_name_2'] ?> <?= $data['last_name_2'] ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Relationship:</span>
+								<?= $data['relationship_1'] ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Relationship:</span>
+								<?= $data['relationship_2'] ?>
+							</td>
+						</tr>
+					</tbody></table>
+				</div>
+
+				<div class="infoPane" style="border-bottom: 1px solid silver; margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+							<td class="infoTitle" style="width: 50%;"><h2>Contact Information</h2></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Primary Phone:</span>
+								<?= $data['primary_phone'] ?>
+							</td>
+							<td class="infoText" style="width: 50%; padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Language:</span>
+								<?= $data['language'] ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Secondary Phone:</span>
+								<?= $data['secondary_phone'] ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Best time:</span>
+								<?
+									if ($data['best_times_start'] && $data['best_times_end']) {
+										if ($data['best_times_start'] === $data['best_times_end']) {
+											echo $data['best_times_start'];
+										} else {
+											echo $data['best_times_start'] . " - " . $data['best_times_end'];
+										}
+									} else {
+										echo $data['best_times'];
+									}
+
+									if ($data['best_times_days']) {
+										echo ', ' . ucwords($data['best_times_days']);
+									}
+								?>
+
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="width: 50%; padding-left: 12px; vertical-align: top;">
+								<span class="infoLabel" style="font-weight: bold;">Email:</span>
+								<?= ($data['email'] ? '<a href="mailto:' . $data['email'] . '">' . $data['email'] . '</a>' : '') ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Best way to contact:</span>
+								<?
+									$contact = array();
+									if($data['contact_phone']){
+										$contact[] = 'Phone';
+									}
+									if($data['contact_text']){
+										$contact[] = 'Text';
+									}
+									if($data['contact_email']){
+										$contact[] = 'Email';
+									}
+									echo implode(', ', $contact);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Address:</span>
+								<div style="padding-left: 20px;">
+									<?= $data['address'] ?><br />
+									<?= $data['city'] ?>, <?= $data['state'] ?> <?= $data['zip'] ?>
+									<?= (! empty($data['county']) ? '<br />' . $data['county'] . ' County' : '') ?>
+								</div>
+							</td>
+							<td class="infoText" style="padding-left: 24px; vertical-align: top;">
+								<span class="infoLabel" style="font-weight: bold;">Screening Preference:</span>
+								<?php //$settingOb = new Setting(); //191016 ?>
+								<?= $setting->getSettingById($data['asq_preference']); ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="bottom" style="width: 50%; padding-bottom: 8px;"></td>
+							<td class="bottom" style="padding-bottom: 8px;"></td>
+						</tr>
+					</tbody></table>
+				</div>
+
+				<div id="childrenDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+					<div class="title"><h2>Children</h2></div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0"  id="grid">
+
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th style="padding-right: 0px;">Gender</th>
+							<th class="sorting_asc" style="">Birth/Due Date</th>
+							<th style="padding-right: 0px;">Age Years</th>
+							<th style="padding-right: 0px;">Age Months</th>
+							<th style="padding-right: 0px;">Early</th>
+							<th style="padding-right: 0px;">Adj. Age</th>
+						</tr>
+						</thead>
+
+						<tbody>
+
+						<? $row = 'odd'; ?>
+						<? if(is_array($data['children'])) : //echo "<pre>";print_r($data['children']);die;?>
+						<? foreach($data['children'] as $child) : ?>
+
+						<tr id="childRow_<?= $child['id'] ?>" class="<?=$row?>">
+							<td>
+								<div class="toggleArrow"></div>
+								<a href="index.php?action=child&child_id=<?= $child['id'] ?>&pos=<?= $pos ?>" class="child-name"><?= $child['first'] . ' ' . $child['last'] ?> (<?= $child['id'] ?>)</a>
+							</td>
+							<td class="center"><?= $child['gender'] ?></td>
+							<td>
+
+							<?
+								if (!$child['birth_date_formatted'] && $child['birth_due_date_formatted'] ) {
+									if (strtotime($child['birth_due_date_formatted']) < time()) {
+										echo '<span style="color: #f00">' . 
+											$child['birth_due_date_formatted'] .
+											'</span>';
+									} else {
+										echo $child['birth_due_date_formatted'];
+									}
+								} else {
+									echo $child['birth_date_formatted']; 
+								}
+							?>
+							</td>
+							<td class="center">
+							<?
+								$daysInCurrentMonth = date('t');
+								//$d1 = new DateTime('yesterday');
+								$d1 = new DateTime();
+								$d2 = new DateTime($child['birth_date']);
+
+								$adjustedDate = date('M d, Y', strtotime($child['early'] . ' weeks ago', strtotime('yesterday')));
+								$d3 = new DateTime($adjustedDate);
+								
+								$earlyInterval = $d3->diff($d2);
+								$interval = $d1->diff($d2);
+								$unborn = false;
+								if(strtotime($child['birth_date']) > time()){
+									$unborn = true;
+								}
+								
+								if(strtotime($child['birth_due_date']) > time()){
+									$d4 = new DateTime($child['birth_due_date']);
+									$interval = $d1->diff($d4);
+									$unborn = true;
+								}
+								$years  = $interval->format("%y");
+								$months = $interval->format("%m");
+								$days   = $interval->format("%d");
+
+								$totalMonths = $years * 12 + $months;
+								$displayAgeInfo = false;
+								$monthFraction = round($days/30, 1);
+								$months += $monthFraction;
+								
+								if($years || $months){
+									$displayAgeInfo = true;
+
+								} /*else if($days) {
+									echo '0 yr 0 mo '.$days.' day';
+								}*/ 
+								else {
+									echo '0 yr 0 mo';
+								}
+								if($displayAgeInfo){
+									echo ($unborn ? '-' : '') . $years .' yr ' . $months . ' mo ';
+								}
+							?>
+							</td>
+							<td class="center">
+							<?
+								if($displayAgeInfo){
+									echo ($unborn ? '-' : '') . ($totalMonths + $monthFraction) . ' mo ';
+								} else {
+									echo '0 mo';
+								}
+							?>
+							</td>
+							<td class="center"><?= ($child['early'] ? $child['early'] . 'wk' : '') ?></td>
+							<td class="center">
+							<?
+								$actualAge = $totalMonths + $monthFraction;
+								if($child['early'] >= 3 && $years < 2){
+									if($earlyInterval->format('%d')){
+										$earlyFraction = round($earlyInterval->format('%d')/30, 1);
+									} else {
+										$earlyFraction = '';
+									}
+									$yearMonths = $earlyInterval->format('%y') * 12;
+									if($yearMonths){
+										$totalMonths = $yearMonths +  $earlyInterval->format('%m');
+									} else {
+										$totalMonths = $earlyInterval->format('%m');
+									}
+									$adjustedAge = ($totalMonths + $earlyFraction);
+									if ($actualAge < ($child['early'] / 4)) {
+										echo ($adjustedAge * -1)  . ' mo';
+									} else {
+										echo $adjustedAge  . ' mo';
+									}
+								} else {
+									echo '';
+								}
+							?>
+							</td>
+						</tr>
+						<?php /* 050117
+						<tr id="childRow_details_<?= $child['id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="7" style="padding: 4px 6px;">
+								<div class="infoText"><span class="infoLabel" style="font-weight: bold;">Presenting Issue:&nbsp;&nbsp;</span>
+									<?= $setting->getSettingById($child['issue_id']) ?></div>
+								<div class="infoText edit_notes"><span class="infoLabel" style="font-weight: bold;">Notes <?php if(!empty($child['notes'])) { ?>( <a href="javascript:;" class="edit_chnotes btn-small" data-id="<?= $child['id']; ?>" data-fid="<?= $child['parent_id']; ?>">edit</a>&nbsp;&nbsp;<a href="javascript:;" class="delete_chnotes btn-small" data-id="<?= $child['id']; ?>" data-fid="<?= $child['parent_id']; ?>">delete</a> )<?php } ?>:&nbsp;&nbsp;</span><span class="chnotes_text"><?= $child['notes'] ?></span></div>
+							</td>
+						</tr>
+						<?php */ ?>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? endforeach; ?>
+						<? endif; ?>
+
+						</tbody>
+					</table>
+				</div>
+                <div id="screeningDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$developmentalScreeningsHtml?>
+				</div>
+				<div id="referralDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$referral_content?>
+				</div>
+
+				<div id="followUpDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$followup_content?>
+				</div>
+				<br />
+			</div>
+
+			<div class="infoColumn" style="float: left; height: 100%; width: 238px;">
+
+				<div class="infoPane">
+					<div id="program-information-hdr" class="infoTitle infoHdrButton"><h2 class="down">Program Information</h2></div>
+					<div id="program-information" class="" style="padding: 10px;">
+						<div class="infoText"><span class="infoLabel">HMG Worker:&nbsp;&nbsp;</span><?= $data['hmg_worker'] ?></div>
+						<div class="infoText"><span class="infoLabel">Status:&nbsp;&nbsp;</span><?= $data['status'] ?></div>
+						<div class="infoText"><span class="infoLabel">CC Level:&nbsp;&nbsp;</span><?= $data['cc_level'] ?></div>
+						<div class="infoText"><span class="infoLabel">Enrollment:&nbsp;&nbsp;</span><?= $data['enrollment_filed'] ?></div>
+						<!--div class="infoText" style="padding-left: 24px;"><span class="infoLabel">Type:&nbsp;&nbsp;</span><?= $data['enrollment_type'] ?></div>
+						<div class="infoText" style="padding-left: 24px;"><span class="infoLabel">Fax Permission Granted:&nbsp;&nbsp;</span><?= ($data['date_permission_granted_formatted'] != '00/00/0000' ? $data['date_permission_granted_formatted'] : '') ?></div-->
+						<div id="attachments" class="infoText">
+							<div class="toggleArrow"></div>
+							<span class="infoLabel">Attachments:&nbsp;&nbsp;</span>
+							<div id="attachment-container"></div>
+							<iframe id="file-upload-window" src="index.php?action=file&id=<?=$data['id']?>&type=family" style="display:none; border: none; width: 260px; height: 20px; margin: 0 -10px;"></iframe>
+						</div>
+						
+						<div class="infoText"><span class="infoLabel">
+						
+						ECIDS Permission : </span><?= $data['ecids_permission'] ?></div>
+						<div class="infoText">
+						<span class="infoLabel">
+						
+Granted : </span><?=  ($data['ecids_permission_granted_formatted'] != '00/00/0000' ?$data['ecids_permission_granted_formatted']:'')  ?>
+    
+						<span class="infoLabel">
+						
+						Revoked : </span>
+<?=  ($data['ecids_permission_revoked_formatted'] != '00/00/0000' ? $data['ecids_permission_revoked_formatted']:'')  ?>
+
+						</div>
+						<div class="infoText"><span class="infoLabel">
+						
+						Sharing Family Info :</span> <?= $data['sharing_info'] ?></div>
+						<div class="infoText">
+						<span class="infoLabel">
+						
+						Granted :</span>
+	                                      <?=   ($data['sharing_permission_granted_formatted']!= '00/00/0000' ? $data['sharing_permission_granted_formatted']:'')  ?>
+						<span class="infoLabel">
+						
+						Revoked :</span>
+	                                     <?=   ($data['sharing_permission_revoked_formatted'] != '00/00/0000' ? $data['sharing_permission_revoked_formatted'] :'')  ?>
+                                                  </div>
+    	<div class="infoText">
+							<div style="float: right; margin-right: 10px;"><a href="#" class="add-start-end" data-family-id="<?= $data['id'] ?>">Add</a></div>
+							<span class="infoLabel">Status History:&nbsp;&nbsp;</span>
+						</div>
+						<div class="infoText start-end-container"><?= $start_end_content ?></div>
+					</div>
+				</div>
+
+				<div class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2 class="down">Additional Information</h2></div>
+					<div class="" style="padding: 10px;">
+						<div class="infoText"><span class="infoLabel">Who is calling:&nbsp;&nbsp;</span><?= $data['who_called'] ?></div>
+						<div class="infoText"><span class="infoLabel">Reason for call?:&nbsp;&nbsp;</span><!--<br /><div style="padding-left: 12px;"></div--><?= $data['call_reason'] ?></div>
+						<div class="infoText"><span class="infoLabel">How Heard Category:&nbsp;&nbsp;</span><?= $data['family_heard'] ?></div>
+						<div class="infoText"><span class="infoLabel">How Heard Details:&nbsp;&nbsp;</span>
+						<?= $data['how_heard_details']; ?></div>
+						<div class="infoText"><span class="infoLabel">Point of Entry:&nbsp;&nbsp;</span><?= $data['point_of_entry'] ?></div>
+						<div class="infoText"><span class="infoLabel">Race:&nbsp;&nbsp;</span><?= $data['race'] ?> &nbsp;</div>
+						<div class="infoText"><span class="infoLabel">Ethnicity:&nbsp;&nbsp;</span><?= $data['ethnicity'] ?></div>
+						<div class="infoText"><span class="infoLabel">Insurance:&nbsp;&nbsp;</span><?= $setting->getSettingById($data['health_insurance']); //201016 ?></div>
+						<div class="infoText"><span class="infoLabel">Health Insurance Notes:&nbsp;&nbsp;</span><?= $data['health_insurance_notes'] ?></div>
+						<div class="infoText"><span class="infoLabel">Success Story:&nbsp;&nbsp;</span><?= $data['success_story'] ?></div>
+						<div class="infoText"><span class="infoLabel">Success Story Notes:&nbsp;&nbsp;</span><?= $data['success_story_notes'] ?></div>
+						
+					</div>
+				</div>
+				<div id="providerDiv" class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2>Provider Information</h2></div>
+					<div id="providerContent" class="hide">
+					<?=$provider_content?>
+					</div>
+				</div>
+				<div class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2>Family Notes</h2></div>
+					<div class="hide family-note-container">
+						<div id="" class="show-hide-all"><a href="#" style="color: #464646; font-weight: bold; text-decoration: none;">+ Show/Hide All</a></div>
+						<div id="add-note-form" class="infoHdrButton">
+							<input id="add-note" type="button" class='btn-small' style="float: right; margin: 10px 10px 0 0;" value="Add" />
+							<textarea cols="5" rows="5" id="note" name="note" style="width: 165px; height: 40px; line-height: 16px; padding: 3px;"></textarea>
+						</div>
+						<? if(is_array($notes)) : ?>
+						<? foreach($notes as $note) : ?>
+							<div class="noteTitle" data-id="<?= $note['id'] ?>">
+								<div class="toggleArrow"></div>
+                        <?= $note['hmg_worker']  . ' - ' . $note['formatted_date'] ?>
+							</div>
+							<div class="noteText-family"><?= $note['note'] ?></div>
+						<? endforeach; ?>
+						<? endif; ?>
+						<div id="end-notes" style="border-top: 1px solid silver;"></div>
+					</div>
+				</div>
+				<div style="clear: both;"></div>
+			</div>
+		</div>
+
+		<div style="clear: both;"></div>
+
+	</div>
+
+
+</div>
+<div id="child-developmental-screening" style="display: none"></div>
+<? include_once(VIEW_PATH . '/advanced-search.phtml');?>
+    

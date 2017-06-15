@@ -1,0 +1,37 @@
+
+<div id="addNewProvider" class="input">
+	<input id="providerListSearch" name="search" placeholder="Type provider name" autocomplete="off" />
+	<div id="providerList"></div>
+	<div id="editProviderList" style="float: right;">
+     		<input type="button" id="editList" name="editList" value="Edit" class="btn-small" />
+		<input type="button" id="addProvider" name="addProvider" value="Add" class="btn-small" />
+	</div>
+</div>
+<? 
+if(is_array($providerList)) : ?>
+<? foreach($providerList as $provider) : ?>
+<div id="provider<?= $provider['id'] ?>" class="providerData">
+     <div class="providerName clickable" data-provider-id="<?= $provider['id'] ?>"><b><?= ($provider['primary'] ? 'Primary ' : '') ?>Provider:</b> <?= $provider['first'] . ' ' . $provider['last'] ?></div>
+	<div style="padding: 10px; position: relative;">	
+     		<div class="infoText"><span class="infoLabel">Title:&nbsp;&nbsp;</span><?= $provider['title'] ?></div>
+		<div class="infoText"><span class="infoLabel">Organization:&nbsp;&nbsp;</span><?= $provider['org'] ?></div>
+		<div class="infoText"><span class="infoLabel">Site:&nbsp;&nbsp;</span><?= $provider['site'] ?></div>
+
+     		<div class="infoText"><span class="infoLabel">Fax:&nbsp;&nbsp;</span><?= $provider['fax'] ?></div>
+<div class="sfu infoText"><span class=" infoLabel">Send follow-up:&nbsp;&nbsp;</span><span id='sfu'><?= ($provider['send_follow_up']?'Yes':'No') ?></span></div>
+
+<div  class="ptf infoText"><span class="infoLabel">Permission to fax:&nbsp;&nbsp;</span><span id='ptf'> <?=($provider['fax_permission']?'Yes':'No') ?></span></div>
+
+     
+     <div class="granted infoText"><span class="infoLabel">Granted:&nbsp;&nbsp;</span><span id='granted'><?= (($provider['date_permission_granted']!='0000-00-00')?date('m/d/Y',strtotime($provider['date_permission_granted'])):'') ?></span>
+     
+     <span class="infoLabel">&nbsp;&nbsp;Revoked:&nbsp;&nbsp;</span><span id='revoked'><?= (($provider['date_permission_revoked']!='0000-00-00')?date('m/d/Y',strtotime($provider['date_permission_revoked'])):'') ?></span></div>
+                                                                                                                                                                     
+     <div class="infoText perms"  data-perms='Type:<?= $perms ?>' ><span class="infoLabel">Type:&nbsp;&nbsp;</span><span id='type'><?= $provider['permission_type'] ?><span></div>	
+
+		<div  style="float: right; bottom: 10px; right: 10px;"><input type="button" value="Edit" class="btn-small editProvider" data-provider-id="<?= $provider['id'] ?>" /></div>	<br>
+
+	</div>
+</div>
+<? endforeach; ?>
+<? endif; ?>

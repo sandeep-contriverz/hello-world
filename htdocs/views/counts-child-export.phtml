@@ -1,0 +1,95 @@
+<? 
+$csv = "Counts: Child Demographics\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Children,Count,Pct%' . "\n";
+foreach($childStatusCounts as $row){
+	$csv .= (!empty($row['status']) ? $row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Recurrring Children,Count,Pct%' . "\n";
+foreach($recurringChildCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Recurring') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Ages of Children,Count,Pct%' . "\n";
+foreach($childAgeCounts as $row){
+	$csv .= (!is_null($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Ages of Children (Time of entry),Count,Pct%' . "\n";
+foreach($childAgeCountsAtStart as $row){
+	$csv .= (!is_null($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Child Presenting Issues,Count,Pct%' . "\n";
+foreach($childIssueCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded'). ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Children by County,Count,Pct%' . "\n";
+foreach($childCountyCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded'). ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Successful Referrals,Count,Pct%' . "\n";
+foreach($successfulReferralCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded'). ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+echo $csv;
+?>
+
+					                         

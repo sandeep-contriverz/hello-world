@@ -1,0 +1,1436 @@
+<?
+
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Family;
+use Hmg\Models\Event;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+$org = new Setting();
+
+if(!isset($_REQUEST['pos']) ){
+	$pos = $pos-1;
+}
+
+?>
+
+<style>
+a.btn-small { background: #ccc none repeat scroll 0 0 !important; border: 2px outset #998997 !important; border-radius: 7px; color: #555 !important; cursor: pointer; font: bold 12px/12px arial,helvetica,san-serif !important; padding: 2px 5px; }
+button.btn-small {
+    border: 2px outset #998997 !important;
+    border-radius: 7px;
+    background: #ccc !important;
+    color: #555 !important;
+    font: bold 12px/12px arial, helvetica, san-serif !important;
+    padding: 3px 6px;
+    cursor: pointer;
+}
+select.setting {
+    width: 185px;
+}
+#table-follow-up td textarea {width: 80%;}
+#attachments iframe { height: 40px !important; }
+#attachment-container .file-name {display:none;}
+.setting.reason.startend{display:none;}
+</style>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no'
+	});
+	$(document).on('click', '.add-event', function(){
+		$('#event_form').find("input[type=text], textarea, select").not('#hmg_worker').val(""); //reset form
+		$('#event_name').val(' ');
+		$.fancybox.open('#add-organization-event');
+	});
+	$('.radio.mou, .radio.success_story').attr('disabled', true);
+
+	$(document).on('click', '.edit_chnotes', function(e){
+		$(this).parents('div.edit_notes').after('<div><textarea style="width: 80%; height: 70px;" name="child_notes" id="child_notes">'+$(this).parents('div.edit_notes').find('span.chnotes_text').text()+'</textarea><br><a href="javascript:;" class="update_ch_notes btn-small">Update</a></div>');
+		$(this).parents('div.edit_notes').hide();
+	});
+
+	$(document).on('click', '.delete_chnotes', function(e){
+		if(confirm('Are you sure to delete this note')) {
+			//ajax call delete note
+			var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+			var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+			var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '" }';
+			$.ajax({
+				type		: "POST",
+				data		: { 'action' : 'contact', 'delete_note' : 'true', 'json' : json },
+				url			: 'index.php',
+				dataType	: 'json',
+				beforeSend	: function() {},
+				error		: function() {},
+				success		: function( result ) {
+					if(result && result.msg == 'deleted') {
+						$('#childRow_details_'+cid).find('.edit_notes').remove();
+					}
+				}
+			});
+		}
+	});
+
+	$(document).on('click', '.update_ch_notes', function(e){
+		//ajax call to save notes
+		var note  = $.trim($('#child_notes').val());
+		var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+		var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+		var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '", "note" : "' + note + '" }';
+		$.ajax({
+			type		: "POST",
+			data		: { 'action' : 'contact', 'save' : 'true', 'json' : json },
+			url			: 'index.php',
+			dataType	: 'json',
+			beforeSend	: function() {},
+			error		: function() {},
+			success		: function( result ) {
+				if(result && result.msg == 'updated') {
+					$('#childRow_details_'+cid).find('span.chnotes_text').text($.trim($('#child_notes').val()));
+					$('#childRow_details_'+cid).find('span.chnotes_text').parents('div.edit_notes').show();
+					$('#childRow_details_'+cid).find('.update_ch_notes').parent().remove();
+				}
+			}
+		});
+	});
+
+	$('.infoColumn').on('click', '.infoHdrButton', function(e){
+		h2 = $(this).find('h2');
+		if(h2.length){
+			h2.toggleClass('down');
+			sib = $(this).next();
+			sib.slideToggle(500);
+		}
+	});
+	$('.child-name').on('click', function(e){
+		e.stopPropagation();
+		location.href = $(this).attr('href');
+	});
+	$('#note').on('keydown', function(e){
+		if(e.keyCode == 13){
+			$('#add-note').click();
+		}
+	});
+	$('#add-note').on('click', function(){
+		note = $('#note').val().replace(/"/g, '\\"').replace(/\n/g, '\\n');
+		organization_id = $('#organization-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(organization_id && hmg_worker && note){
+			json = '{ "organization_sites_id" : "' + organization_id + '", "hmg_worker" : "' + hmg_worker + '", "note" : "' + note + '" }';
+			$.post('index.php', { 'action' : 'organization-note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					newNote = data[0];
+					$('<div class="noteText-family">' + newNote.note + '</div>').insertAfter($('#add-note-form'));
+					$('<div class="noteTitle" data-id="' + newNote.id + '"><div class="toggleArrow"></div>' + newNote.hmg_worker + ' - ' + newNote.formatted_date + '</div>').insertAfter($('#add-note-form'));
+					$("#note").val('');
+  				}
+			});
+		}
+	});
+	$(".family-note-container").on('mouseover', '.noteTitle', function(e){
+		e.preventDefault();
+		$(this).css({ 'cursor' : 'pointer'});
+	});
+	var tH;
+	$(".family-note-container").on('click', '.noteTitle', function(e){
+		if(tH){
+			return false;
+		}
+		ele = $(this);
+		tH = setTimeout(function(){
+			if(ele.find('.toggleArrow').length >= 1){
+				ele.find('.toggleArrow').toggleClass('on');
+				noteElement = ele.next('.noteText-family');
+				noteText = noteElement.text();
+				noteElement.text(noteText);
+				noteElement.toggle();
+				tH = null;
+			}
+    	}, 300);
+	});
+	$(".family-note-container").on('dblclick', '.noteTitle', function(e){
+		if(tH){
+    		clearTimeout(tH);
+    		tH = null;
+    	}
+		ele = $(this);
+		noteId = ele.data('id');
+		if(ele.find('.toggleArrow').length >= 1){
+			var arrow = ele.find('.toggleArrow');
+			var arrowOn = arrow.hasClass('on');
+			noteElement = ele.next('.noteText-family');
+			noteText = noteElement.text();
+			noteElement.html('<div style="float: right; width: 52px; text-align: center;"><input type="button" class="btn-small saveNote" value="Save" data-id="' + noteId + '" /><input type="button" class="btn-small deleteNote" style="margin-top:2px;" value="Delete" data-id="' + noteId + '" /></div><textarea cols="5" rows="5" class="edit-note" name="note" style="width: 160px; height: 40px; line-height: 16px; padding: 3px;">' + noteText + '</textarea>');
+			if(!arrowOn){
+				arrow.toggleClass('on');
+				noteElement.toggle();
+			}
+		}
+	});
+	$('#create-fax-sheet').on('click', function(e){
+		e.preventDefault;
+		$('.provider_checkboxes:checked').each(function(){
+            window.open('index.php?action=organization&type=fax&org_id=' + $('#organization-id').val() + '&provider_id=' + $(this).val(), '_blank');
+        });
+		
+	});
+	$(".family-note-container").on('click', '.saveNote', function(e){
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		noteInput = noteContainer.find('textarea');
+		noteRaw = noteInput.val();
+		note = noteRaw.replace(/\n/g, '\\n');
+		organization_id = $('#organization-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(organization_id && hmg_worker && note){
+			var json = {
+				organization_sites_id : organization_id,
+				 hmg_worker : hmg_worker,
+				 id : noteId,
+				 note : note
+			};
+			$.post('index.php', { 'action' : 'organization-note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					// toggle note form
+					noteInput.text(noteRaw);
+					noteContainer.prev().click();
+  				}
+			});
+		}
+	});
+	$(".family-note-container").on('click', '.deleteNote', function(e){
+		confirmDelete = confirm("Are you sure you want to delete this note permanently?");
+		if(!confirmDelete){ return false; }
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		$.post('index.php', { 'action' : 'organization-note', 'delete' : 'true', 'id' : noteId }, function(data){
+			// remove from view
+			noteContainer.prev().remove();
+			noteContainer.remove();
+		});
+	});
+	var showAll = false;
+	$(".family-note-container").on('click', '.show-hide-all', function(e){
+		e.preventDefault();
+		if(! showAll){
+			$(this).parent('.family-note-container').find('.toggleArrow').addClass('on');
+			$(this).parent('.family-note-container').find('.noteText-family').show();
+			$(this).text('- Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = true;
+		} else {
+			$(this).parent('.family-note-container').find('.toggleArrow').removeClass('on');
+			$(this).parent('.family-note-container').find('.noteText-family').hide();
+			$(this).text('+ Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = false;
+		}
+	});
+	$('#referralDiv').on('click','#add-referral', function(e){
+		e.preventDefault();
+		organization_id = $('#organization-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(organization_id){
+			referral = 'action=organization-referral&organization_id=' + organization_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				$('#add-referral-fields').find('*').serialize() + '&save=true';
+			$.post('index.php', referral, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#referralDiv').html(data);
+  				}
+			}).done(function(){
+				request = 'action=organization-follow-up&organization_id=' + organization_id  + '&get-list=true';
+				$.post('index.php', request, function(data){
+					if(! $.isEmptyObject(data)){
+						$('#followUpDiv').html(data);
+	  				}
+				});
+			});
+		}
+	});
+    $("#referralDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#referralDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=organization-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+    });
+	$("#referralDiv").on('click', ".edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=organization-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".cancel-edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		request = 'action=organization-referral&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".save-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=organization-referral&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".delete-referral", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this referral?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=organization-referral&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".show-all-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-referrals').addClass('hide-extra-referrals');
+		$(this).text("Hide extra referrals.");
+
+	});
+	$("#referralDiv").on('click', ".hide-extra-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-referrals').addClass('show-all-referrals');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " referrals.");
+
+	});
+	$("#referralDiv").on('change', '.referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = $('.referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var request = 'action=referral-services&referralId=' + referredToId;
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#referralDiv").on('change', '.edit-referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var request = 'action=referral-services&referralId=' + referredToId;
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$('#followUpDiv').on('click','#add-follow-up', function(e)
+	{
+		e.preventDefault();
+		organization_id = $('#organization-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		followUpTable = $("#table-follow-up");
+		tbody = followUpTable.find('tbody:first');
+		firstRow = followUpTable.find('tbody tr');
+		firstRowClass = firstRow.attr('class');
+		rowClass = firstRowClass=='odd'?'even':'odd';
+		formElements = $('#add-follow-up-fields').find('*').not('.done');
+		if(organization_id){
+			request = 'action=organization-follow-up&organization_sites_id=' + organization_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				formElements.serialize() +
+				'&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+					$('.date').datepicker();
+  				}
+			});
+		}
+	});
+    $("#followUpDiv").on('click', ".clickable", function(e){
+    	// If this get activated when the edit form is showing then it isn't replacing the values like a cancel edit does.
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#followUpDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=organization-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', true);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+    });
+	$("#followUpDiv").on('click', ".edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=organization-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".cancel-edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.addClass('clickable');
+		rowClass = row.attr('class');
+		request = 'action=organization-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".edit-done-checkbox", function(e){
+		e.stopPropagation;
+		// Update the date input with today's value
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		followUpRow = $('#followUpRow_' + id);
+		if($(this).prop('checked')){
+			dateObj = new Date();
+			todaysDate = pad(2, (dateObj.getMonth() + 1).toString(), 0) + '/' + pad(2, dateObj.getDate().toString(), 0) + '/' + dateObj.getFullYear().toString().substring(2);
+
+			//console.log(todaysDate);
+			followUpRow.find('input.date').val(todaysDate);
+		}
+
+	});
+	$("#followUpDiv").on('click', ".done-check-box", function(e){
+		e.stopPropagation;
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		doneField = $(this).prev();
+		doneValue = $(this).is(':checked') ? '1' : '0';
+		saveId = '#save_' + id;
+		saveBtn = $(saveId);
+		if(saveBtn.length){
+			detailRow = $('#followUpRow_details_' + id);
+			if(doneValue === '1'){
+				detailRow.find('input:checkbox').prop('checked', true);
+			} else {
+				detailRow.find('input:checkbox').prop('checked', false);
+			}
+			saveBtn.trigger('click');
+		} else {
+			if(doneValue === '1'){
+				formFields = $(this).serialize();
+			} else {
+				formFields = doneField.serialize();
+			}
+			formFields += '&' + escape('followUp[' + id + '][follow_up_date]') + '=<?=date('Y-m-d')?>';
+			parentRowEle = $(this).parent('td').parent('tr');
+			rowClass = parentRowEle.attr('class');
+			id = parentRowEle.attr('id').split('_')[1];
+			request = 'action=organization-follow-up&id=' + id + '&' + formFields + '&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+				}
+			});
+		}
+	});
+	$("#followUpDiv").on('click', ".save-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		rowInputs = $('#followUpRow_' + id + ' :input');
+		detailRowInputs = $('#followUpRow_details_' + id + ' :input');
+		row.addClass('clickable');
+		rowClass = row.attr('class');
+		request = 'action=organization-follow-up&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".delete-follow-up", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this follow-up?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		request = 'action=organization-follow-up&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".show-all-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-follow-ups').addClass('hide-extra-follow-ups');
+		$(this).text("Hide extra follow ups.");
+
+	});
+	$("#followUpDiv").on('click', ".hide-extra-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-follow-ups').addClass('show-all-follow-ups');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " follow ups.");
+
+	});
+	$("#followUpDiv").on('change', '.follow-up-referred-to', function(){
+	
+		var select = $(this);
+		var serviceSelect = $('.follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('change', '.edit-follow-up-referred-to', function(e){
+		e.stopPropagation();
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('click', '.edit-follow-up-service', function(e){
+		e.stopPropagation();
+	});
+
+	$("#providerTable").on('click', '.providerName', function(){
+		$(this).parent('tr').next().toggleClass('hidden');
+		$(this).toggleClass('down');
+	});
+	$("#providerDiv").on('click focus', "#providerListSearch", function(e){
+		$(document).unbind('keydown');
+		$(this).select();
+	});
+	$("#providerDiv").on('keyup', "#providerListSearch", function(e){
+		if(e.which == 40){
+			// Move focus to first element in Div
+			var providerList = $("#providerDiv #providerList");
+			var firstItem = providerList.find('a:first-child');
+			firstItem.addClass('hover').focus();
+			// Disable scrolling while in the auto-suggest
+            $(document).keydown(function(e) {
+                e.preventDefault();
+            });
+		} else {
+			var searchValue = $(this).val();
+			postString = 'action=providers&search=' + searchValue;
+			$.post(
+				'index.php', postString, function(data){
+				if(! $.isEmptyObject(data)){
+					providerList = $('#providerList');
+					providerList.find('a').remove(); // resets the list
+					curClass = '';
+					$.each(data, function(key, val) {
+						if(curClass == 'odd'){
+							curClass = 'even';
+						} else {
+							curClass = 'odd';
+						}
+						$('<a href="#" class="pitem ' + curClass + '" id="select-provider-' + val.id + '">' + val.name + '</a>').appendTo(providerList);
+					});
+					if(searchValue){
+						$('#providerList').show();
+					} else {
+						$('#providerList').hide();
+					}
+				} else {
+					$('#providerList').hide();
+				}
+			});
+		}
+	});
+    $('#providerDiv').on('keyup', '.pitem', function(event){
+	    var keyCode = event.which;
+	    var currentNode = $(this);
+	    switch(keyCode){
+	        case 40:
+	            nextNode = currentNode.next();
+	            if(nextNode){
+	                currentNode.removeClass('hover');
+	                nextNode.focus().addClass('hover');
+	                if(currentNode.attr('id') == $('#providerList a:last-child').attr('id')){
+	                    $('#providerList').hide();
+	                    $('#providerListSearch').focus();
+	                }
+	                //console.log(currentNode.attr('id') + '=' + $(suggestDiv + ' a:first-child').attr('id'));
+	            }
+	            break;
+	        case 38:
+	            prevNode = currentNode.prev();
+	            if(prevNode){
+	                currentNode.removeClass('hover');
+	                prevNode.focus().addClass('hover');
+	                if(currentNode.attr('id') == $('#providerList a:first-child').attr('id')){
+	                    $('#providerList').hide();
+	                    $('#providerListSearch').focus();
+	                }
+	                //console.log(currentNode.attr('id') + '=' + $(suggestDiv + ' a:first-child').attr('id'));
+	            }
+	            break;
+	        case 13:
+	        case 9:
+	        	$(this).click();
+	        	break;
+	        default:
+        }
+    });
+	$("#providerDiv").on('click', "#providerList a", function(e){
+		e.preventDefault();
+		var provider_id = $(this).attr('id').replace('select-provider-', '');
+		var provider = $(this).text();
+		$('#providerListSearch').val(provider);
+		$('#addProvider').attr('data-id', provider_id);
+		$('#providerList').hide();
+		$('#providerListSearch').focus();
+	});
+	$("#providerDiv").on('click', "#addProvider", function(e){
+		provider_id = $(this).attr('data-id');
+		organization_id = $('#organization-id').val();
+		postString = 'action=organization-provider&organization_id=' + organization_id + '&provider_id=' + provider_id + '&save=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', "#editList", function(e){
+		organization_id = $('#organization-id').val();
+		postString = 'action=organization-provider&organization_id=' + organization_id + '&list=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', "#saveList", function(e){
+		organization_id = $('#organization-id').val();
+		var data = $("#providerDiv").find('input[type=hidden], input[type=checkbox]').serialize();
+		postString = 'action=organization-provider&organization_id=' + organization_id + '&' + data;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', ".cancelList", function(e){
+		e.preventDefault();
+		organization_id = $('#organization-id').val();
+		postString = 'action=organization-provider&organization_id=' + organization_id;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+    $("#providerDiv").on('dblclick', ".clickable", function(e){
+		organization_id = $('#organization-id').val();
+		id = $(this).data('provider-id');
+		var myContainer = $('#provider' + id);
+		postString = 'action=provider&id=' + id + '&organization_id=' + organization_id + '&edit-provider-organization=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			myContainer.replaceWith(data);
+		});
+    });
+	$("#providerDiv").on('click', ".editProvider", function(e){
+		e.preventDefault();
+		organization_id = $('#organization-id').val();
+		id = $(this).data('provider-id');
+		var myContainer = $('#provider' + id);
+		postString = 'action=provider&id=' + id + '&organization_id=' + organization_id + '&edit-provider-organization=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			myContainer.replaceWith(data);
+		});
+	});
+	$("#providerDiv").on('click', ".saveProvider", function(e){
+		e.preventDefault();
+		id = $(this).data('provider-id');
+		var myContainer = $('#provider' + id);
+		organization_id = $('#organization-id').val();
+		var providerData = $(myContainer).find('input, select, textarea').not("input[type=radio]").serialize();
+		var organizationProviderData = $(myContainer).find("input[type=radio]").serialize();
+
+		// Save provider data
+		postString = 'action=provider&' + providerData + '&save=true';
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			// Save fax permission
+			postString = 'action=organization-provider&organization_id=' + organization_id + '&provider_id=' + id + '&' + organizationProviderData + '&update=true';
+			$.post('index.php', postString, function(data){
+
+			}).done(function(data){
+				$("#providerContent").html(data);
+			});
+		});
+	});
+	$("#providerDiv").on('click', ".cancelEditProvider", function(e){
+		e.preventDefault();
+		organization_id = $('#organization-id').val();
+		postString = 'action=organization-provider&organization_id=' + organization_id;
+		$.post('index.php', postString, function(data){
+
+		}).done(function(data){
+			$("#providerContent").html(data);
+		});
+	});
+	$("#providerDiv").on('click', ".removeProvider", function(e){
+		e.preventDefault();
+		var confirmDelete = confirm('Are you sure you want to remove this provider?');
+		if(confirmDelete){
+			organization_id = $('#organization-id').val();
+			provider_id = $(this).data('provider-id');
+			postString = 'action=organization-provider&organization_id=' + organization_id + '&provider_id=' + provider_id + '&delete=true';
+			$.post('index.php', postString, function(data){
+
+			}).done(function(data){
+				$("#providerContent").html(data);
+			});
+		}
+	});
+	$(".infoTable").on('click', 'select', function(e){
+		e.stopPropagation();
+	});
+	$("#attachment-container").on('click', '.remove-file', function(e){
+		e.preventDefault();
+		var organization_id = '<?=$data['id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this file?');
+		if(confirmDelete){
+			$.post('index.php', "action=organization-attachments&attachmentId=" + $(this).data('id'), function(data){
+				if(! $.isEmptyObject(data)){
+					reloadAttachments2(data.organization_id, true);
+				}
+			});
+		}
+	});
+	$("#attachments2").on('click', '.toggleArrow', function(e){
+		e.preventDefault();
+		$(this).toggleClass('on');
+		$('.file-name').toggle();
+		$('#file-upload-window2').toggle();
+	});
+	$(".start-end-container").on('click', '.remove-start-end', function(e){
+		e.preventDefault();
+		var id = '<?=$data['id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this record?');
+		if(confirmDelete){
+			$.post('index.php', "action=organization-start-end&delete=true&id=" + $(this).data('id'), function(data){
+				$(".start-end-container").html(data);
+			});
+		}
+	});
+	function displayStartEndReasonSelect(selected){
+		htmlSelect = $('<div style="display:none;"><?= $reason_file_closed->displaySelect('reason', '', 'Reason for ending', '', false, 'reason startend', false) ?></div>');
+		options = htmlSelect.find('option');
+		options.each(function(index){
+			option = $(this);
+			if(option.val() == selected){
+				option.attr('selected', 'selected');
+			}
+		});
+		return htmlSelect.html();
+	}
+	$("#program-information").on('click', '.add-start-end', function(e){
+		e.preventDefault();
+		$(this).toggle();
+		var organization_id = $(this).data('organization-id');
+		
+		var reason = '';
+		$(".start-end-container").prepend('<div class="add-start-end-container"><input type="text" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" /><input type="text" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-organization-id="' + organization_id + '" class="btn-small save-start-end" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-organization-id="' + organization_id + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+		return false;
+	});
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	$("#program-information").on('click', '.edit-start-end', function(e){
+		e.preventDefault();
+		var id = $(this).data('id');
+		var organization_id = $(this).data('organization-id');
+		var start_date = $(this).data('start-date');
+		var end_date = $(this).data('end-date');
+		var reason = $(this).data('reason');
+		$(this).replaceWith('<div class="editing-start-end" data-id="' + id + '" data-organization-id="' + organization_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date + '" data-reason="' + reason + '"><input type="text" id="start_date_' + id + '" name="start_date" class="date startend" style="width: 88px; margin-right: 10px;" placeholder="Start Date" value="' + start_date + '" /><input type="text" id="end_date_' + id + '" name="end_date" class="date startend" style="width: 88px;" placeholder="End Date" value="' + end_date + '" /><br />' + displayStartEndReasonSelect(reason) + '<br ><input type="button" data-id="' + id + '" data-organization-id="' + organization_id + '" class="btn-small save-start-end" style="float: right; margin-top: 3px;" value="Save" /><input type="button" data-id="' + id + '" data-organization-id="' + organization_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date +'" data-reason="' + reason + '" class="btn-small cancel-save-start-end" style="float: right; margin-top: 3px; margin-right: 3px;" value="Cancel" /><div style="clear: right; margin-bottom: 3px;"></div></div>');
+		setTimeout(function(){
+			$('.date').datepicker();
+		}, 300);
+	});
+	$("#program-information").on('click', '.save-start-end', function(e){
+		e.preventDefault();
+		var organization_id = $(this).data('organization-id');
+		var id = $(this).data('id');
+		var request = 'action=organization-start-end' + (id ? '&id=' + id : '') + '&organization_id=' + organization_id + '&' + $('.startend').serialize() + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$(".start-end-container").html(data);
+				if(!id){
+					$('#program-information .add-start-end').toggle();
+				}
+			}
+		});
+	});
+	$("#program-information").on('click', '.cancel-save-start-end', function(e){
+		e.preventDefault();
+		var id = $(this).data('id');
+		var organization_id = $(this).data('organization-id');
+		var start_date = $(this).data('start-date');
+		var end_date = $(this).data('end-date');
+		var reason = $(this).data('reason');
+		var parent = $(this).parent();
+		var isAdd = parent.hasClass('add-start-end-container');
+		if(isAdd){
+			parent.remove();
+			$('#program-information .add-start-end').toggle();
+		} else {
+			var newHtml = '<div class="edit-start-end" data-id="' + id + '" data-organization-id="' + organization_id + '" data-start-date="' + start_date + '" data-end-date="' + end_date + '" data-reason="' + reason + '"><div style="float: right;"><a href="#" class="remove-start-end" data-id="' + id + '">[X]</a></div>Start: ' + start_date + '&nbsp;&nbsp;End: ' + end_date + '<br>' + reason + '</div>';
+			parent.replaceWith(newHtml);
+		}
+	});
+	$('.date').datepicker();
+});
+
+function reloadAttachments2(id, showFiles) {
+	var request = 'action=organization-attachments';
+	request += '&id=' + id;
+	request += '&get-attachments=1';
+	
+	
+	
+	$.post('index.php', request, function(data){
+		if(! $.isEmptyObject(data)){
+			$('#attachment-container').html(data);
+			if (showFiles) 
+			{
+				$('.file-name').toggle();
+			}
+		} else {
+			$('#attachment-container').empty();
+		}
+	});
+}
+
+
+</script>
+<script type="text/javascript" src="js/autosuggest.js"></script>
+
+<div class="pageTitleBar">
+	<h1>Organizations</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="organization" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Organization" class="btn-small" /></form>
+	</div>
+
+	<div style="float: right;">
+	<a href="#advanced-search" class="fancybox" style="font-size: 10px !important; line-height: 10px; font-weight: bold; display: inline-block; padding-top: 7px; text-align: center;">Advanced<br /> Search</a>
+	</div>
+
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="organizations" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['organizations']['filters']['quick']) ? $_SESSION['organizations']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+</div>
+
+<div class="infoMain">
+
+	<div class="titleBar">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<form action="index.php" style="display: inline-block;">
+				<input type="hidden" name="action" value="organization"  />
+				<input type="hidden" id="organization-id" name="id" value="<?= $data['organization_sites_id'] ?>" />
+				
+				<input type="submit" name="edit" value="Edit Organization" class="btn-small" />
+			</form>
+			<form action="index.php" style="display: inline-block;">
+				<input type="hidden" name="action" value="organizations" />
+				<input type="hidden" name="field" value="<?=$field?>" />
+				<input type="hidden" name="sort" value="<?=$sort?>" />
+				<input type="submit" value="Organizations List" class="btn-small" />
+			</form>
+			<? if(isset($_SESSION['totalOrganizations']) && ($pos - 1) >= 0) : ?>
+				<form action="index.php" style="display: inline-block;">
+					<input type="hidden" name="action" value="organization" />
+					<input type="hidden" name="id" value="<?= $data['id'] ?>" />
+					<input type="hidden" name="pos" value="<?= ($pos - 1) ?>" />
+					<input type="submit" name ="prev" value=" " class="prev" />
+				</form>
+			<? endif ?>
+			<? if(isset($_SESSION['totalOrganizations']) && ($pos + 1) < $_SESSION['totalOrganizations']) : ?>
+				<form action="index.php" style="display: inline-block;">
+					<input type="hidden" name="action" value="organization" />
+					<input type="hidden" name="id" value="<?= $data['id'] ?>" />
+					<input type="hidden" name="pos" value="<?= ($pos + 1) ?>" />
+					<input type="submit" name="next" value=" " class="next" />
+				</form>
+			<? endif ?>
+		</div>
+		<div class="caption">
+			<?=($data['organization_name'] ? $data['organization_name'] : '')?>
+			(<?= $data['organization_sites_id'] ?>)
+		</div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+	<form id="organizationForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="organization" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+	</form>
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px; width: 830px; border-right: 1px solid #CACBCE; float: left;">
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+							<td class="infoTitle borderRight" style="width: 50%;"><h2>Organization Profile</h2></td>
+							
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Organization:</span>
+								<?= $data['organization_name'] ?> 
+							</td>
+							
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Site:</span>
+								<?= $data['site'] ?>
+							</td>
+							
+						</tr>
+					</tbody></table>
+				</div>
+
+				<div class="infoPane" style="border-bottom: 1px solid silver; margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+							<td class="infoTitle" style="width: 50%;"><h2>Contact Information</h2></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Phone:</span>
+								<?= $data['primary_phone'] ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Fax:</span>
+								<?= $data['fax'] ?>
+							</td>
+							
+						</tr>
+						<tr>
+							<td class="infoText" style="width: 50%; padding-left: 12px;">
+								<span class="infoLabel" style="font-weight: bold;">Website:</span>
+									<? $website = str_replace('#', ' ', trim($data['website']));
+									$websiteArray = explode(' ', $website);
+									$websiteString = '';
+									if(!empty($websiteArray)) {
+										foreach ($websiteArray as $value) {
+											if(!empty($value)) {
+												if(!empty($websiteString)) {
+												    $websiteString .= '<br>&nbsp;&nbsp;&nbsp;&nbsp;';
+												}
+												$link = $value;
+												if (!preg_match("~^(?:f|ht)tps?://~i", $link))
+												{
+												    $link = "http://" . $link;
+												}
+												$websiteString .= '<a target="_blank" href="'.$link.'">'.$value.'</a>';
+											}
+										}
+									}
+									?><?= $websiteString ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText" style="width: 50%; padding-left: 12px; vertical-align: top;">
+								<span class="infoLabel" style="font-weight: bold;">Address:</span>
+								<div style="padding-left: 20px;">
+									<?= $data['address'] ?><br />
+									<?= $data['city'] ?>, <?= $data['state'] ?> <?= $data['zip'] ?>
+									<?= (! empty($data['county']) ? '<br />' . $data['county'] . ' County' : '') ?>
+								</div>
+							</td>
+						</tr>
+						
+						<tr>
+							<td class="bottom" style="width: 50%; padding-bottom: 8px;"></td>
+							<td class="bottom" style="padding-bottom: 8px;"></td>
+						</tr>
+					</tbody></table>
+				</div>
+
+				<div id="contactDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+					<div class="title"><h2>Providers</h2></div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0"  id="grid">
+
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th style="padding-right: 0px;">Gender</th>
+							<th style="padding-right: 0px;">Title</th>
+							<th style="padding-right: 0px;">Email</th>
+							<th style="padding-right: 0px;">Direct Phone</th>
+
+							<th style="padding-right: 0px;">Type of Provider</th>
+						</tr>
+						</thead>
+
+						<tbody>
+
+    <? $row = 'odd'; $total_cnt = count($data['contacts']); ?>
+						<? if(is_array($data['contacts'])) : ?>
+						<? foreach($data['contacts'] as $contacts) : ?>
+
+						<tr id="contactsRow_<?= $contacts['id'] ?>" class="<?=$row?>" >
+							<td class="center">								
+								<a href="index.php?action=contact&contact_id=<?= $contacts['id'] ?><?php if(isset($_GET['pos'])) { echo '&pos='.$pos;}?>" class="child-name"><?= ucfirst($contacts['first']) . ' ' . ucfirst($contacts['last']) ?> (<?= $contacts['id'] ?>)</a>
+							</td>
+							<td class="center"><?= $contacts['gender'] ?></td>
+							<td class="center"><?= $contacts['title'] ?></td>
+							<td class="center"><a style="color: #000;" href="mailto:<?= $contacts['email'] ?>"><?= $contacts['email'] ?> </a></td>
+							<td class="center"><?= $contacts['cell_phone'] ?></td>
+				
+							<td class="center"><?= $setting->getValue($contacts['type_of_contact_id']); ?></td>
+						</tr>
+						<tr id="contactsRow_details_<?= $contacts['id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="7" style="padding: 4px 6px;border: 1px solid black;">
+								<div class="infoText"><span class="infoLabel" style="font-weight: bold;">Notes:&nbsp;&nbsp;</span></div>
+								<div class="infoText edit_notes"><span class="infoLabel" style="font-weight: bold;">&nbsp;&nbsp;<span class="chnotes_text"><?= $contacts['notes'] ?>
+									
+								</span></div>
+							</td>
+						</tr>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? endforeach; ?>
+						<? endif; ?>
+
+						</tbody>
+					</table>
+		<? if($total_cnt > 10) : ?>					
+    <a href='#' id="seeMoreRecords">  Show All <?=$total_cnt  ?> contacts</a> 
+			<? endif; ?>
+
+				</div>
+				<div id="eventDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$events?>
+				</div>
+				<br />
+
+				<!--div id="eventsDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+					<div class="title"><h2>Events</h2></div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0"  id="grid">
+
+						<thead>
+						<tr>
+							<th>HMG Worker</th>
+							<th style="padding-right: 0px;">Date</th>
+							<th class="sorting_asc" style="">Title</th>
+							<th style="padding-right: 0px;">Event Name</th>
+							<th style="padding-right: 0px;">Outreach Type</th>
+							<th style="padding-right: 0px;">Event Type</th>
+							<th>
+								<button class="btn-small add-follow-up" >
+									<a class="fancybox" href="#add-organization-event" class="fancybox add-event" style="color:#555;">Add New </a>
+								</button>
+							</th>
+						</tr>
+						</thead>
+
+						<tbody>
+						<? $row = 'odd'; ?>
+<? if(is_array($data1)) :  ?>
+?>
+							<tr id="eventsRow_<?= $data1['event_id'] ?>" class="<?=$row?>" onclick="detail = $(this).next(); detail.toggleClass('hidden'); $(this).find('div').toggleClass('on');" >
+								<td><div class="toggleArrow"></div>
+								<?php echo $data1['hmg_worker'];?></td>
+								<td class="center"><?php echo $data1['event_date'];?></td>
+								<td class="center"><?php echo $data1['event_venue'];?></td>
+								<td class="center"><?php echo $data1['event_name'];?></td>
+								<td class="center"><?php echo $data1['outreach_type_id'];?></td>
+								<td class="center"><?= isset($data1['event_type_id']) ? $data1['event_type_id'] : ''  ?></td>
+								<td class="center">
+
+									<button class="btn-small add-follow-up" >
+										<a class="fancybox" href="#add-organization-event" class="fancybox add-event" style="color:#555;">
+											Edit
+										</a>
+									</button>
+								</td>
+							</tr>
+							<tr id="contactsRow_details_<?= $contacts['id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="7" style="padding: 4px 6px;border: 1px solid black;">
+								<div class="infoText"><span class="infoLabel" style="font-weight: bold;">Notes:&nbsp;&nbsp;</span></div>
+								<div class="infoText edit_notes"><span class="infoLabel" style="font-weight: bold;">&nbsp;&nbsp;<span class="chnotes_text"><?= $contacts['notes'] ?>
+									
+								</span></div>
+							</td>
+						</tr>
+
+							<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+						<? endif; ?>
+						</tbody>
+
+					</table>
+				</div-->
+
+				
+
+				<div id="followUpDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$followup_content?>
+				</div>
+				<br />
+			</div>
+
+			<div class="infoColumn" style="float: left; height: 100%; width: 238px;">
+
+				<div class="infoPane">
+					<div id="program-information-hdr" class="infoTitle infoHdrButton"><h2 class="down">Program Information</h2></div>
+					<div id="program-information" class="" style="padding: 10px;">
+
+						<div class="infoText"><span class="infoLabel">HMG Region:&nbsp;&nbsp;</span><?= isset($data['region_id']) ? $org->getSettingById($data['region_id']) : '' ?></div>
+
+						<div class="infoText"><span class="infoLabel">Organization Status:&nbsp;&nbsp;</span><?= isset($data['status']) ? $data['status'] : '' ?></div>
+
+						<div class="infoText"><span class="infoLabel">Organization Type:&nbsp;&nbsp;</span><?= isset($data['organization_type_id']) ? $org->getSettingById($data['organization_type_id']) : '' ?></div>
+						<?php 
+							$string = $data['service_area'];
+							$id_array = (explode(",",$string));
+							$service_area_string = '';
+							if(is_array($id_array) && !empty($id_array)){
+								$str_array = array();
+								foreach($id_array as $a){
+									$a = $org->getSettingById($a);
+									array_push($str_array,$a);
+								}
+								$service_area_string = implode(', ',$str_array);
+							}
+							/*else{
+								$service_area_string = $org->getSettingById($string);
+							}*/
+						?>
+						<div class="infoText"><span class="infoLabel">Service Area:&nbsp;&nbsp;</span><?= $service_area_string; ?></div>
+
+						<div class="infoText">
+							<div style="float: right; margin-right: 10px;"><a href="#" class="add-start-end" data-organization-id="<?= $data['id'] ?>">Add</a></div>
+							<span class="infoLabel">Status History:&nbsp;&nbsp;</span>
+						</div>
+						<div class="infoText "><?= $start_end_content ?></div>
+
+					</div>
+				</div>
+				<div class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2 class="down">Additional Information</h2></div>
+					<div class="" style="padding: 10px;">
+						<div class="infoText"><span class="infoLabel">Mode Of Initial Contact:&nbsp;&nbsp;</span><?= $data['mode_of_contact'] ?></div>
+						<div class="infoText"><span class="infoLabel">Resource Database:&nbsp;&nbsp;</span>
+						<?= isset($data['resource_database_id']) ? $org->getSettingById($data['resource_database_id']) : '' ?>
+						</div>
+						<div class="infoText"><span class="infoLabel">ID#:&nbsp;&nbsp;</span><?= isset($data['database_id']) ? $data['database_id'] : '' ?></div>
+						<div class="infoText">
+							<span class="infoLabel">Success Story:&nbsp;&nbsp;</span>
+							<td class="infoText borderRight">
+									<?= $organization->displayEnumOptions('data[success_story]', 'success_story', (!empty($data['success_story']) && $data['success_story'] == 'Yes' ? $data['success_story'] : 'No'), 33) ?>
+							</td>
+						</div>
+						<div class="infoText"><span class="infoLabel">Success Notes:&nbsp;&nbsp;</span><?= $data['success_story_notes'] ?> &nbsp;</div>
+						<div class="infoText"><span class="infoLabel">Service Terms:&nbsp;&nbsp;</span>
+						<?php 
+							//echo $data['organization_name_id'];
+							$org_id=$organization->getOrganizationByOrgID($data['organization_name_id']);
+							
+							if(!empty($data['service_terms']))
+							{
+								$string = $data['service_terms'];	
+							}
+							else{
+								$string = $org_id['service_terms'];	
+							}
+							
+							
+							$id_array = (explode(",",$string));
+					
+							$service_terms_string = '';
+							
+							if(is_array($id_array) && !empty($id_array)){
+								$str_array = array();
+								foreach($id_array as $a){
+								
+									$a = $org->getSettingById($a);
+									array_push($str_array,$a);
+								}
+								$service_terms_string = implode(', ',$str_array);
+							}
+						?>
+						<?= $service_terms_string; ?>
+						</div>
+						</div>
+						
+						<div class="infoPane">
+					<div id="fax-hdr" class="infoTitle infoHdrButton"><h2>Agency Fax Sheet</h2></div> 
+						
+						<div id="primary-provider-form" class="hide" style="padding: 10px;">
+                        <ul name="provider-id" style="width: 220px;list-style:none;">
+	                            <? if(is_array($data['contacts'])) : ?>
+						<? foreach($data['contacts'] as $contacts) : ?>
+	                                <li style="width:100%;"><input type="checkbox"  name="provider-id-checkbox" class="provider_checkboxes" value="<?= $contacts['id'] ?>" /><span style="margin:0px 5px;"><?= ucfirst($contacts['first']) . ' ' . ucfirst($contacts['last']) ?></span></li>
+	                            <? endforeach ?>
+	                            <? endif ?>
+	                        </ul>
+							
+							<div style="padding-top: 10px;"><input id="create-fax-sheet" type="submit" value="Create Fax Sheet" class="btn-small" /></div>
+						</div>
+					</div>
+				</div>
+				<div id="partnershipDiv" class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2 class="down">Partnership Information</h2></div>
+					<div id="partnershipContent" >
+						<div id="attachments2" class="infoText" style="padding-left: 10px;">
+							<div class="toggleArrow"></div>
+							<span class="infoLabel">&nbsp;&nbsp;Attachments:&nbsp;&nbsp;</span>
+							<div id="attachment-container"></div>
+							<iframe id="file-upload-window2" src="index.php?action=organization-file&id=<?=$data['organization_sites_id']?>&type=organization" style="display:none; border: none; width: 260px; height: 40px; margin: 0 -10px;"></iframe>
+							
+						</div>
+						
+					<div class="infoText" style="padding-left: 10px;">
+							<span class="infoLabel">MOU:&nbsp;&nbsp;</span>
+							<td class="infoText borderRight">
+									<?= $organization->displayEnumOptions('data[mou]', 'mou', (!empty($data['mou']) && $data['mou'] == 'Yes' ? $data['mou'] : 'No'), 33) ?>
+							</td>
+						</div>
+						<div class="infoText" style="padding-left: 10px;"><span class="infoLabel">Date Last Signed:&nbsp;&nbsp;</span><?= isset($data['date_last_signed_formatted']) && $data['date_last_signed_formatted'] != '01/01/1970' && $data['date_last_signed_formatted'] != '00/00/0000' ? $data['date_last_signed_formatted'] : '' ?> &nbsp;</div>
+						<div class="infoText" style="padding-left: 10px;"><span class="infoLabel">Partnership Level:&nbsp;&nbsp;</span><?= $data['partnership_level'] ?></div>
+						<div class="infoText" style="padding-left: 10px;"><span class="infoLabel">Partnership Notes:&nbsp;&nbsp;</span><?= $data['partnership_notes']?></div>
+					</div>
+			  </div>
+				
+				<div class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2>Organization Notes</h2></div>
+					<div class="hide family-note-container">
+						<div id="" class="show-hide-all"><a href="#" style="color: #464646; font-weight: bold; text-decoration: none;">+ Show/Hide All</a></div>
+						<div id="add-note-form" class="infoHdrButton">
+							<input id="add-note" type="button" class='btn-small' style="float: right; margin: 10px 10px 0 0;" value="Add" />
+							<textarea cols="5" rows="5" id="note" name="note" style="width: 165px; height: 40px; line-height: 16px; padding: 3px;"></textarea>
+						</div>
+						
+						<? if(is_array($notes)) : ?>
+						<? foreach($notes as $note) : ?>
+							<div class="noteTitle" data-id="<?= $note['id'] ?>">
+								<div class="toggleArrow"></div>
+								<?= $note['hmg_worker']  . ' - ' . $note['formatted_date'] ?>
+							</div>
+							<div class="noteText-family"><?= $note['note'] ?></div>
+						<? endforeach; ?>
+						<? endif; ?>
+						<div id="end-notes" style="border-top: 1px solid silver;"></div>
+					</div>
+				</div>
+				<div style="clear: both;"></div>
+			</div>
+		</div>
+		<div style="clear: both;"></div>
+	</div>
+</div>
+<? include_once(VIEW_PATH . '/organizations-advanced-search.phtml');
+?> 
+<div id="add-organization-event" style="display:none;"><?php
+   include_once(VIEW_PATH . '/add-organization-event.phtml');
+?></div>
+<script>
+var trs = $("#grid tr");
+var notes = $('[class^="hidden"]');
+$(".toggleArrow").click(function() {
+
+});
+var btnMore = $("#seeMoreRecords");
+
+var trsLength = trs.length;
+var currentIndex = 20;
+
+
+if (trsLength <  21)
+    btnMore.hide();
+        
+    else {
+trs.hide();
+trs.slice(0, 20).show();
+notes.hide();
+
+
+    }
+
+
+btnMore.click(function (e) { 
+    e.preventDefault();
+    trs.show();
+    notes.hide();
+    btnMore.hide();
+
+});
+
+var trsE = $("#events tr");
+
+
+var btnMoreE = $("#seeMoreEvents");
+
+var trsELength = trsE.length;
+var currIndex = 40;
+
+
+if (trsELength <  41)
+    btnMoreE.hide();
+        
+    else {
+trsE.hide();
+trsE.slice(0, 40).show();
+notes.hide();
+    }
+
+
+btnMoreE.click(function (e) { 
+    e.preventDefault();
+  trsE.show();
+notes.hide();		  
+    btnMoreE.hide();
+
+});
+		 
+</script>
+
+
+

@@ -1,0 +1,280 @@
+<?php
+
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Pragma: no-cache"); // HTTP/1.0
+
+ini_set('display_errors', 'on');
+error_reporting(E_ALL);
+
+require('../vendor/autoload.php');
+
+const CLASS_PATH        = 'Models';
+const VIEW_PATH         = 'views';
+const CONTROLLER_PATH   = 'Controllers';
+const TEMPLATE_PATH     = 'templates';
+const TEMPLATE          = '/site_db_template.phtml';
+const SITE_TEMPLATE     = '/site_main_template.phtml';
+const PRINT_TEMPLATE    = '/site_print_template.phtml';
+
+$env = getenv('ENVIRONMENT');
+
+switch($env){
+    case 'UTAH':
+        $host       = 'localhost';
+        $database   = 'hmgutah';
+        $user       = 'hmgdbuser';
+        $pass       = 'webadmin';
+        $GLOBALS['pdfLogo']    = 'images/pdf-logo.png';
+        $GLOBALS['footerText'] = $GLOBALS['footerText'] = 'helpmegrowutah.org | helpmegrow@unitedwayuc.org | 801-691-5322 | 148 North 100 West, Provo, UT 84604';
+        break;
+    case 'ALABAMA':
+        $host       = 'localhost';
+        $database   = 'hmg_alabama';
+        $user       = 'hmgalabama';
+        $pass       = 'montgomery';
+        $GLOBALS['pdfLogo']    = 'images/pdf-logo.png';
+        $GLOBALS['footerText'] = '3600 8th Avenue South | P.O. Box 320189 | Birmingham, AL 35232 | 205-458-2070 or dial 2-1-1';
+        break;
+    case 'SKELETON':
+        $host       = 'localhost';
+        $database   = 'hmg_skeleton';
+        $user       = 'hmgskeleton';
+        $pass       = 'hmgskeleton';
+        $GLOBALS['pdfLogo']    = 'images/pdf-logo.png';
+        $GLOBALS['footerText'] = $GLOBALS['footerText'] = 'helpmegrowutah.org | helpmegrow@unitedwayuc.org | 801-691-5322 | 148 North 100 West, Provo, UT 84604';
+        break;
+    default:
+        $host       = 'localhost';
+        $database   = 'hmgutahdemo';
+        $user       = 'hmgdbuser';
+        $pass       = 'webadmin';
+        $GLOBALS['pdfLogo']    = 'images/pdf-logo.png';
+        $GLOBALS['footerText'] = $GLOBALS['footerText'] = 'helpmegrowutah.org | helpmegrow@unitedwayuc.org | 801-691-5322 | 148 North 100 West, Provo, UT 84604';
+}
+
+$db = new Hmg\Controllers\DbController($host, $user, $pass, $database);
+$db->connect();
+
+$action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : '');
+
+if (!is_null($action)) {
+    $action = strtolower($action);
+} else {
+    $action = null;
+}
+
+function frontController($action)
+{
+
+    session_start();
+
+    $GLOBALS['action'] = $action;
+
+    $loginController =  new Hmg\Controllers\LoginController();
+
+    switch($action){
+
+        case 'login':
+            $user = new Hmg\Models\User($_POST['Email'], $_POST['Password']);
+            $loginController =  new Hmg\Controllers\LoginController($user, $_POST['Password']);
+            break;
+
+        case 'logout':
+            if ($_SESSION['user']['id']) {
+                $_SESSION = array();
+                if (ini_get("session.use_cookies")) {
+                    $params = session_get_cookie_params();
+                    setcookie(
+                        session_name(),
+                        '',
+                        time() - 42000,
+                        $params["path"],
+                        $params["domain"],
+                        $params["secure"],
+                        $params["httponly"]
+                    );
+                }
+                session_destroy();
+            }
+            header("Location: index.php");
+            break;
+
+        case 'families':
+            $loginController->checkLoggedIn();
+            $familiesController = new Hmg\Controllers\FamiliesController();
+            break;
+
+        case 'family':
+            $loginController->checkLoggedIn();
+            $familyController = new Hmg\Controllers\FamilyController();
+            break;
+
+        case 'child':
+            $loginController->checkLoggedIn();
+            $childController = new Hmg\Controllers\ChildController();
+            break;
+
+        case 'child-referral':
+            $loginController->checkLoggedIn();
+            $childReferralController = new Hmg\Controllers\ChildReferralController();
+            break;
+
+        case 'child-follow-up':
+            $loginController->checkLoggedIn();
+            $childFollowUpController = new Hmg\Controllers\ChildFollowUpController();
+            break;
+
+        case 'child-prior-resource':
+            $loginController->checkLoggedIn();
+            $childPriorResourceController = new Hmg\Controllers\ChildPriorResourceController();
+            break;
+
+        case 'child-developmental-screening':
+            $loginController->checkLoggedIn();
+            $childDevelopmentalScreeningController = new Hmg\Controllers\ChildDevelopmentalScreeningController();
+            break;
+
+        case 'screening-attachment':
+            $loginController->checkLoggedIn();
+            $screeningAttachmentController = new Hmg\Controllers\ScreeningAttachmentController();
+            break;
+
+        case 'screening-attachments':
+            $loginController->checkLoggedIn();
+            $screeningAttachmenstController = new Hmg\Controllers\ScreeningAttachmentsController();
+            break;
+
+        case 'screenings-file':
+            $loginController->checkLoggedIn();
+            $screeningsFileController = new Hmg\Controllers\ScreeningsFileController();
+            break;
+
+        case 'providers':
+            $loginController->checkLoggedIn();
+            $providersController = new Hmg\Controllers\ProvidersController();
+            break;
+
+        case 'provider':
+            $loginController->checkLoggedIn();
+            $providerController = new Hmg\Controllers\ProviderController();
+            break;
+
+        case 'family-provider':
+            $loginController->checkLoggedIn();
+            $familyProviderController = new Hmg\Controllers\FamilyProviderController();
+            break;
+
+        case 'family-start-end':
+            $loginController->checkLoggedIn();
+            $familyStartEndController = new Hmg\Controllers\FamilyStartEndController();
+            break;
+
+        case 'family-start-ends':
+            $loginController->checkLoggedIn();
+            $familyStartEndsController = new Hmg\Controllers\FamilyStartEndsController();
+            break;
+
+        case 'family-attachments':
+            $loginController->checkLoggedIn();
+            $familyAttachmentsController = new Hmg\Controllers\FamilyAttachmentsController();
+            break;
+
+        case 'volunteers':
+            $loginController->checkLoggedIn();
+            $volunteersController = new Hmg\Controllers\VolunteersController();
+            break;
+
+        case 'volunteer':
+            $loginController->checkLoggedIn();
+            $volunteerController = new Hmg\Controllers\VolunteerController();
+            break;
+
+        case 'volunteering':
+            $loginController->checkLoggedIn();
+            $volunteerController = new Hmg\Controllers\VolunteeringController();
+            break;
+
+        case 'counts':
+            $loginController->checkLoggedIn();
+            $countsController = new Hmg\Controllers\CountsController();
+            break;
+
+        case 'users':
+            $loginController->checkLoggedIn();
+            $usersController = new Hmg\Controllers\UsersController();
+            break;
+
+        case 'user':
+            $loginController->checkLoggedIn();
+            $userController = new Hmg\Controllers\UserController();
+            break;
+
+        case 'settings':
+            $loginController->checkLoggedIn();
+            $settings = new Hmg\Controllers\SettingsController();
+            break;
+
+        case 'setting':
+            $loginController->checkLoggedIn();
+            $setting = new Hmg\Controllers\SettingController();
+            break;
+
+        case 'referral-services':
+            $loginController->checkLoggedIn();
+            $referralServices = new Hmg\Controllers\ReferralServiceController();
+            break;
+
+        case 'note':
+            $loginController->checkLoggedIn();
+            $note = new Hmg\Controllers\NoteController();
+            break;
+
+        case 'child-note':
+            $loginController->checkLoggedIn();
+            $childNote = new Hmg\Controllers\ChildNoteController();
+            break;
+
+        case 'zip':
+            $loginController->checkLoggedIn();
+            $zip = new Hmg\Controllers\ZipController();
+            break;
+
+        case 'letter':
+            $loginController->checkLoggedIn();
+            $letterController = new Hmg\Controllers\LetterController();
+            break;
+
+        case 'family-referral':
+            $loginController->checkLoggedIn();
+            $familyReferralController = new Hmg\Controllers\FamilyReferralController();
+            break;
+
+        case 'family-follow-up':
+            $loginController->checkLoggedIn();
+            $familyFollowUpController = new Hmg\Controllers\FamilyFollowUpController();
+            break;
+
+        case 'follow-ups':
+            $loginController->checkLoggedIn();
+            $followUpsController = new Hmg\Controllers\FollowUpsController();
+            break;
+
+        case 'file':
+            $loginController->checkLoggedIn();
+            $fileController = new Hmg\Controllers\FileController();
+            break;
+
+        case 'reports':
+            $loginController->checkLoggedIn();
+            $reportController = new Hmg\Controllers\ReportsController();
+            break;
+
+        default:
+            $loginController->checkLoggedIn();
+            $loginController->displayLoggedIn($_SESSION['user']);
+    }
+}
+
+frontController($action);

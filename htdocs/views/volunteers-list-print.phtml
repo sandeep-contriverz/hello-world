@@ -1,0 +1,66 @@
+<script type="text/javascript">
+$("document").ready(function(){
+	$(".volunteer").on("click", function(){
+		var id = $(this).attr('id').slice(10);
+		location.href="index.php?action=volunteer&id=" + id;
+	});
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(/ /g, '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		} 
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		if(field == 'volunteer_name'){
+			field = 'last_name';
+		}
+		if(field == 'volunteer_areas'){
+			field = 'areas';
+		}
+		location.href="index.php?action=volunteers&field="+field+"&sort="+fieldsort;
+	});
+});
+</script>
+<? if(is_array($volunteers)) : ?>	
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=($sorts['last_name'] ? '_' . strtolower($sorts['last_name']) : '')?>">Volunteer Name</th>
+			<th class="sort sorting<?=($sorts['areas'] ? '_' . strtolower($sorts['areas']) : '')?>">Volunteer Areas</th>
+			<th class="sort sorting<?=($sorts['phone'] ? '_' . strtolower($sorts['phone']) : '')?>">Phone</th>
+			<th class="sort sorting<?=($sorts['email'] ? '_' . strtolower($sorts['email']) : '')?>">Email</th>
+			<th class="sort sorting<?=($sorts['status'] ? '_' . strtolower($sorts['status']) : '')?>">Status</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; ?>
+	<? foreach($volunteers as $volunteer) : ?>
+	
+		<tr id="volunteer_<?=$volunteer['id']?>" class="volunteer <?=$row?>">
+			<td><?=ucfirst(strtolower($volunteer['last_name'])) . ', ' . ucwords(strtolower($volunteer['first_name']))?></td>
+			<td><?=preg_replace("/,+/", '<br />', $volunteer['areas'])?></td>
+			<td><?=$volunteer['phone']?></td>
+			<td><?=($volunteer['email'] ? '<a href="mailto:' . $volunteer['email'] . '" title="' . $volunteer['email'] . '">Email</a>' : '')?></td>
+			<td><?=$volunteer['status']?></td>
+		</tr>
+		
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+		
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalVolunteers ?> volunteers
+	</div>
+</div>
+<? else : ?>
+<p><br /><em>No result found.</em></p>
+<? endif; ?>

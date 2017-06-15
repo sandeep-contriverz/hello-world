@@ -1,0 +1,21 @@
+<div class="login-form">
+	<p><?php echo isset($GLOBALS['site_title']) ? $GLOBALS['site_title'] : ''; ?></p>
+
+	<p class="colored">Office Login</p>
+	<form method="POST">
+	<input type="hidden" name="action" value="login">
+	<div style="color: #c00; font-size: 16px;"><?=$error?></div>
+	<p>
+	Email<br>
+	<input class="login" type="text" name="Email">
+	</p>
+	<p>
+	Password<br>
+	<input class="login" type="password" name="Password"><br />
+	Forgot password? Contact your database manager.
+	</p>
+	<p>
+	<input class="btn" type="submit" value="Login">
+	</p>
+	</form>
+</div>

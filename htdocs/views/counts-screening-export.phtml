@@ -1,0 +1,88 @@
+<? 
+$csv = "Counts: Developmental Screenings\n\n";
+
+if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) $csv .=  implode(' - ' , $this->drillheading)."\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Screenings,Count,Pct%,""' . "\n";
+foreach($screeningsCounts as $row){
+	$csv .= (!is_null($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . ',';
+	$csv .= "" . "\n";
+}
+
+$csv .= "\n" . 'Screening Frequency,Count,Pct%,""' . "\n";
+foreach($asqFrequencyCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . ',';
+	$csv .= "" . "\n";
+}
+
+$csv .= "\n" . 'ASQ SE Interval,Count,Pct%,""' . "\n";
+foreach($asqSeCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . ',';
+	$csv .= "" . "\n";
+}
+
+$csv .= "\n" . 'ASQ-3 Interval,Count,Pct%,""' . "\n";
+foreach($asq3Counts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . ',';
+	$csv .= "" . "\n";
+}
+
+$csv .= "\n" . 'ASQ-3 Domain,White,Grey,Black' . "\n";
+foreach($asq3DomainCounts as $row){
+	$csv .= (!empty($row['domain']) ? $row['domain'] : 'Uncoded') . ',';
+	$csv .= $row['White'] . ',';
+	$csv .= $row['Grey'] . ',';
+	$csv .= $row['Black'] . "\n";
+}
+
+echo $csv;
+?>
+
+					                         

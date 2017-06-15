@@ -1,0 +1,353 @@
+<?php 
+//echo "<pre>";print_r($_SERVER);die;
+function buildUrl($new) {
+	$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+	$url = $scheme.'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	if(empty($scheme) && isset($_SERVER['REQUEST_SCHEME'])) {
+		$url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	}
+
+	$url_parts = parse_url($url);
+	parse_str($url_parts['query'], $params);
+
+	$params[$new] = true;     // Overwrite if exists
+	// Note that this will url_encode all values
+	$url_parts['query'] = http_build_query($params);
+
+	// If not
+	return $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'] . '?' . $url_parts['query'];
+}
+$urlPrint  = buildUrl('print');
+$urlExport = buildUrl('export');
+
+?>
+<?php 
+	$is_drill_active = false;
+	if(isset($_SESSION['user']) && isset($_SESSION['user']['permission']) 
+		&& !empty($_SESSION['user']['permission']) 
+		&& in_array(strtolower($_SESSION['user']['permission']), array('edit', 'admin'))) {
+		$is_drill_active = true;
+	} 
+?>
+
+<script>
+$(function(){
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no'
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		//window.open('index.php?print=true&' + postString, '');
+		window.open('<?php echo $urlPrint?>');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		//window.open('index.php?export=true&' + postString, '');
+		window.open('<?php echo $urlExport?>');
+	});
+	$('th.sort').click(function(){
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+		}
+		else {
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+		}
+	    var table = $(this).parents('table').eq(0)
+	    var lastRow = table.find('tr:last');
+	    lastRowLabel = lastRow.find('td:first').text();
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	    	lastRow.remove();
+	    }
+	    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+	    this.asc = !this.asc
+	    if (this.asc){rows = rows.reverse()}
+	    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	   		table.append(lastRow);
+	   	}
+	   	// Fix odd/event class on sorted elements
+	   	rowClass = 'even';
+	   	table.find('tr:gt(0)').each(function(index){
+	   		curRow = $(this);
+	   		curRow.attr('class', rowClass);
+	   		if(rowClass == 'even'){
+	   			rowClass = 'odd';
+	   		} else {
+	   			rowClass = 'even';
+	   		}
+	   	});
+	});
+	function comparer(index) {
+	    return function(a, b) {
+	        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+	        return ($.isNumeric(valA) && $.isNumeric(valB)) ? valA - valB : valA.localeCompare(valB)
+	    }
+	}
+	function getCellValue(row, index){
+		var text = $(row).children('td').eq(index).text();
+		if(text.indexOf('month') !== -1){
+			text = parseInt(text)
+		} else if(text.indexOf('Uncoded') !== -1){
+			if($(row).children('td').eq(index).hasClass('Uncoded'))
+				text = 1000;
+		}
+		return text;
+	}
+
+	$('#multi-zip').on('change', function(e){
+		var checkbox = this;
+		$('.select').attr('multiple',checkbox.checked);
+	 	if(checkbox.checked){
+	 		$('.select').attr('name','filters[zip][]');
+	 		$('.select').attr('size','11');
+	 	} else {
+	 		$('.select').attr('name','filters[zip]');
+	 		$('.select').attr('size','1');
+	 	}
+	});
+
+	$('.date').datepicker();
+});
+</script>
+<div class="pageTitleBar">
+	<a href="index.php?action=counts"><h1>Developmental Screenings</h1></a>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 0px;">
+				<form id="filter-form" action="index.php" style="padding: 8px 3px 0 4px;">
+			<input type="hidden" name="action" value="counts">
+			<input type="hidden" id="count-family" name="type" value="screenings">
+			<input type="hidden" id="drillName" name="drillName" value="<?php echo isset($_REQUEST['drillName']) ? $_REQUEST['drillName'] : '' ?>">
+			<div style="float: right; margin-left: 15px">
+			<input type="submit" class="btn-small" id="export-list" name="export_list" value="Export" />
+			<input type="submit" class="btn-small" id="print-list" name="export_list" value="Print" />
+			<input type="submit" class="btn-small" value="Counts" onclick="$('#count-family').val(0);" />
+			</div>
+			<style>
+			select.status{
+				width: auto;
+			}
+			.pageTitleBar input[type="text"] {
+				width: 80px;
+			}
+			.school_district, .select, .filter {
+				display: inline-block;
+				float: left;
+				margin-right: 2px;
+				margin-top: 2px;
+			}
+			.counts-county{
+				float: left;
+				margin-right: 2px;
+				margin-top: 2px;
+			}
+			.select-wrapper {
+				float: left;
+				margin-right: 20px;
+			}
+			.filter-container {
+				float: left;
+				margin: auto 0;
+			}
+			#multi-zip{
+				vertical-align: middle;
+			}
+			a.childLinks { color: #464646; text-decoration: none; }
+			a.childLinks:hover { text-decoration: underline; }
+			</style>
+			<div class="filter-container">
+				
+				<?= $region->displaySelect('filters[region_id]', $filters['region_id'], 'Region', false, null, 'filter') ?>
+				<?php /*<?= $county->displaySelect('filters[county]', $filters['county'], 'County', '', false, ' counts-county', false) ?>
+				<? if(is_array($filters['zip'])){ $multiSelect = true; } else { $multiSelect = false; } $tabIndex = ''; ?>
+				<?= $schoolDistrict->displaySelect('filters[school_district]', $filters['school_district'], 'School District') ?>
+				<div class="select-wrapper">
+					<?= $family->displayFieldSelect('filters[zip]', 'zip', $filters['zip'], 'Zip Code', $tabIndex, $multiSelect) ?>
+				</div>
+				Multi <input id="multi-zip" type="checkbox" <?= ($multiSelect ? ' checked' : ''); ?> />
+				*/ ?>
+				<?= $status->displaySelect('filters[status]', $filters['status'], 'Status', '', false, ' counts-status', false) ?>
+				<input type="text" class="date" id="start-date" name="filters[start_date]" value="<?= $filters['start_date'] ?>" placeholder="Start Date" />
+				<input type="text" class="date" id="end-date" name="filters[end_date]" value="<?= $filters['end_date'] ?>" placeholder = "End Date" />
+				<input type="submit" value="Filter" class="btn-small" />  <input type="submit" name="clearFilters" value="Clear" class="btn-small" />
+
+			</div>
+			<a href="#counts-advanced-search" class="fancybox" style="font-size: 10px !important; line-height: 10px; font-weight: bold; display: inline-block; margin-left: 10px; text-align: center;">Advanced<br /> Search</a>
+		</form>
+	</div>
+</div>
+
+<div style="width: 100%; margin-bottom: 5px; clear: both;">
+<?php if($is_drill_active) { ?>
+<b style="color:#464646"> * - Click on the Count for details.</b><br/>
+<?php } ?>
+
+<?
+
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+echo $filteredByLabel . $filteredBy;
+?>
+</div>
+
+<div id="counts-column1">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Screenings<?php if($is_drill_active) { ?>*<?php } ?></th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($screeningsCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!is_null($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center">
+		<?php if(!$is_drill_active) { ?>
+		<?= $row['cnt'] ?>
+		<?php } else { ?>
+			<a class="childLinks" href="index.php?action=counts&type=screeningsDrill&drillheading=Number of Screenings&screenings=<?php echo $row['name']; ?>&drillName=<?php echo (!is_null($row['name']) ? $row['name'] : 'Uncoded'); ?>"><?= $row['cnt'] ?></a>
+		<?php } ?>
+		</td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Screening Frequency<br>(by Child)</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($asqFrequencyCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">ASQ-3 Domains</th>
+		<th class="sort sorting_asc">White</th>
+		<th class="sort sorting_asc">Grey</th>
+		<th class="sort sorting_asc">Black</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($asq3DomainCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['domain']) ? $row['domain'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['White'] ?></td>
+		<td class="center"><?= $row['Grey'] ?></td>
+		<td class="center"><?= $row['Black'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+</div>
+
+<div id="counts-column2">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">ASQ-3 Interval</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($asq3Counts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td class="<?= (empty($row['name']) || $row['name'] == 'Uncoded' ? 'Uncoded' : '') ?>"><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+<div id="counts-column3">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">ASQ SE Interval</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($asqSeCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td class="<?= (empty($row['name']) || $row['name'] == 'Uncoded' ? 'Uncoded' : '') ?>"><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+<? include_once(VIEW_PATH . '/counts-advanced-search.phtml');
+
+
+

@@ -1,0 +1,90 @@
+<?
+use Hmg\Models\Setting;
+
+
+$org = new Setting();
+$export = 'Organization Export,,,,,,,,,,,,,,' . "\n\n";
+if(is_array($organizations)){
+
+	// Adds filtered by
+	$filteredBy = '';
+	if(count($filters)){
+		$export .= 'Active Filters:,,,,,,,,,,,,,,' . "\n";
+	}
+	foreach($filters as $filter => $value){
+		// if value is numeric then we need to look up it's name in the settings table
+		if(is_numeric($value)
+			&& $filter != 'zip'
+			&& $filter != 'school_district'
+			&& $filter != 'contact_id'
+		){
+			$value = $setting->getValue($value);
+		}
+		if(is_array($value) && $filter == 'providers'){
+			$tmpValues = [];
+			foreach ($value as $providerId) {
+				$tmpValues[] = $providers->getProviderNameById($providerId);
+			}
+			$value = $tmpValues;
+		} 
+		if(is_array($value)) {
+			$value = implode(', ', $value);
+		}
+		if($value){
+			$filteredBy .=
+				($filteredBy ? ' - ' : '') .
+				ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+				': ' .
+				$value;
+		}
+	}
+	$export .= (strpos($filteredBy, ',') ? '"' . $filteredBy . '"': $filteredBy) . "\n";
+	$export .= ',,,,,,,,,,,,,,' . "\n";
+
+	// Adds header
+	$export .= 'Organization ID,Organization,Site,Organization Type, Partnership Level,Address,City,State,Zip,Phone, Region,HMG Worker, Mode of Contact, Resource Database' . "\n";
+
+	// Adds rows
+	foreach($organizations as $organization){
+
+		$contact = '';
+
+
+		$org_id=$organizationed->getOrganizationByOrgID($organization['organization_name_id']);
+		
+		$string = $org_id['service_terms'];							
+		$id_array = (explode(",",$string));
+		$service_terms_string = '';
+		
+		if(is_array($id_array) && !empty($id_array)){
+			$str_array = array();
+			foreach($id_array as $a){
+			
+				$a = $org->getSettingById($a);
+				array_push($str_array,$a);
+			}
+			$service_terms_string = implode(', ',$str_array);
+		}						
+						
+		$export .= $organization['id'] . ',"'
+			. (($organization['organization_name'])) . '","'
+			. $organization['site'] . '","'
+			. $organization['organization_type'] . '","'
+			. $organization['partnership_level'] . '","'
+			//. $service_terms_string . ','
+			. $organization['address'].'","'
+			. $organization['city'] . '","'
+			. $organization['state'] . '","'
+			. $organization['zip'] . '","'
+			. $organization['primary_phone'] . '","'
+			. $organization['region'] . '","'
+			. $organization['hmg_worker'] . '","'
+			. $organization['mode_of_contact'] . '","'
+			. $setting->getSettingById($organization['resource_database_id']) . '",'
+			. $contact . "\n";
+
+	}
+}
+
+echo $export;
+?>

@@ -1,0 +1,104 @@
+<script type="text/javascript">
+$(document).ready(function(){ 
+	$('#referral-form').on('click', '#add-organization', function(e){
+			e.preventDefault();
+			settingType  = $('#type_org').val();
+			settingValue = $('#value_org').val();
+			if(settingValue){
+				json = '{"id":"' + settingType + '","settings":[' + '{"id" : "0", "value" : "' + settingValue + '"}'+ ']}';
+				$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'type': 'organization_name', 'json' : json }, function(data){
+					if(! $.isEmptyObject(data)){
+						//location.href = '/index.php?action=referral-services';
+						var html = '<option value="">-- Select From Available Referral Agency --</option>';
+						$.each(data, function(index, val) {
+							if($.trim(settingValue) == $.trim(val.name)) {
+								html += '<option value="'+val.id+'" selected="selected">'+val.name+'</option>';
+							} else {
+								html += '<option value="'+val.id+'">'+val.name+'</option>';
+							}
+						});
+						if(html != '') {
+							$('#organizations').html(html);
+						}
+	  				}
+				});
+			} else {
+				alert('Please enter a value!');
+			}
+	});
+	$('#referral-form').on('click', '#add-referral', function(e){
+			e.preventDefault();
+			settingType  = $('#type').val();
+			settingValue = $('#value').val();
+			orgValue = $('#organizations').val();
+			if(settingValue){
+				json = '{"id":"' + settingType + '","settings":[' + '{"id" : "0", "value" : "' + settingValue + '", "org_id" : "' + orgValue + '"}'+ ']}';
+				$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'json' : json }, function(data){
+					if(! $.isEmptyObject(data)){
+						location.href = '/index.php?action=referral-services';
+	  				}
+				});
+			} else {
+				alert('Please enter a value!');
+			}
+	});
+	$('#referral-form').on('click', '#delete-referral', function(e){
+			e.preventDefault();
+			confirmDelete = confirm('Are you sure you want to delete this agency and all of it\'s services?');
+			if(!confirmDelete){
+				return false;
+			}
+			settingType = $('#type').val();
+			idValue = $('#referral_id').val();
+			settingValue = '';
+			if(idValue){
+				json = '{"id":"' + settingType + '","settings":[' + '{"id" : "' + idValue + '", "value" : "' + settingValue + '"}'+ ']}';
+				$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'json' : json }, function(data){
+					if(! $.isEmptyObject(data)){
+						location.href = '/index.php?action=referral-services';
+	  				}
+				});
+			} else {
+				alert('Please select and agency!');
+			}
+	});
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Manage Organization Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="referral-services" /><input type="submit" value="Referrals/Services" class="btn-small" /></form>	 <form action="index.php"><input type="hidden" name="action" value="users" /><input type="submit" value="User Accounts" class="btn-small" /></form>			
+	</div>
+</div>
+
+<div>
+	<form id="referral-form" action="" method='post'>
+		<div>Add a new Referral Agency</div>
+		<input type="hidden" id="type_org" name="type_org" value="referred_to" />
+		<input type="text" id="value_org" name="value_org" style="padding: 2px;" />
+		<input type="submit" class="btn-small" value="Add" id="add-organization" />
+		&nbsp;&nbsp;Or&nbsp;&nbsp;
+			<select id="organizations" name="organizations">
+				<option value="">-- Select From Available Referral Agency --</option>
+				<?php 
+					if(is_array($organizations->settings) && !empty($organizations->settings)) {
+						foreach( $organizations->settings as $org) {
+							echo '<option value="'.$org['id'].'">'.$org['name'].'</option>';
+						}
+					}
+				?>
+			</select>
+		<br /><br />
+		<div style="margin-left: 25px;">
+			<div>Add Site</div>
+			<input type="hidden" id="type" name="type" value="organization_site" />
+			<input type="text" id="value" name="value" style="padding: 2px;" />
+			<input type="submit" class="btn-small" value="Add" id="add-referral" />
+		</div>
+		<br /><br />
+		<div>Delete existing Referral Agency</div>
+		<?= $referrals->displaySelect('referral_id', '', 'Select a Referral Agency'); ?>
+		<input type="submit" class="btn-small" value="Delete" id="delete-referral" />
+	</form>
+</div>

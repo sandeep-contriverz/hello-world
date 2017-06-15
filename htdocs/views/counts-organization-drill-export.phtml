@@ -1,0 +1,61 @@
+<? 
+$csv = "Counts: Organization Demographics\n\n";
+
+if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) $csv .= "".implode(', ' , $this->drillheading)." - ".(!empty($this->subvalue) ? ( is_numeric($this->subvalue))?$setting->getValue($this->subvalue):$this->subvalue : 'Uncoded')."\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Organization,Site,Organization Type,City,Phone,Partnership Level,Region' . "\n";
+foreach($organizations as $row){
+	
+	$csv .= $row['organization_name']. ',';
+	$csv .= $row['site'] . ',';
+	$csv .= $row['organization_type']. ',';
+	$csv .= $row['city']. ',';
+	$csv .= $row['primary_phone']. ',';
+	$csv .= $row['partnership_level']. ',';
+	$csv .= $row['region']. ','. "\n";
+	
+}
+
+echo $csv;
+?>
+
+					                         

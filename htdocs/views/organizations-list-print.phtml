@@ -1,0 +1,138 @@
+<style>
+td {page-break-inside:avoid;}
+</style>
+<script type="text/javascript">
+$("document").ready(function(){
+	function addPageBreaks(){
+		rows = $('.print-row');
+		rowsHeight = 0;
+		$.each(rows, function(){
+			row = $(this);
+			rowsHeight += row.height();
+			if(rowsHeight > 1065){
+				breakHeight = 1110 - rowsHeight;
+				row.after('<tr><td colspan="8"><p style="color: red; font-weight: bold; height: ' + breakHeight + 'px;">Add Page Break: ' + (rowsHeight + breakHeight) + 'px</p></td></tr>');
+				console.log(row.attr('id'))
+				rowsHeight = -84; // minus header height
+			}
+			//console.log(row.attr('id') + ' Height: ' + row.height())
+		});
+	};
+	//addPageBreaks();
+	$(".organization").on("click", function(){
+		var id = $(this).attr('id').slice(7);
+		location.href="index.php?action=organization&id=" + id;
+	});
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(/ /g, '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		if(field == 'parent_name'){
+			field = 'first_name_1';
+		}
+		if(field == 'reason_for_call'){
+			field = 'call_reason';
+		}
+		if(field == 'phone'){
+			field = 'primary_phone';
+		}
+		location.href=window.location+"&field="+field+"&sort="+fieldsort<?= ($search ? '+"&search=' . $search . '"' : '')?>;
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?print=true&' + postString, '');
+	});
+});
+</script>
+<? if(is_array($organizations)) : ?>
+<!-- <div class="pageTitleBar">
+	<h1>Families Search</h1>
+</div> -->
+<?
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	if ($filter == 'hmg_worker') {
+		$filter = 'HMG Worker';
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if (is_numeric($value)
+		&& $filter != 'zip'
+		&& $filter != 'school_district'
+		&& $filter != 'contact_id'
+	) {
+		$value = $setting->getValue($value);
+	}
+	if(is_array($value) && $filter == 'providers'){
+		$tmpValues = [];
+		foreach ($value as $providerId) {
+			$tmpValues[] = $providers->getProviderNameById($providerId);
+		}
+		$value = $tmpValues;
+	}
+	if ($value){
+		if (is_array($value)) {
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+?>
+	<?= $headerHtml ?>
+	<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=(isset($sorts['organization']) && $sorts['organization'] ? '_' . strtolower($sorts['organization']) : '')?>">Organization</th>
+			<th class="sort sorting<?=(isset($sorts['site']) && $sorts['site'] ? '_' . strtolower($sorts['site']) : '')?>">Site</th>
+			<th class="sort sorting<?=(isset($sorts['call_reason']) && $sorts['call_reason'] ? '_' . strtolower($sorts['call_reason']) : '')?>">Organization Type</th>
+			<th class="sort sorting<?=(isset($sorts['city']) && $sorts['city'] ? '_' . strtolower($sorts['city']) : '')?>">City</th>
+			<th class="sort sorting<?=(isset($sorts['primary_phone']) && $sorts['primary_phone'] ? '_' . strtolower($sorts['primary_phone']) : '')?>">Phone</th>
+			<th class="sort sorting<?=(isset($sorts['partnership_level']) && $sorts['partnership_level'] ? '_' . strtolower($sorts['partnership_level']) : '')?>">Partnership Level</th>
+			<th class="sort sorting<?=(isset($sorts['region']) && $sorts['region'] ? '_' . strtolower($sorts['region']) : '')?>">Region</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; $count = 0; ?>
+	<? foreach($organizations as $organization) : ?>
+		<tr id="organization_<?=$organization['id']?>" class="organization <?=$row?> print-row">
+			<td><?=$organization['organization_name']?></td>
+			<td><?=$organization['site']?></td>
+			<td><?=$organization['organization_type']?></td>
+			<td><?=$organization['city']?></td>
+			<td><?=$organization['primary_phone']?></td>
+			<td><?=($organization['partnership_level'] ? $organization['partnership_level'] : '')?></td>
+			<td><?=$organization['region']?></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; } ?>
+
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalOrganizations ?> organizations
+	</div>
+</div>
+<? else : ?>
+<p><br /><em>No result found.</em></p>
+<? endif; ?>

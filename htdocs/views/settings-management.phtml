@@ -1,0 +1,1566 @@
+<?php
+use Hmg\Models\ReferralServices;
+$obj = new ReferralServices();
+use Hmg\Models\Setting;
+$subTypeObj = new Setting();
+?>
+<style>
+.child-setting-container {
+    padding-left: 25px;
+}
+.child-setting-container ul.settings-list {position: relative;}
+
+.org_clickable, .setting-item, .referral-item, .region-item {
+    font-size: 10pt;
+    line-height: 18pt;
+    color: #000;
+    cursor: pointer;
+}
+.org_dbclickable, .setting-item, .referral-item, .region-item {
+    font-size: 10pt;
+    line-height: 18pt;
+    color: #000;
+    cursor: pointer;
+}
+.site-setting-container, .services-setting-container {
+    width: 100%;
+    float: left;
+    padding-left: 25px;
+    margin-left: 10px;
+    font-size: 10pt;
+    line-height: 18pt;
+    cursor: pointer;
+    margin-bottom: 2px;
+}
+.services-setting-container{margin-top: 10px;}
+.service_click{
+	color: #000;
+	font-size: 10pt;
+    line-height: 18pt;
+    cursor: pointer;
+}
+.service_dbclick{
+	color: #000;
+}
+.services-ul .setting-input-disabled, .services-ul .setting-input{width: auto !important;}
+.hide3 {display: none;}
+.setting-item-child{font-size: 10pt}
+.organization_how_heard_category .setting-buttons{ margin-left:400px; padding-bottom:40px;}
+</style>
+<script type="text/javascript">
+	function regionsCounties($this) 
+	{
+		// Save Data
+		btn = $this;
+		//console.log($this);
+		ulElement = btn.parents('ul');
+		parentDiv = ulElement.parent('div');
+		arrow = parentDiv.find('.toggleArrow');
+		// Create a JSON string and post to model
+		// Create a new list of settings
+
+		regionElement = parentDiv.find('.clickable');
+		regionName = regionElement.find('input').val().replace(/"/g, '\\\"');
+
+		regionId = parentDiv.attr('data-id');
+		
+		json = '{"id":"' + regionId + '","name":"' + regionName + '","counties":[';
+		liElements = ulElement.find('li');
+		addSeparator = false;
+		liElements.each(function(index){
+			tmpInput = $(this).find('select');
+			checkbox = tmpInput.next();
+			var disabled = 1;
+			if(checkbox.prop('checked') || checkbox.length === 0){
+				disabled = 0;
+			}
+			tmpId = tmpInput.val();
+			options = tmpInput.find('option');
+			options.each(function(index){
+				option = $(this);
+				if(option.val() == tmpId){
+					tmpVal = option.text();
+				}
+			});
+			if(tmpId){
+				json += (addSeparator ? ',' : '');
+				json += '{"id" : "' + tmpId + '", "name" : "' + tmpVal + '"}';
+				addSeparator = true;
+			}
+		});
+		json += ']}';
+		$.post('index.php', { 'action' : 'region-counties', 'save' : 'true', 'json' : json }, function(data){
+			if(! $.isEmptyObject(data)) {
+				
+				btn.val('Edit'); // Change button value
+				regionElement.html(regionName); // replace form element
+				liElements.remove(); // Remove input list items
+				var items = [];
+			    $.each(data, function(key, val) {
+					$('<li id="setting'+val.id+'" class="region-item setting-item' + (val.disabled ==="1" ? ' region-item-disabled' : '') + '" data-region-id="' + regionId + '" data-id="' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+				});
+
+
+				ulElement.toggleClass('hide2', 1000, "easeOutSine");
+				arrow.toggleClass('on');
+			}
+		});
+	}
+	
+	
+	//get referral-services 
+	
+	function referral_services($this){
+
+		
+		btn = $this;
+		
+	    	ulElement = btn.parents('ul');
+	    	parentDiv = ulElement.parents('div.child-setting-container');		
+		arrow = parentDiv.find('.toggleArrow');
+		
+	    	referralElement = parentDiv.find('.org_clickable');	    
+		siteElement  = parentDiv.find('.site_ref');
+	    	referralName = referralElement.find('input').val().replace(/"/g, '\\\"');
+		siteName     = '';
+
+		referralId   = parentDiv.attr('data-id');
+		if(ulElement.parent('.referrals_services').length > 0) {
+			org_sites_id = ulElement.find('li').attr('data-sites-id');
+		} else {
+			org_sites_id = ulElement.parent('div').parent('div').attr('data-sites-id');
+		}
+		if(ulElement.parent('.referrals_services').length > 0) {
+			siteId = 0;
+		} else {
+			siteId = parentDiv.find('.site-setting-container').attr('site-data-id');
+		}
+
+
+    		json = '{"id":"' + org_sites_id + '","org_name_id":"'+referralId+'","siteID":"'+siteId+'","name":"' + $.trim(referralName) + '","siteName":"'+$.trim(siteName)+'","services":[' ;
+
+		liElements   = ulElement.find('li');
+		addSeparator = false;
+		liElements.each(function(index){
+		    	tmpInput = $(this).find('select');
+		    	id=$(this).data('sites-id');
+			checkbox = tmpInput.next();
+			
+			var disabled = 1;
+			if(checkbox.prop('checked') || checkbox.length === 0){
+				disabled = 0;
+			}
+			tmpId   = tmpInput.val();
+			options = tmpInput.find('option');
+			options.each(function(index){
+				option = $(this);
+				if(option.val() == tmpId){
+					tmpVal = option.text();
+				}
+			});
+			if(tmpId){
+				json += (addSeparator ? ',' : '');
+				json += '{"id":"'+referralId+'","service_id" : "' + tmpId + '", "sr_name" : "' + tmpVal + '", "disabled" : "' + disabled + '"}';
+				addSeparator = true;
+			}
+		});
+
+		json += ']}';
+
+		$.post('index.php', { 'action' : 'referral-services', 'infosave' : 'true', 'json' : json }, 
+		function(data){
+			if(data==true){
+			location.reload();	
+			}
+			if(! $.isEmptyObject(data)) 
+			{
+			    	btn.val('Edit');
+				if(parentDiv.find('.org_clickable').find('input').length > 0) {
+					parentDiv.find('.org_clickable').html(parentDiv.find('.org_clickable').find('input').val());
+				}
+		            	
+		    		//ulElement = parentDiv.find('ul.ser-list');
+				arrow = parentDiv.find('.toggleArrow');
+
+//				siteElement.html(siteName); 
+				liElements.remove(); 				
+				var items = [];
+			    $.each(data, function(key, val) {
+
+				if(val.disabled == 1)
+				    class_dis = "setting-disabled";
+				else
+				    class_dis = "";
+
+	    		    		$('<li class="setting-item services-list '+class_dis +'" id="setting'+val.id + '" data-id="' + val.service_id + '" data-sites-id="' + val.id + '">' + val.Column_4 + '</li>').appendTo(ulElement); 
+				});
+
+				ulElement.toggleClass('hide2', 1000, "easeOutSine");
+				arrow.toggleClass('on');
+			
+			}
+		});
+		
+	}
+	
+    //edit section 
+	
+	function getCountySelect(selected)
+	{
+		var select = '';
+		
+		
+		$.ajax({
+			url: 'index.php',
+			data: {
+				action: 'region-counties',
+				'get-select': true,
+				'selected': selected
+			},
+			async: false
+		}).done(function(data){
+			select = data;
+		});
+
+		return select;
+	}
+	
+
+	function getReferralSelect(selected,siteID){
+		var select = '';
+		$.ajax({
+			url: 'index.php',
+			data: {
+				action:'referral-services',
+				'get-select': true,
+				'selected': selected,
+				'siteID' : siteID
+			},
+			async: false
+		}).done(function(data){
+			//alert(data);
+			select = data;
+		});
+
+		return select;
+	}
+	
+
+	
+	
+$(document).ready(function(){
+	
+	$('.fancybox').fancybox({
+		padding : '10px'
+	});
+	$(".date").datepicker({ dateFormat: 'yy-mm-dd' });
+
+	$('#regions_counties ul').on('change', '.new-item select', function(){
+		var selected = '';
+		var select = $(getCountySelect(selected));
+		select.attr('name', 'rs[0]');
+		htmlSelect = $('<div></div>');
+		htmlSelect.append(select);
+		ulElement = $(this).parents('#regions_counties ul');
+		regionId = parentElementId.replace(/r/, '');
+		ulElement.append('<li class="region-item new-item" data-region-id="' + regionId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+	});
+	
+	$('#referrals_services ul').on('change', '.new-item select', function(){
+		var selected = '';
+		var select = $(getReferralSelect(selected));
+		select.attr('name', 'rs[0]');
+		htmlSelect = $('<div></div>');
+		htmlSelect.append(select);
+		ulElement = $(this).parents('#referrals_services ul');
+		referralID = parentElementId.replace(/r/, '');
+		ulElement.append('<li class="referral-item new-item" data-region-id="' + referralID + '" data-referral-id="0">' + htmlSelect.html() + '</li>');
+	});
+	
+	/******Informational Referral********/
+	$(document).on('click','.child-setting-container .service_click, .child-setting-container .child1.toggleArrow', function(e){
+		if($(this).find('input[type="text"]').length < 1){
+			var parent = $(this);
+				//$('.child-setting-container').find('.settings-list').removeClass('hide2');
+			//parent.find('.child-setting-container').find('.settings-list').removeClass('hide2');
+			parent.find('.site-setting-container').removeClass('hide2');
+			parent.find('.services-setting-container').removeClass('hide2');
+		}
+	});
+	
+	
+	$(document).on('click','.child-setting-container .org_clickable, .child-setting-container .child.toggleArrow', function(e){
+		if($(this).find('input[type="text"]').length < 1) {
+		
+			var parent = $(this).parent();
+			parentElementId = parent.attr('id');
+			
+			arrow = parent.find('.child.toggleArrow').toggleClass('on');
+			parent.find('.child1.referral-title').css("display","block");
+			parent.find('.site-setting-container').toggleClass('hide2');
+			if(parent.find('.child.org_clickable').next('ul.services-ul').length > 0) 
+			{
+				parent.find('.child.org_clickable').next('ul.services-ul').toggleClass('hide2');
+				currentItem = parent.clone(true, true); // Cache in case they cancel
+			}
+		}
+	});
+	
+	/********end*******/
+	/********How Heard category**********/
+	
+	$(document).on('click','.child-setting-container .heard_category , .child-setting-container .child.toggleArrow', function(e){
+		if($(this).find('input[type="text"]').length < 1) {
+		
+			var parent = $(this).parent();
+			parentElementId = parent.attr('id');
+			arrow = parent.find('.child.toggleArrow').toggleClass('on');
+			if(parent.find('.child.heard_category').next('ul.heard_category_child').length > 0) 
+			{
+				
+				//alert(1);
+				parent.find('.child.heard_category').next('ul.heard_category_child').toggleClass('hide2');
+				currentItem = parent.clone(true, true); // Cache in case they cancel
+			}
+		}
+	});
+	
+/******End************/
+	$('.child-setting-container .clickable, .child-setting-container .child.toggleArrow').on('click', function(e){
+		
+		if($(this).find('input[type="text"]').length < 1) {
+		
+			var parent = $(this).parent();
+			currentItem = parent.clone(true, true); // Cache in case they cancel
+			parentElementId = parent.attr('id');
+			arrow = parent.find('.child.toggleArrow');
+			parent_child = currentItem.find('parent-child');
+			
+			
+			if(clicktimer){
+				clearTimeout(clicktimer);
+			}
+			clicktimer = setTimeout(function(){
+				ul = parent.find('ul');
+				var toggleDisplay = true;
+				removeEditForm(parentElementId, toggleDisplay);
+			}, 300);
+		}
+	});
+
+	var allowDoubleClick = true;
+	$('.child-setting-container .clickable, .child-setting-container .child.toggleArrow').on('dblclick', function(e){
+		
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		if(allowDoubleClick){
+			parentElementId = $(this).parent().attr('id');
+			var toggleDisplay = true;
+			replaceWithEditForm(parentElementId, toggleDisplay);
+			allowDoubleClick = false;
+		}
+	});
+
+	var self = this;
+	var currentItem;
+	/** Open sync popup on click **/
+	$(document).on('click', '#sync_popup_open', function(){
+		var is_open = true;
+		
+		$('#sync_date').val('');
+		if(is_open)
+			$.fancybox.open('#sync_popup');
+		else 
+			$('#sync-asq').trigger('click');
+
+		return false;
+	});
+	/** On start sync button click **/
+	$(document).on('click', '#start_sync', function(){
+		var token = $.trim($('#sync_region').val());
+		var sync_date = $.trim($('#sync_date').val()); //yyyy-mm-dd
+		var region = $.trim($('#sync_region').find('option:selected').text());
+		sync_url = "<?php echo $GLOBALS['sync_url']; ?>?token="+token+"&date="+sync_date+"&region="+region;
+		window.open(
+            sync_url,
+            '_blank' 
+        );
+		//close sync popup
+		setTimeout(function() {
+			$.fancybox.close();
+		}, 300);
+	});
+	/** On cancel sync button click **/
+	$(document).on('click', '#cancel_sync', function(){
+		$.fancybox.close();
+	});
+
+	function replaceWithEditForm(parentElementId, toggleDisplay){
+		var parent = $('#' + parentElementId);
+		//console.log(parentElementId);
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		var cls = $(btn).attr('class');
+		//console.log(cls);
+		var pcls = parent.attr('class');
+		
+		if(cls.search('edit-child') != -1 ){
+		ulElement = parent.find('ul.heard_category_child');
+		liElements = ulElement.find('li');
+		
+		} else if(pcls.search('hhc') != -1) {
+				
+			tmpClass = parent.attr('class');
+			disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			
+			ulElement = parent.find('ul');
+			parent.find('ul.heard_category_child').addClass('hide2');
+			
+			liElements = ulElement.find('li').not('.setting-item-child');
+		
+			
+			parent.find('.child-setting-container').each(function(i,elv){
+			if(i >= 0){	
+			var lblTxt = $(this).find('.clickable').text();
+			var heardID = $(this).attr("data-id");
+			$(this).html('<li class="setting-item" id="setting' + heardID + '"><input name="settings[' + heardID + ']" value="'+lblTxt+'" data-id="' + heardID + '" class="setting-input"> <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span></li>');
+			}			
+			});
+			
+			
+		} else{
+		ulElement = parent.find('ul');
+		liElements = ulElement.find('li');	
+		//console.log(2);
+		}
+		//console.log($(liElements));
+		btn.val('Save'); // Change button value
+		
+		
+		//console.log('liElements length : '+liElements.length);
+		
+		var cityClone = $('#div_cities_html').clone();
+		cityClone.find('select').prop('name', 'city');
+		var count = 1;
+		var is_disabled = false;
+		liElements.each(function(index){
+			if(parentElementId == 'region_api') {
+				ex = $(this).text().split('-');
+				tmp = $.trim(ex[0]);
+				tokenVal = '';
+				if(ex.length>1){
+			    	tokenVal = $.trim(ex[1]);
+			    }
+			} else if(parent.parent().attr('id') == 'school_districts_zipcodes') {
+				ex = $(this).text().split('-');
+				tmp = $.trim(ex[0]);
+				
+			} else if(parent.parent().attr('id') == 'county_zipcodes') {
+				ex = $(this).text().split('-');
+				tmp = $.trim(ex[1]);
+				cityVal = '';
+				if(ex.length>1){
+			    	cityVal = $.trim(ex[0]);
+			    }
+				
+			} else if(parent.parent().parent().attr('id') == 'referrals_services') {
+				tmp = $.trim($(this).text());
+				tmpClass = $(this).attr('class');
+				is_disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			}
+			/*else if(parent.parent().attr('id') == 'county_zipcodes') {
+				ex = $(this).text().split('-');
+				tmp = $.trim(ex[1]);
+				cityVal = '';
+				if(ex.length>1){
+			    	cityVal = $.trim(ex[0]);
+			    }
+				
+			}*/
+			else {
+				tmp = $.trim($(this).text());
+				
+			}
+			
+			tmpId = $(this).attr('id').replace('rs','').replace('setting','');
+			tmpClass = $(this).attr('class');
+			$(this).attr('class', 'setting-item');
+			//console.log(tmpClass);
+			disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			curIndex = index;
+			if(parentElementId == 'region_api') {
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' /> '+'<input type="text" value="'+tokenVal+'" name= "token" placeholder="Token"/>'+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			} else if(parent.parent().attr('id') == 'school_districts_zipcodes') {
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' maxlength="5" /> '+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			} else if(parent.parent().attr('id') == 'county_zipcodes') {
+				$('#div_cities_html').find('select option').removeAttr('selected');
+				var cityOptions = $('#div_cities_html').find('select').find('option');
+				var selected    = '';
+				//console.log(cityVal);
+				$(cityOptions).each(function(){
+					$(this).removeAttr('selected');
+					if($.trim($(this).text()) == $.trim(cityVal)) {
+						$(this).prop('selected', true);
+						$(this).attr('selected', 'selected');
+						return false;
+					}
+				});
+				var cityClone = $('#div_cities_html').clone();
+				cityClone.find('select').prop('name', 'city');
+				cityClone.find('select').prop('data-id', tmpId);
+				
+				$(this).html(cityClone.html()+' - <input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' maxlength="5" /> '+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			} 
+			
+			else if(parent.parent().attr('id') == 'regions_counties') { //in case of regions_counties
+				if(count == 1) {
+					regionElement = parent.find('.clickable');
+					var regionDisabled = regionElement.hasClass('setting-disabled');
+					selects = parent.find('select');
+					if(selects.length){
+						//return false;
+					}
+					btn.prop('disabled', false);
+					btn.removeClass('disabled');
+					//console.log(regionElement.text());
+					regionName = regionElement.text().replace(/"/g, '&quot;');
+					regionId = $('#'+parentElementId).attr('data-id');
+					//console.log(regionId);
+					regionElement.html('<input type="text" class="region-input' + (regionDisabled ? ' region-input-disabled' : '') + '" name="region[' + regionId + ']" data-id="' + regionId + '"' + (regionDisabled ? ' disabled="true"' : '') + '  value="' + regionName + '" />');
+
+					if(regionDisabled){
+						regionElement.removeClass('setting-disabled');
+						btn.prop('disabled', true);
+						btn.addClass('disabled');
+						return;
+					}
+				}
+				count++;
+
+				var li = $(this);
+				countyId = li.attr('data-id');
+				curIndex = index;
+				var select = getCountySelect(countyId);
+				newHtmlSelect = $('<div>' + select + '</div>');
+				select = newHtmlSelect.find('select');
+				select.attr('id', 'rc[' + regionId + ']');
+				select.attr('name', 'rc[' + regionId + ']');
+				tmpClass = li.attr('class');
+				li.removeClass('region-item-disabled');
+				disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+				newClass = 'setting region-county' + (disabled ? ' region-input-disabled' : '');
+				select.attr('class', newClass);
+				if(disabled){
+					select.prop('disabled', true);
+				}
+				options = newHtmlSelect.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == countyId){
+						option.attr('selected', 'selected');
+					}
+				});
+				//$(this).html('<input name="rc[' + tmpId + ']" value="' + tmp + '" class="setting" style="width: 300px !important;" />');
+
+				// checkboxInput = ' <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+				countyId = $(this).attr('data-id');
+				if(countyId > 0){
+					$(this).html(newHtmlSelect.html()); //  + checkboxInput
+				} else {
+					$(this).remove();
+				}
+				/*
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' /> '+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');*/
+			} 
+			
+			else if(parent.parent().parent().attr('id') == 'referrals_services') { //in case of referral_services
+				//parent = parent.parent();
+				if(count == 1) {
+					referralElement = parent.parent().find('.org_clickable'); //parent.find('.click_ref');
+					siteElement = parent.find('.site_ref');
+					//console.log(siteElement);
+					var referralDisabled = referralElement.hasClass('setting-disabled');
+					selects = parent.find('select');
+					if(selects.length){
+						//return false;
+					}
+					btn.prop('disabled', false);
+					btn.removeClass('disabled');
+					//console.log(regionElement.text());
+					referralName = referralElement.text().replace(/"/g, '&quot;');
+					siteName = siteElement.text().replace(/"/g, '&quot;');
+					
+					referralId = $('#'+parentElementId).attr('data-id');
+					siterefId = $('#'+parentElementId).find('.site-setting-container').attr('site-data-id');
+				
+					siteElement.html('<input type="text" class="referral-input' + (referralDisabled ? ' referral-input-disabled' : '') + '" name="site[' + siterefId + ']" site-data-id="' + siterefId + '"' + (referralDisabled ? ' disabled="true"' : '') + '  value="' + siteName + '" />');
+					
+					referralElement.html('<input type="text" class="referral-input' + (referralDisabled ? ' referral-input-disabled' : '') + '" name="referral[' + referralId + ']" data-id="' + referralId + '"' + (referralDisabled ? ' disabled="true"' : '') + '  value="' + referralName + '" />');
+					
+
+					if(referralDisabled){
+						referralElement.removeClass('setting-disabled');
+						btn.prop('disabled', true);
+						btn.addClass('disabled');
+						return;
+					}
+				}
+				count++;
+
+				var li = $(this);
+				countyId = li.attr('data-id');
+				siteId = parent.find('.site-setting-container').attr('site-data-id');
+				
+				curIndex = index;
+				var select = getReferralSelect(countyId,siteId);
+				newHtmlSelect = $('<div>' + select + '</div>');
+				select = newHtmlSelect.find('select');
+				select.attr('id', 'rc[' + referralId + ']');
+				select.attr('name', 'rc[' + referralId + ']');
+				tmpClass = li.attr('class');
+				li.removeClass('referral-item-disabled');
+				disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+				newClass = 'setting referral-county' + (disabled ? ' referral-input-disabled' : '');
+				select.attr('class', newClass);
+				if(disabled){
+					select.prop('disabled', true);
+				}
+				options = newHtmlSelect.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == countyId)
+					{
+						option.attr('selected', 'selected');
+					}
+				});
+				//$(this).html('<input name="rc[' + tmpId + ']" value="' + tmp + '" class="setting" style="width: 300px !important;" />');
+				
+				checkboxInput = ' <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+				countyId = $(this).attr('data-id');
+				if(countyId > 0){
+					$(this).html(newHtmlSelect.html() +' <input type="checkbox" class="js-enable-setting" value="1"' + (! is_disabled ? ' checked' : '') + ' data-id="'+countyId+'"> <span class="enable">Enabled</span>')
+				} else {
+					$(this).remove();
+				}
+	
+			}
+			else if(parent.parent().attr('id') == 'referrals_services') {
+				if(count == 1) {
+					referralElement = parent.find('.org_clickable'); //parent.find('.click_ref');
+					siteElement = '';
+					//console.log(siteElement);
+					var referralDisabled = referralElement.hasClass('setting-disabled');
+					selects = parent.find('select');
+					if(selects.length){
+						//return false;
+					}
+					btn.prop('disabled', false);
+					btn.removeClass('disabled');
+					//console.log(regionElement.text());
+					referralName = referralElement.text().replace(/"/g, '&quot;');
+					if(siteElement != '')
+						siteName = siteElement.text().replace(/"/g, '&quot;');
+					
+					referralId = $('#'+parentElementId).attr('data-id');
+					siterefId = $('#'+parentElementId).find('.site-setting-container').attr('site-data-id');
+				
+					referralElement.html('<input type="text" class="referral-input' + (referralDisabled ? ' referral-input-disabled' : '') + '" name="referral[' + referralId + ']" data-id="' + referralId + '"' + (referralDisabled ? ' disabled="true"' : '') + '  value="' + referralName + '" />');
+					
+
+					if(referralDisabled){
+						referralElement.removeClass('setting-disabled');
+						btn.prop('disabled', true);
+						btn.addClass('disabled');
+						return;
+					}
+				}
+				count++;
+
+				var li = $(this);
+				countyId = li.attr('data-id');
+				siteId = parent.find('.site-setting-container').attr('site-data-id');
+				
+				curIndex = index;
+				var select = getReferralSelect(countyId,siteId);
+				newHtmlSelect = $('<div>' + select + '</div>');
+				select = newHtmlSelect.find('select');
+				select.attr('id', 'rc[' + referralId + ']');
+				select.attr('name', 'rc[' + referralId + ']');
+				tmpClass = li.attr('class');
+				li.removeClass('referral-item-disabled');
+				disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+				newClass = 'setting referral-county' + (disabled ? ' referral-input-disabled' : '');
+				select.attr('class', newClass);
+				if(disabled){
+					select.prop('disabled', true);
+				}
+				options = newHtmlSelect.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == countyId)
+					{
+						option.attr('selected', 'selected');
+					}
+				});
+				//$(this).html('<input name="rc[' + tmpId + ']" value="' + tmp + '" class="setting" style="width: 300px !important;" />');
+				
+				checkboxInput = ' <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+				countyId = $(this).attr('data-id');
+				if(countyId > 0){
+					$(this).html(newHtmlSelect.html() +' <input type="checkbox" class="js-enable-setting" value="1"' + (! is_disabled ? ' checked' : '') + ' data-id="'+countyId+'"> <span class="enable">Enabled</span>')
+				} else {
+					$(this).remove();
+				}
+			}
+			
+			else {
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' /> '+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			}
+
+		});
+		/*liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/>'+(ex.length>1?'<input type="text" value="" name= "token" placeholder="Token"/>':'')+'</li>');*/
+		//console.log('parentElementId= '+parentElementId);
+		if(parentElementId == 'region_api') {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/><input type="text" value="" name= "token" placeholder="Token"/></li>');
+		} else if($('#'+parentElementId).parent().attr('id') == 'county_zipcodes') {
+			if(liElements.length < 1) {
+				parent.find('ul').append('<li id="setting0">'+cityClone.html()+' - <input name="setting[0]" value="" class="new-input" placeholder="Zip Code" maxlength="5" /></li>');
+			} else {
+				$('#div_cities_html').find('select option').removeAttr('selected');
+				var cityClone = $('#div_cities_html').clone();
+				cityClone.find('select').prop('name', 'city');
+				liElements.last().after('<li id="setting0">'+cityClone.html()+' - <input name="setting[0]" value="" class="new-input" placeholder="Zip Code" maxlength="5" /></li>');
+				//liElements.last().after('<li id="setting0"><input type="text" value="" name="city" placeholder="City Name"/> - <input name="setting[0]" value="" class="new-input" placeholder="Zip Code" maxlength="5" /></li>');
+			}
+		} else if($('#'+parentElementId).parent().attr('id') == 'school_districts_zipcodes') {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" maxlength="5" /></li>');
+		} else if($('#'+parentElementId).parent().attr('id') == 'regions_counties') {
+			select = $(getCountySelect(''));
+			select.attr('id', 'rc[0]').attr('name', 'rc[0]');
+			htmlSelect = $('<div></div>');
+			htmlSelect.append(select);
+			liElements.last().after('<li class="region-item new-item" data-region-id="' + regionId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+		} 
+		
+		else if($('#'+parentElementId).parent().parent().attr('id') == 'referrals_services') {
+			select = $(getReferralSelect(''));
+		//	console.log(select);
+			select.attr('id', 'rc[0]').attr('name', 'rc[0]');
+			htmlSelect = $('<div></div>');
+			htmlSelect.append(select);
+			liElements.last().after('<li class="referral-item new-item" data-referral-id="' + referralId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+		} else if($('#'+parentElementId).parent().attr('id') == 'referrals_services') {
+			select = $(getReferralSelect(''));
+			//console.log(select);
+			select.attr('id', 'rc[0]').attr('name', 'rc[0]');
+			htmlSelect = $('<div></div>');
+			htmlSelect.append(select);
+			liElements.last().after('<li class="referral-item new-item" data-referral-id="' + referralId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+		} 
+		else if(cls.search('edit-child') != -1 ){
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input new-child" /></li>');
+		}
+		else {
+			
+			
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" /></li>');
+		}
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		
+	/*if(toggleDisplay2)
+	{
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+	}*/
+		
+	}
+
+	function removeEditForm(parentElementId, toggleDisplay){
+		// Make an ajax request
+		var parent = $('#' + parentElementId);
+		btn = parent.find('.btn-edit');
+		//console.log(parent);
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Edit'); // Change button value
+		ulElement = parent.find('ul.settings-list');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			input = li.find('.setting-input');
+
+			if(input.length){
+				inputValue = input.val();
+				if(parentElementId == 'region_api') {
+					tokenValue = input.next().val();
+					if(tokenValue != '') {
+						inputValue = inputValue+' - '+tokenValue;
+					}
+				}
+				if(inputValue){
+					li.html(inputValue);
+				} else {
+					li.remove();
+				}
+			}
+		});
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	function cancelEditForm(parentElementId, toggleDisplay){
+		// Retrieve from cache
+		//console.log(parentElementId);
+		var parent = $('#' + parentElementId);
+		parent = parent.replaceWith(currentItem);
+		
+		/** for referral/services starts **/
+		if($('#' + parentElementId+'.services-setting-container').parent().parent().find('.org_clickable').find('input').length > 0) {
+			$('#' + parentElementId+'.services-setting-container').parent().parent().find('.org_clickable').html($.trim($('#' + parentElementId+'.services-setting-container').parent().parent().find('.org_clickable').find('input').val()));
+		}
+		/** for referral/services ends **/
+
+		ulElement = parent.find('ul.settings-list');
+		arrow = parent.find('.toggleArrow');
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	$(document).on('change', '.js-enable-setting', function(){
+		var input = $(this).parent('li').find('input').eq(0);
+		var id = input.data('id');
+		var value = this.checked ? 0 : 1;
+		
+		json = '{"id":"' + id + '", "value": "' + value + '"}';
+		var is_zip = '';
+		if($(this).parent('li').parent('ul').parent('div').parent('div').attr('id') == 'school_districts_zipcodes') {
+			is_zip = 'zip';
+			json = '{"id":"' + id + '", "value": "' + value + '", "is_zip":"'+is_zip+'"}';
+		}
+		if($(this).parent('li').parent('ul').parent('div').parent('div').attr('id') == 'county_zipcodes') {
+			is_zip = 'county_zip';
+			json = '{"id":"' + id + '", "value": "' + value + '", "is_zip":"'+is_zip+'"}';
+		}
+		if($(this).parent('li').parent('ul').parent('div').attr('id') == 'school_districts') {
+			is_zip = 'district';
+			json = '{"id":"' + id + '", "value": "' + value + '", "is_zip":"'+is_zip+'"}';
+		}
+		
+
+		
+		if($(this).parent('li').parent('ul').hasClass('services-ul')) {
+			var sites_id = $(this).parent('li').parent('ul').parent().parent().attr('data-sites-id');
+			is_service = 'service';
+			json = '{"id":"' + id + '", "value": "' + value + '", "is_service":"'+is_service+'", "sites_id":"'+sites_id+'"}';
+		}
+
+		
+		$.post('index.php', { 'action' : 'setting', 'update' : 'true', 'json' : json }, function(data){
+			if(data.success){
+				if(value){
+					input.attr('class', 'setting-input setting-input-disabled');
+					input.prop('disabled', true);
+				} else {
+					input.attr('class', 'setting-input');
+					input.prop('disabled', false);
+				}
+			}
+		});
+	});
+
+	$(document).on('click', '.settings-list .btn-small', function(){
+		if($(this).val() == 'Edit'){
+			
+			parentElementId = $(this).parent().parent().parent().attr('id');
+			console.log(parentElementId);
+			replaceWithEditForm(parentElementId);
+		} else if($(this).val() == 'Cancel'){
+			parentElementId = $(this).parent().parent().parent().attr('id');
+			var toggleDisplay = true;
+			cancelEditForm(parentElementId, toggleDisplay);
+		} else {
+			parentElementId = $(this).parent().parent().parent().attr('id');
+
+			//if its regions_counties call function here and skip rest lines
+			if($('#'+parentElementId).parent().attr('id') == 'regions_counties') {
+				regionsCounties($(this));
+				return false;
+			}
+			if($('#'+parentElementId).parent().parent().attr('id') == 'referrals_services') 
+			{
+				referral_services($(this));
+			    return false;
+			}
+			if($('#'+parentElementId).parent().attr('id') == 'referrals_services') 
+			{
+				referral_services($(this));
+			    return false;
+			}
+		
+			
+			var syncSelectList = $('#sync_region');
+			if(parentElementId == 'region_api') {
+				syncSelectList.find('option').remove(); // Remove sync select list items
+			}
+			//btn = $(this);
+			var parent = $('#' + parentElementId);
+			//console.log(parentElementId);
+			btn = parent.find('.btn-edit');
+			
+			var cls = $(btn).attr('class');
+			//console.log(cls);
+			var pcls = parent.attr('class');
+			media = false;
+			if(cls.search('edit-child') != -1 ){
+			ulElement = parent.find('ul.heard_category_child');
+			liElements = ulElement.find('li');
+			media = true;
+			}
+			else{
+				ulElement = btn.parents('ul');
+				liElements = ulElement.find('li');
+			}			
+			
+			
+			
+			parentDiv = ulElement.parent('div');
+  			arrow = parentDiv.find('.toggleArrow');
+
+  			// Create a JSON string and post to model
+			// Create a new list of settings
+
+  			/** 251116 **/
+  			var is_zip = '';
+  			parentId = parentDiv.attr('id');
+  			json = '{"id":"' + parentId + '", "is_zip":"'+is_zip+'", "settings":[';
+			
+			if(cls.search('edit-child') != -1 ){
+			var mediaName = parent.attr('media-name');
+			var heard_ID = parent.attr("data-id");
+			json = '{"type":"media","mediaName":"'+mediaName+'","id":"' + heard_ID + '","settings":[';	
+			}
+
+  			if($('#'+parentElementId).parent().attr('id') == 'school_districts_zipcodes') {
+  				is_zip = 'zip';
+  				var district_id = $.trim($('#'+parentId).attr('data-id'));
+  				json = '{"id":"' + parentId + '", "is_zip":"'+is_zip+'", "district_id":"'+district_id+'", "settings":[';
+			}
+			if($('#'+parentElementId).parent().attr('id') == 'county_zipcodes') {
+  				is_zip = 'county_zip';
+  				var district_id = $.trim($('#'+parentId).attr('data-id'));
+  				json = '{"id":"' + parentId + '", "is_zip":"'+is_zip+'", "district_id":"'+district_id+'", "settings":[';
+			}
+			if($('#'+parentElementId).attr('id') == 'school_districts') {
+  				is_zip = 'district';
+  				json = '{"id":"' + parentId + '", "is_zip":"'+is_zip+'", "settings":[';
+			}
+
+			//parentId = parentDiv.attr('id');
+			//json = '{"id":"' + parentId + '", "is_zip":"'+is_zip+'", "settings":[';
+			
+			addSeparator = false;
+			liElements.each(function(index){
+				tokenVal = '';
+				var zipVal = '';
+				tmpInput = $(this).find('input').eq(0);
+				tmpId = $(this).attr('id').replace('setting', '');
+				tmpVal = $.trim(tmpInput.val());
+				if($.trim($(this).find('input[name="token"]').val()) != '') {
+					tokenVal = $.trim($(this).find('input[name="token"]').val());
+				}
+				if($('#'+parentElementId).parent().attr('id') == 'county_zipcodes') {
+					if($.trim($(this).find('input').eq(0).val()) != '') {
+						zipVal = $.trim($(this).find('input').eq(0).val());
+					}
+					tmpInput = $(this).find('select');
+					tmpId = $(this).attr('id').replace('setting', '');
+					tmpVal = $.trim(tmpInput.val());
+				}
+				if(tmpId || tmpVal){
+					json += (addSeparator ? ',' : '') + '{"id" : "' + tmpId + '", "value" : "' + tmpVal + '","token" : "'+tokenVal+'","zip" : "'+zipVal+'"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			//console.log(json);
+			//console.log('linked');
+			$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'json' : json }, function(data){
+				if($.trim(data.msg) == 'child save'){
+					location.reload();
+				}
+				if(! $.isEmptyObject(data)){
+					console.log(data);
+				
+					btn.val('Edit'); // Change button value
+					liElements.remove(); // Remove input list items
+					var items = [];
+					$.each(data, function(key, val) {
+						
+						if(parentElementId == 'region_api') {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + val.name + (val.token ? ' - '+val.token : '') + '</li>').appendTo(ulElement);
+	    					if(val.disabled != "1" && $.trim(val.token) != '') {
+	    						$('<option value="'+val.token+'">' + val.name + '</option>').appendTo(syncSelectList);
+	    					}
+	    				} else if($('#'+parentElementId).parent().attr('id') == 'school_districts_zipcodes') {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+	    				} else if($('#'+parentElementId).parent().attr('id') == 'county_zipcodes') {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + (val.city ? val.city+' - ' : '') + val.name + '</li>').appendTo(ulElement);
+	    				} else if(parentElementId == 'city') {
+	    					//reload the page
+	    					location.reload();
+	    				} else if(parentElementId == 'county') {
+	    					//reload the page
+	    					location.reload();
+	    				} else if(parentElementId == 'school_districts') {
+	    					//reload the page
+	    					location.reload();
+	    				} 
+						else if(parentElementId == 'how_heard_category') {
+	    					//reload the page
+	    					location.reload();
+	    				}
+						
+						else {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+	    				}
+    					
+  					});
+					ulElement.toggleClass('hide2', 1000, "easeOutSine");
+					arrow.toggleClass('on');
+  				}
+			});
+		}
+	});
+	clicktimer = 0;
+	$('.setting-container .clickable, .setting-container .toggleArrow').on('click', function(e){
+		
+		var parent  = $(this).parent();
+		
+		
+		if($(this).find('input[type="text"]').length > 0) {
+
+			return false;
+		}
+		
+		
+		
+		currentItem = parent.clone(true, true); // Cache in case they cancel
+		parentElementId = parent.attr('id');
+		arrow = parent.find('.toggleArrow');
+	
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		var toggleDisplay = true;
+		if((parent).hasClass('sdz') || (parent).hasClass('cz') || (parent).hasClass('rc') || (parent).hasClass('rs')) {
+			toggleDisplay = false;
+		}
+		clicktimer = setTimeout(function(){
+			ul = parent.find('ul');
+			removeEditForm(parentElementId, toggleDisplay);
+		}, 300);
+		//251116
+		if((parent).hasClass('sdz') || (parent).hasClass('cz') || (parent).hasClass('rc') || (parent).hasClass('rs')) {
+			parent.find('.child-setting-container').toggleClass('hide2');
+			parent.find('.child toggleArrow').toggleClass('on');
+			//parent.find('.child1 toggleArrow').toggleClass('on');
+			parent.find('.child-setting-container').find('.settings-list').toggleClass('hide2');
+			parent.find('.child-setting-container').find('.settings-list').toggleClass('hide2');
+		}
+		if(parent.hasClass('rs') || parent.hasClass('sdz')) {
+			parent.find('.child.toggleArrow').eq(0).toggleClass('on');
+		}
+		
+		if((parent).hasClass('hhc')){
+			setTimeout(function() {			
+				$(".organization_how_heard_category").each(function(i,ele){	
+					if(i >= 0){	
+						$(this).find('.heard_category_child').addClass('hide2');
+						$(this).find('.toggleArrow').removeClass('on').addClass('off');
+					}
+				});
+			}, 300);
+		}
+	});
+
+	var allowDoubleClick = true;
+	$('.setting-container .clickable, .setting-container .toggleArrow').on('dblclick', function(e){
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		if(allowDoubleClick){
+			parentElementId = $(this).parent().attr('id');
+			var toggleDisplay = true;
+			replaceWithEditForm(parentElementId, toggleDisplay);
+			allowDoubleClick = false;
+		}
+	});
+
+	$('.settings-list').on('click', '.new-input', function(e){
+		// another li and input
+		//liElements.last().after()
+		
+		if($(this).hasClass('new-child')){
+			ulElement = $(this).parents('ul.settings-list.heard_category_child');
+		}
+		else{
+			ulElement = $(this).parents('ul.settings-list');
+		}
+		var parentEleId = $(this).parent('li').parent('ul').parent('div').attr('id');
+		console.log(parentEleId);
+		if(parentEleId == 'region_api') {
+			ulElement.append('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/><input type="text" value="" name="token" placeholder="Token"/></li>');
+		} else if($('#'+parentElementId).parent().attr('id') == 'county_zipcodes') {
+			$('#div_cities_html').find('select option').removeAttr('selected');
+			var cityClone = $('#div_cities_html').clone();
+			cityClone.find('select').prop('name', 'city');
+			ulElement.append('<li id="setting0">'+cityClone.html()+' - <input name="setting[0]" value="" class="new-input" placeholder="Zip Code" maxlength="5" /></li>');
+		} else if($('#'+parentElementId).parent().attr('id') == 'school_districts_zipcodes') {
+			ulElement.append('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" maxlength="5" /></li>');
+		}
+		else if(parentEleId == 'how_heard_category') {
+		ulElement.append('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" /></li>');
+		
+		}
+		else if($('#'+parentEleId).hasClass('organization_how_heard_category')){
+		ulElement.append('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input new-child" /></li>');	
+		return false;
+		}
+		else {
+		
+			ulElement.append('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" /></li>');
+		}
+	});
+	var toggleAll = false;
+	// show /hide button jquery
+	$('#toggle-btn').on('click', function()
+	{
+		//alert('alert');
+		toggleAll = !toggleAll;
+		
+		if(toggleAll){
+			$('.settings-list').removeClass('hide2');
+			$('.toggleArrow').addClass('on');
+			$('.referrals_services').removeClass('hide2');
+			$('.site-setting-container').removeClass('hide2');
+		} else {
+			$('.region').each(function(i, ele){
+				var div = $(ele);
+				var hasSelect = div.find('select').length;
+				if(hasSelect) {
+					removeEditForm(div.attr('id'), true);
+				}
+			});
+			$('.settings-list').addClass('hide2');
+			$('.toggleArrow').removeClass('on');
+
+			$('.referrals_services').addClass('hide2');
+			$('.site-setting-container').addClass('hide2');
+		}
+	});
+	
+});
+
+	function showSyncResponse() {
+	    $.fancybox({
+	        'type': 'inline',
+	        'href': '#sync-result'
+	    });
+	};
+</script>
+
+<div id="sync_popup" style="display: none; padding: 10px; white-space: nowrap; width:350px;">
+	<table class="" cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+		<tbody>
+			<tr>
+				<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Select Location:</td>
+				<td class="infoText borderRight" style="">
+				<?php //echo "<pre>";print_r($settingLists);die; ?>
+					<select id="sync_region" style="max-width: 240px;min-width: 210px;">
+					<?php 
+						foreach($settingLists['General Items']['Regions for the API'] as $settingLabel => $settingObj) {
+							 
+								if(is_array($settingObj)){
+									foreach($settingObj as $setting){
+										if($setting['disabled'] == "1" || empty($setting['token']) )
+											continue;
+										
+                                        echo '<option value="'.$setting['token'].'">'.$setting['name'].'</option>';
+										
+									}
+								}
+							
+						} 
+					?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Start From Date:</td>
+				<td class="infoText borderRight" style="">
+					<input type="text" id="sync_date" class="date" placeholder="Leave blank to sync from last update" style="width: 205px;">
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+			<tr>
+				<td colspan="2" class="txtCntr"><input type="submit" id="start_sync" value="Start Sync" class="btn-small">&nbsp;&nbsp;<input type="submit" id="cancel_sync" value="Cancel" class="btn-small"></td>
+			</tr>
+			<tr>
+				<td colspan="2"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div style="margin-top: 10px;font-weight: bold;white-space: normal;text-align: center;">This process can take several minutes.</div>
+</div>
+<!--a href="#sync_popup" class="fancybox" style="font-weight: normal">Open</a-->
+<div class="pageTitleBar">
+	<h1>Settings Management</h1>
+	
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="region-counties" /><input type="submit" value="Region/Counties" class="btn-small" /></form>
+		<!--form action="index.php">
+		<input type="hidden" name="action" value="referral-services" /><input type="submit" value="Informational Referral" class="btn-small" /></form-->
+		<form action="index.php"><input type="submit" class="btn-small" id="sync_popup_open" value="Sync to ASQ Database"></form>
+		<div style="display:none; float: right;" id="ASQSyncApp"></div>
+		<form action="index.php"><input type="hidden" name="action" value="users" /><input type="submit" value="User Accounts" class="btn-small" /></form>
+	</div>
+	
+	
+</div>
+<div class="titleBar">
+		<form id="filter-form" action="index.php" style="padding: 4px 3px 0 4px;"><input type="hidden" name="action" value="region-counties">
+			<input id="toggle-btn" type="button" value="Show/Hide All" class="btn-small" style="margin-left: 20px;">
+		</form>
+	</div>
+
+<? 
+
+foreach ($settingLists as $parentLabel => $parentObj) : $c = 1;
+
+?>
+<div id="<?= str_replace(' ', '_', strtolower($parentLabel)) ?>" class="parent-setcontainer">
+	<div style="margin: 7px 10px 5px 0;" class="parent toggleArrow on"></div>
+	<div class="clickable"><?= $parentLabel ?></div>
+	
+	
+<? 
+
+foreach ($parentObj as $settingLabel => $settingObj) : 
+
+?>
+<?  $clss = '';
+	if($settingLabel == 'School Districts') {
+		$type = 'school_districts';
+		$clss = 'sd';
+
+	} elseif($settingLabel == 'School Districts Zipcodes') {
+		$type = 'school_districts_zipcodes';
+		$settingLabel = 'School District Zipcodes';
+		$clss = 'sdz';
+
+	} elseif($settingLabel == 'County Zipcodes') {
+		$type = 'county_zipcodes';
+		$clss = 'cz';
+
+	} elseif($settingLabel == 'Regions/Counties') {
+		$type = 'regions_counties';
+		$clss = 'rc';
+
+	} elseif($settingLabel == 'Informational Referral'){
+		$type = 'referrals_services';
+		$clss = 'rs';
+	
+	} elseif($settingLabel == 'How Heard Category'){
+		$type = 'how_heard_category';
+		$clss = 'hhc';
+	
+	}elseif($settingLabel == 'info') 
+    {  }
+	else 
+	{
+		$type = $settingObj->getType();
+	}
+	
+?>
+<div id="<?= $type; ?>" class="setting-container <?=$clss; ?>">
+<?//= ($c===1) ? "margin: 7px 10px 10px 0;" : "margin: 7px 10px 5px 0;"; ?>
+	<div class="child toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+	<div class="clickable"><?= ($settingLabel == 'County Zipcodes') ? 'County Cities/Zipcodes' : $settingLabel; ?></div>
+	
+		<? //echo "<pre>";print_r($settingObj->settings);die; 
+			$oldDistrict = $oldZip = '';
+		?>
+		<? if(in_array($settingLabel, array('School District Zipcodes', 'County Zipcodes', 'Regions/Counties', 'Informational Referral'))){ ?>
+		
+		<?
+//echo "<pre>";print_r($settingObj);die;
+		
+foreach($settingObj as $k=>$settings) : //echo "<pre>";print_r($settings);die; ?>
+	<? if($settings) : ?>
+		<? if($settingLabel == 'School District Zipcodes' || $settingLabel == 'County Zipcodes'
+  		 || $settingLabel == 'Regions/Counties' || $settingLabel == 'Informational Referral') { 
+  			
+			$is_same = false; 
+	  		$clickableClass = 'clickable';
+  		?>
+  			<? if($settingLabel == 'Regions/Counties') { 
+					
+				$dataID = isset($settings[0]['region_id']) 
+			  			? $settings[0]['region_id'] : 0; ?>
+			<? } elseif($settingLabel == 'Informational Referral') {
+						//print_r($settings);
+				$dataID = isset($settings[0]['info_referred_id']) 
+			  			? $settings[0]['info_referred_id'] : 0; ?>
+					
+			<?
+			 }else { 
+				 $dataID = isset($settings[0]['district_id']) 
+			  			? $settings[0]['district_id'] : (isset($settings[0]['county_id']) ? $settings[0]['county_id'] : 0); 
+			}
+			?>
+					
+						
+			<div id="<?= str_replace(array(' ', ','), '-', $k); ?><?= $dataID; ?>" data-id="<?= $dataID; ?>" class="child-setting-container <?= str_replace(array(' ', '/'), array('_', '_'), strtolower($settingLabel)) ?> hide2">
+					
+					
+				<div class="child toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+						
+					<? if($settingLabel == 'Informational Referral')
+							$clickableClass = 'org_clickable';
+						?>
+				  <div class="child <?=$clickableClass; ?>"   > <?= $k; ?></div>
+						<? if($settingLabel == 'Informational Referral') { ?>
+					
+						<?
+					
+						foreach($settings as $val) ://echo "<pre>";print_r($val);die;?>
+							<? if(!empty($val['id']) && !empty($val['organization_site_id'])) {?>
+							<? $sitesArray = $obj->getServiceById($val['info_referred_id']);
+						//	print_r($sitesArray);
+							?> 
+								<? foreach($sitesArray as $stieVal) :?>	
+							<div id="<?=str_replace(array(' ', ','), '-', $stieVal['name'])?><?=$stieVal['id']?>" class="site-setting-container hide2" site-data-id="<?=$stieVal['organization_site_id']?>" data-sites-id="<?=$stieVal['id']?>">
+							<div class="child1 referral-title" style="display:none;"></div>
+							<div class="child1 toggleArrow service_click site_ref" style="margin: 0px;padding-left: 7px;padding-bottom: 4px;"><?=$stieVal['name'] ?>
+							</div>
+								<div id="<?=str_replace(array(' ', ','), '-', $stieVal['name'])?><?=$stieVal['id']?>" class="services-setting-container" site-data-id="<?=$stieVal['organization_site_id']?>">
+								<ul class="settings-list hide2 services-ul" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+									<div class="setting-buttons">
+										<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+									</div>
+								
+									<? $seviceArray = $obj->getServiceBySiteID($stieVal['org_site_id']);
+									
+									//echo "<pre>";print_r($seviceArray);?>
+									<?	
+										foreach($seviceArray as $service1) :?>
+										<? if(!empty($service1['name'])) :?>
+											<li class="setting-item<?= ($service1['disabled'] ? ' setting-disabled' : '') ?> services-list" id="setting<?= $service1['service_id'] ?>" data-id="<?= $service1['service_id'] ?>"><?= $service1['name'] ?>
+											</li>
+										<? endif;?>	
+									  <? endforeach;?>	
+								</ul></div>
+							</div>
+								<? endforeach;?>
+							<? } //ends not empty site id IF	
+						 		else { ?> 
+							<ul  class="settings-list hide2 services-ul" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+									<div class="setting-buttons">
+										<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+									</div>
+
+<?              $seviceArray =     $obj->getServiceById($val['info_referred_id']);
+									
+                                           //echo "<pre>";print_r($seviceArray);?>
+		<?
+										foreach($seviceArray as $service1) :?>
+										<? if(!empty($service1['name'])) :?>
+											<li class="setting-item<?= ($service1['disabled'] ? ' setting-disabled' : '') ?> services-list" id="setting<?= $service1['id'] ?>"  data-id="<?= $service1['id'] ?>" data-sites-id="<?= $service1['id'] ?>"><?= $service1['name'] ?>
+											</li>
+										<? endif;?>	
+									  <? endforeach;?>	
+								</ul>
+						<? } //ends else ?>
+	                                      <? break; endforeach;?>
+						
+						<? } else { ?>
+							
+						
+						<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+						<div class="setting-buttons">
+							<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+						</div>
+						<? } ?>
+			  <? } ?>
+			  		<? if($settingLabel == 'School District Zipcodes') { ?>
+				  		<? foreach($settings as $setting) : //echo "<pre>";print_r($setting);die;?>
+				  			<? if(isset($setting['name'])) : ?>
+							<li class="setting-item<?= ($setting['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><? /*if(isset($setting['district']) && !empty($setting['district'])) { echo $setting['district'].' - '; }*/ ?><?= $setting['name'] ?>
+							</li>
+							<? endif; ?>
+						<? endforeach; ?>
+					<? } elseif($settingLabel == 'Regions/Counties') { ?>
+				  		<? foreach($settings as $setting) : //echo "<pre>";print_r($setting);die;?>
+				  			<? if(isset($setting['name'])) : ?>
+							<li class="setting-item<?= ($setting['setting_disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['county_id'] ?>" data-id="<?= $setting['county_id'] ?>"><? /*if(isset($setting['district']) && !empty($setting['district'])) { echo $setting['district'].' - '; }*/ ?><?= $setting['name'] ?>
+							</li>
+							<? endif; ?>
+						<? endforeach; ?>
+					<? } 
+					elseif($settingLabel == 'Informational Referral') 
+					{ 
+/*
+					?>
+						<?
+						foreach($settings as $service) :?>
+						<? if(!empty($service['id'])) :?>
+							<? $sitesArray = $obj->getSiteByOrganizationID($service['id']);?>
+							<? foreach($sitesArray as $stieVal) :?>	
+							<? $seviceArray1 = $obj->getServiceBySiteID($stieVal['id']);
+							
+							//echo "<pre>";print_r($seviceArray1);?>
+							<?	
+								foreach($seviceArray1 as $service1) :?>
+								<? if(!empty($service1['name'])) :?>
+									<li class="setting-item" id="setting<?= $service1['service_id'] ?>" data-id="<?= $service1['service_id'] ?>"><?= $service1['name'] ?>
+									</li>
+								<? endif;?>	
+							  <? endforeach;?>	
+						<? endforeach;?>
+						<? endif;?>
+						<? endforeach;?>
+						
+					<? 
+					*/
+					}
+					else { 
+					
+					?>
+				  		<? foreach($settings as $setting) : //echo "<pre>";print_r($setting);die;?>
+				  			<? if(isset($setting['name'])) : ?>
+							<li class="setting-item<?= ($setting['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><? if(isset($setting['city']) && !empty($setting['city'])) { echo $setting['city'].' - '; } ?><?= $setting['name'] ?>
+							</li>
+							<? endif; ?>
+						<? endforeach; ?>
+					<? } ?>
+					
+			  <? if(($settingLabel == 'School District Zipcodes' || $settingLabel == 'County Zipcodes' || $settingLabel == 'Regions/Counties' || $settingLabel == 'Informational Referral') && !$is_same) { ?>
+				</ul></div>
+					
+			  <? } ?>
+			<? endif; ?>
+			<? //$oldDistrict = $setting['district']; $oldZip = $setting['name']; ?>
+			
+		<? endforeach ?>
+		<? } elseif($settingLabel == 'School Districts') { ?>
+			<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+			<div class="setting-buttons">
+				<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+			</div>
+			<? if(is_array($settingObj)) : ?>
+			<? foreach($settingObj as $setting) : ?>
+				<? if($setting) : ?>
+					<li class="setting-item<?= ((isset($setting['disabled']) && $setting['disabled']) ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><?= $setting['name'] ?> <?php if(isset($setting['token'])){ echo ' - '.$setting['token']; } ?>
+						
+					</li>
+				<? endif; ?>
+			<? endforeach ?>
+			<? endif; ?>
+		<? } elseif($settingLabel == 'How Heard Category') { ?>
+		<? /*<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+		<div class="setting-buttons">
+			<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+		</div> */?>
+		<? if(is_array($settingObj->settings)) : ?>
+		<? foreach($settingObj->settings as $j=>$setting) : ?>
+			<? if($setting) : ?>
+				<? //if(strtolower($setting['sub_type']) == 'media') { //170117 
+				$sub_types = $subTypeObj->getSubTypes($setting['id']);
+				
+				if(!empty($sub_types) && $setting['disabled']==0){
+					
+				?>
+			
+					<div id="<?= str_replace(array(' ', ','), '-', $setting['name']); ?><?= $setting['id']; ?>" data-id="<?= $setting['id']; ?>" class="child-setting-container <?= str_replace(array(' ', '/'), array('_', '_'), strtolower($settingLabel)) ?>" style="padding-left: 0px;" media-name="<?= $setting['name'] ?>">
+						<div class="child toggleArrow heard_category" style="margin: 2px 10px 5px 0;"></div>
+						<div class="child clickable heard_name"><?= $setting['name'] ?></div>
+						<? /** fetch all its childs elements **/ ?>
+						<ul class="settings-list heard_category_child hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+							<div class="setting-buttons">
+								<input type="submit" value="HeardEdit" class="btn-small btn-edit edit-child" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+							</div>
+						<? 
+							//$sub_types = $subTypeObj->getSubTypes($setting['sub_type']);
+							if(!empty($sub_types)) {
+								foreach ($sub_types as $sub) { ?>
+									<li class="setting-item-child<?= ($sub['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $sub['id'] ?>"><?= $sub['name'] ?> <?php if(isset($sub['token'])){ echo ' - '.$sub['token']; } ?>
+					
+				</li>
+							<? }
+							}
+						?>
+						</ul>
+
+					</div>
+				<? } else { ?>
+				<? if($j < 1 ) { ?>
+		<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+		<div class="setting-buttons">
+			<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+		</div>
+				<? } ?>
+
+				<li class="setting-item<?= ($setting['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><?= $setting['name'] ?> <?php if(isset($setting['token'])){ echo ' - '.$setting['token']; } ?>
+					
+				</li>
+				
+				<? } ?>
+
+			<? endif; ?>
+		<? endforeach ?>
+		<? endif; ?>
+		<? } else { ?>
+		<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+		<div class="setting-buttons">
+			<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+		</div>
+		<? if(is_array($settingObj->settings)) : ?>
+		<? foreach($settingObj->settings as $setting) : ?>
+			<? if($setting) : ?>
+				<li class="setting-item<?= ($setting['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><?= $setting['name'] ?> <?php if(isset($setting['token'])){ echo ' - '.$setting['token']; } ?>
+					
+				</li>
+			<? endif; ?>
+		<? endforeach ?>
+		<? endif; } //closed else part ?>
+	</ul>
+</div>
+<? $c++; endforeach ?>
+</div>
+<? endforeach?>
+
+<!-- html for city names fetch from settings table starts here -->
+<?php //echo "<pre>";print_r($cities);die; ?>
+<div id="div_cities_html" class="hide2">
+	<select class="cities_html">
+		<? if(is_array($cities->settings)) : ?>
+			<? foreach($cities->settings as $setting) : ?>
+				<option value="<?= $setting['id'] ?>"><?= $setting['name'] ?></option>
+			<? endforeach ?>
+		<? endif; ?>
+	</select>
+</div>
+<!-- html for city names fetch from settings table ends here -->
+
+
+
+<div style="clear:left">&nbsp;</div>

@@ -1,0 +1,31 @@
+<div id="resource<?= $resource['id'] ?>" class="resource" style="position: relative;">
+	<div class="resourceForm">
+	<?php //echo "<pre>";print_r($childServices->settings);die; ?>
+		<select class="resource-service-type" name="service">
+			<?php /* <option value="">Service</option>
+			<option<?= ($resource['service_type'] == 'Early Head Start' ? ' selected' : '') ?>>Early Head Start</option>
+			<option<?= ($resource['service_type'] == 'Early Intervention' ? ' selected' : '') ?>>Early Intervention</option>
+			<option<?= ($resource['service_type'] == 'Head Start' ? ' selected' : '') ?>>Head Start</option>
+			<option<?= ($resource['service_type'] == 'Home Visiting' ? ' selected' : '') ?>>Home Visiting</option>
+			<option<?= ($resource['service_type'] == 'Mental Health Authority' ? ' selected' : '') ?>>Mental Health Authority</option>
+			<option<?= ($resource['service_type'] == 'School service_types' ? ' selected' : '') ?>>School service_types</option>
+			<option<?= ($resource['service_type'] == 'State Health Department' ? ' selected' : '') ?>>State Health Department</option>
+			<option<?= ($resource['service_type'] == 'child Protective Services' ? ' selected' : '') ?>>Child Protective Services</option>
+			<option<?= ($resource['service_type'] == 'Other' ? ' selected' : '') ?>>Other</option> */ ?>
+			<?php if(!empty($childServices)) {
+				foreach($childServices->settings as $service) {
+					$selected = ($service['id'] == $resource['service_type']) 
+							? 'selected="selected"' : '';
+					echo '<option value="'.$service['id'].'" '.$selected.'>'.$service['name'].'</option>';
+				}
+			} ?>
+		</select>
+		<div style="float: right; width: 56px; text-align: center; margin-right: -5px; margin-top: -2px">
+			<input type="button" data-resource-id="<?= $resource['id'] ?>" class="btn-small savePriorResource" style="margin-bottom: 3px;" name="savePriorResource" value="Save"  />
+			<input type="button" data-resource-id="<?= $resource['id'] ?>" class="btn-small deletePriorResource" style="margin-bottom: 3px;" name="deletePriorResource" value="Delete" />
+			<input type="button" class="btn-small cancelEditPriorResource" name="cancelEditPriorResource" value="Cancel" />
+		</div>
+		<input class="resource-date date" placeholder="mm/dd/yyyy" name="date" value="<?php if($resource['date_enrolled_formatted'] != '12/31/69'){ echo $resource['date_enrolled_formatted']; } ?>" class="date" style="text-align:left; margin-top: 5px;" /><br />
+		<textarea class="resource-note" name="notes" placeholder="notes" style="width: 165px; height: 40px; line-height: 16px; padding: 3px; margin-top: 5px;"><?= ($resource['notes'] ? htmlentities($resource['notes']) : '') ?></textarea>
+	</div>
+</div>

@@ -1,0 +1,107 @@
+<div class="infoMain">
+
+	<div class="titleBar">
+	<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="users" /><input type="submit" value="User Accounts" class="btn-small" /></form>
+	</div>
+		<div class="caption"><?=(isset($user['first_name']) ? $user['first_name'] . ' ' . $user['last_name'] : 'Add New User')?></div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+	<form id="userForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="user" />
+		<input type="hidden" name="data[id]" value="<?=(isset($user['id']) ? $user['id'] : '')?>" />
+
+		<div class="infoBody" style="">
+			<div class="infoColumn" style="padding: 0px 12px;">
+
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="infoTable" style="width: 100%;" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td colspan="2" class="infoTitle borderRight" style="width: 342px;"><h2>Account Information</h2></td>
+							<td colspan="2" class="infoTitle" style="width: 344px; padding-left: 12px;"><h2>Login Information</h2></td>
+						</tr>
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">First Name</td>
+							<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[first_name]" value="<?=(isset($user['first_name']) ? $user['first_name'] : '')?>" tabindex="1" /></td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px; width: 165px;">Email</td>
+							<td class="infoText" style=""><input type="text" style="border: 1px inset silver; width: 180px;" name="data[email]" value="<?=(isset($user['email']) ? $user['email'] : '')?>" tabindex="6" /></td>
+						</tr>
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">Last Name</td>
+							<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[last_name]" value="<?=(isset($user['last_name']) ? $user['last_name'] : '')?>" tabindex="2" /></td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">* New Password:</td>
+							<td class="infoText" style=""><input type="password" style="border: 1px inset silver; width: 180px;" name="data[password]" value="" tabindex="7" /></td>
+						</tr>
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">HMG Worker</td>
+							<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[hmg_worker]" value="<?=(isset($user['hmg_worker']) ? $user['hmg_worker'] : '')?>" tabindex="2" /></td>
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">* Confirm Password:</td>
+							<td class="infoText" style="">
+								<input type="password" style="border: 1px inset silver; width: 180px;" name="password_confirm" value="" tabindex="8" />
+							</td>
+						</tr>
+						<tr style="height: 25px;">
+							<td class="infoLabel" style="width: 96px; padding: 20px 0px 4px 12px;">Permission</td>
+							<td class="infoText borderRight" style="padding-top: 20px;">
+								<select name="data[permission]" tabindex="3">
+									<option value="Read Only"<?=(isset($user['permission']) && $user['permission'] == 'Read Only' ? ' selected="selected"' : '')?>>Read Only</option>
+									<option value="Edit"<?=(isset($user['permission']) && $user['permission'] == 'Edit' ? '  selected="selected"' : '')?>>Edit</option>
+									<option value="Admin"<?=(isset($user['permission']) && $user['permission'] == 'Admin' ? '  selected="selected"' : '')?>>Admin</option>
+								</select>
+							</td>
+							<td colspan="2" rowspan="3" class="infoText"  style="padding: 15px 0px 4px 28px;">
+								<p style="padding-bottom: 0;">* Only fill in password fields when setting up a new user or if you wan't to change the current password.</p>
+								<p style="margin-top: 0;">** Passwords must be 7-20 characters without spaces and contain at least one number, at least one capital <br />letter, and at least one lowercase letter.</p>
+							</td>
+						</tr>
+						<tr style="height: 25px;">
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">Region</td>
+							<td class="infoText borderRight">
+								<?= $region->displaySelect('data[region_id]', (isset($user['region_id']) ? $user['region_id'] : ''), 'All Regions', 4, false, 'js-region-select', true, false, false) ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0 4px 12px; vertical-align: top;">Status</td>
+							<td class="infoText borderRight" style="vertical-align: top;">
+								<select name="data[status]" tabindex="5">
+									<option value="1"<?=(isset($user['permission']) && $user['status'] === '1' ? '  selected="selected"' : '')?>>Active</option>
+									<option value="0"<?=(isset($user['permission']) && $user['status'] !== '1' ? '  selected="selected"' : '')?>>Inactive</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" style="text-align: right;">
+								<input type="submit" name="save" value="Save" class="btn-small" tabindex="8" />
+								<? if(isset($user['id']) && $user['id'] && $user['id'] != $_SESSION['user']['id']) : ?>
+								<input type="submit" name="delete" value="Delete" class="btn-small" onclick="return confirm('Are you sure you want to delete this user account?');" tabindex="9" />
+								<? endif; ?>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" style="padding-top: 8px;"></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<p style="margin-top: 10px; margin-bottom: 0; padding: 0; border-bottom: 1px solid #000;"><b>Login History</b></p>
+		<?
+		if ($_SESSION['user']['permission'] !== 'Admin') {
+			echo '<script>$(".js-region-select").prop("disabled", true).addClass("region-input--disabled")</script>';
+		}
+		if(is_array($logs)){
+			$count = 1;
+			foreach($logs as $log){
+				echo '<p class="user-log" style="margin: 10px 0 0 0; padding: 0px; line-height: 1; font-style: italic; color: #555;' . ($count >= 10 ? ' display: none;' : '') . '">Login Date: ' . $log['login_date'] . '</p>';
+				$count++;
+			}
+		    if($count >= 10){
+				echo '<p style="margin: 10px 0 0 0; padding: 0px; line-height: 1;"><a href="#" onclick="$(\'.user-log\').show();">Show All</a></p>';
+			}
+		}
+		?>
+	</form>
+</div>

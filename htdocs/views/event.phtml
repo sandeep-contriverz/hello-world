@@ -1,0 +1,91 @@
+
+
+<?
+
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Family;
+use Hmg\Models\Event;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+$family = new Family();
+$events = new Setting();
+?>
+<div class="title"><h2>Events</h2></div>						
+			<table class="display infoTable" style="margin-top: 4px;" border="0" cellspacing="0" cellpadding="0" id="events">
+
+						<thead>
+						<tr>
+							<th style="">HMG Worker</th>
+							<th style="padding-right: 0px;">Date</th>
+							<th style="padding-right: 0px;">Event Name</th>
+							<th style="padding-right: 0px;">Outreach Type</th>
+							<th style="padding-right: 0px;">Event Type</th>
+							<th>
+
+								<button class="btn-small add-follow-up add-event" >
+									<a class="fancybox" href="#add-organization-event" class="fancybox add-event" style="color:#555;">
+										Add New
+									</a>
+								</button>
+							</th>
+						</tr>
+						</thead>
+
+						<tbody>
+						<? 
+						
+						$row = 'odd'; ?>
+						<? $eventCount = 0; ?>
+						<? 
+						if(isset($data['events']) && is_array($data['events'])) : ?>
+						<? foreach ($data['events'] as $key => $event) : ?>
+							<tr  id="eventsRow_<?= $event['event_id'] ?>" class="<?=$row?>" onclick="detail = $(this).next(); detail.toggleClass('hidden');detail.toggle(); $(this).find('div').toggleClass('on');">
+								<td><div class="toggleArrow">
+								</div>
+								<?= isset($event['hmgworker_user']) ? $event['hmgworker_user']: '';  ?></td>
+								<td class="center"><?php echo ($event['event_date'] != '1970-01-01' && $event['event_date'] != '0000-00-00') ? $event['event_date'] : '';?></td>
+								<td class="center"><?php echo $event['event_name'];?></td>
+								<td class="center"><?= isset($event['outreach_type_id']) ? $events->getSettingById($event['outreach_type_id']): ''  ?></td>
+								<td class="center"><?= isset($event['event_type_id']) ? $events->getSettingById($event['event_type_id']): ''  ?></td>
+								<td style="border: none; width: 60px;">&nbsp;</td>
+							</tr>
+
+						<tr id="eventsRow_details_<?=$event['event_id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="7">
+								<table style="width: 100%; border: none;">
+									<tr>
+										<td style="border: none;"><b>Event Venue:</b> <?= $event['event_venue']?></td>
+										<!--td style="border: none;"><b>Barriers:</b></td>
+										<td style="border: none;"><b>Based on Screening:</b> </td>
+										<td style="border: none; width: 60px;">&nbsp;</td-->
+									</tr>
+									<tr>
+										<td colspan="7" style="border: none;">
+											<b>Notes:</b> <?= $event['event_notes']?>
+										</td>
+										<td style="width: 120px; text-align: center; border: none;">
+											
+											<input type="button" class="btn-small edit-event" id="edit_<?= $event['event_id'] ?>" value="Edit" />
+											<input type="button" class="btn-small delete-event" id="edit_<?= $event['event_id'] ?>" value="Delete" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? $eventCount++; ?>
+						
+						<? endforeach; ?>
+						<? endif; ?>
+						</tbody>
+					</table>
+					<? if($eventCount > 10) : ?>
+					<a href="#" id="seeMoreEvents" >Show All <?=$eventCount?> Events</a>
+					<? endif; ?>
+				
+	<div id="event-screening" style="display: none"></div>				

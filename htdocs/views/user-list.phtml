@@ -1,0 +1,83 @@
+<script type="text/javascript">
+$("document").ready(function(){
+	$(".user").on("click", function(){
+		var id = $(this).attr('id').slice(5);
+		location.href="index.php?action=user&id=" + id;
+	});
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(' ', '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		location.href="index.php?action=users&field="+field+"&sort="+fieldsort;
+	});
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="settings" /><input type="submit" value="System Settings" class="btn-small" /></form>
+	</div>
+</div>
+
+<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+<div class="dataTable" style="height: auto;">
+	<div class="titleBar">
+		<div class="options" style="float: right; line-height: 28px; padding: 1px 5px 0 5px !important; color: white; font-size: 10pt;">
+			<form action="index.php"><input type="hidden" name="action" value="user" /><input type="hidden" name="id" value="new" /><input type="submit" value="Add User" class="btn-small" /></form>
+		</div>
+		<div class="caption">User List</div>
+	</div>
+
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=($sorts['last_name'] ? '_' . strtolower($sorts['last_name']) : '')?>">Last Name</th>
+			<th class="sort sorting<?=($sorts['first_name'] ? '_' . strtolower($sorts['first_name']) : '')?>">First Name</th>
+			<th class="sort sorting<?=($sorts['hmg_worker'] ? '_' . strtolower($sorts['hmg_worker']) : '')?>">HMG Worker</th>
+			<th class="sort sorting<?=($sorts['email'] ? '_' . strtolower($sorts['email']) : '')?>">Email</th>
+			<th class="sort sorting<?=($sorts['permission'] ? '_' . strtolower($sorts['permission']) : '')?>">Permission</th>
+			<th class="sort sorting<?=($sorts['status'] ? '_' . strtolower($sorts['status']) : '')?>">Status</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; ?>
+	<? foreach($users as $user) : ?>
+
+		<tr id="user_<?=$user['id']?>" class="user <?=$row?>">
+			<td><?=ucfirst(strtolower($user['last_name']))?></td>
+			<td><?=ucfirst(strtolower($user['first_name']))?></td>
+			<td><?=$user['hmg_worker']?></td>
+			<td><?=$user['email']?></td>
+			<td><?=$user['permission']?></td>
+			<td><?=($user['status'] ? 'Active' : 'Inactive')?></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalUsers ?> users
+	</div>
+	<div style="float: right;" id="gridPages">
+		<a href="index.php?action=families<?= ($field ? '&field=' . $field . ($sort ? '&sort=' . $sort : '') : '') ?>">First</a>
+		<?= ($pageNumber > 1 ? '<a href="index.php?action=families' . ($field ? '&field=' . $field . ($sort ? '&sort=' . $sort : '') : '') . '&page= ' . ($pageNumber - 1) . '">&lt; Prev</a>' : '')?>
+		Page <?= $pageNumber ?> of <?= $numPages ?>
+		<?= ($pageNumber < $numPages ? '<a href="index.php?action=families' . ($field ? '&field=' . $field . ($sort ? '&sort=' . $sort : '') : '') . '&page= ' . ($pageNumber + 1) . '">Next &gt;</a>' : '')?>
+		<a href="index.php?action=families<?= ($field ? '&field=' . $field . ($sort ? '&sort=' . $sort : '') : '') ?>&page=<?= $numPages ?>">Last</a>
+	</div>
+</div>

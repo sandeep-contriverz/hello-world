@@ -1,0 +1,94 @@
+<?php 
+//echo "<pre>";print_r($_SERVER);die;
+function buildUrl($new) {
+	$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+	$url = $scheme.'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	if(empty($scheme) && isset($_SERVER['REQUEST_SCHEME'])) {
+		$url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+	}
+
+	$url_parts = parse_url($url);
+	parse_str($url_parts['query'], $params);
+
+	$params[$new] = true;     // Overwrite if exists
+	// Note that this will url_encode all values
+	$url_parts['query'] = http_build_query($params);
+
+	// If not
+	return $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'] . '?' . $url_parts['query'];
+}
+$urlPrint  = buildUrl('print');
+$urlExport = buildUrl('export');
+
+?>
+
+
+<div style="width: 100%; margin-bottom: 5px; clear: both;">
+<?
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) echo "<b style='color: #464646'>".implode(', ' , $this->drillheading).", ".(!empty($this->subvalue) ? ( is_numeric($this->subvalue))?$setting->getValue($this->subvalue):$this->subvalue : 'Uncoded')."</b><br>";
+echo $filteredByLabel . $filteredBy;
+?>
+</div>
+
+<div>
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">		
+			<th class="sort sorting<?=(isset($sorts['organization_name']) && $sorts['organization_name'] ? '_' . strtolower($sorts['organization_name']) : '')?>">Organization</th>
+			<th class="sort sorting<?=(isset($sorts['site']) && $sorts['site'] ? '_' . strtolower($sorts['site']) : '')?>">Site</th>
+			<th class="sort sorting<?=(isset($sorts['organization_type_id']) && $sorts['organization_type_id'] ? '_' . strtolower($sorts['organization_type_id']) : '')?>">Organization Type</th>
+			<th class="sort sorting<?=(isset($sorts['city']) && $sorts['city'] ? '_' . strtolower($sorts['city']) : '')?>">City</th>
+			<th class="sort sorting<?=(isset($sorts['primary_phone']) && $sorts['primary_phone'] ? '_' . strtolower($sorts['primary_phone']) : '')?>">Phone</th>
+			<th class="sort sorting<?=(isset($sorts['partnership_level_id']) && $sorts['partnership_level_id'] ? '_' . strtolower($sorts['partnership_level_id']) : '')?>">Partnership Level</th>
+			<th class="sort sorting<?=(isset($sorts['region_id']) && $sorts['region_id'] ? '_' . strtolower($sorts['region_id']) : '')?>">Region</th>		
+	</tr>
+	</thead>
+	<tbody>
+<? $row = 'odd'; ?>
+
+<? $organizationObj = $organization; ?>
+	<? foreach($organizations as $organization) : ?>
+
+		<tr id="organization_<?=$organization['organization_sites_id']?>_<?=$pos?>" class="organization <?=$row?>">
+			<td><?=$organization['organization_name']?></td>
+			<td><?=isset($organization['site']) ? $organization['site'] : ''?></td>
+			<td><?= $organization['organization_type']?></td>
+			<td><?=$organization['city']?></td>
+			<td><?=$organization['primary_phone']?></td>
+			<td><?=$organization['partnership_level'] ?></td>
+			<td><?=$organization['region']?></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+		
+	<? endforeach; ?>
+	</tbody>
+</table>
+
+

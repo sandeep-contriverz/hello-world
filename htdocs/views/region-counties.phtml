@@ -1,0 +1,410 @@
+<script type="text/javascript">
+$(document).ready(function(){
+
+	var toggleAll = false;
+
+	function getCountySelect(selected){
+		var select = '';
+		$.ajax({
+			url: 'index.php',
+			data: {
+				action: 'region-counties',
+				'get-select': true,
+				'selected': selected
+			},
+			async: false
+		}).done(function(data){
+			select = data;
+		});
+
+		return select;
+	}
+
+	$('#toggle-btn').on('click', function(){
+		toggleAll = !toggleAll;
+		if(toggleAll){
+			$('.counties').removeClass('hide2');
+			$('.toggleArrow').addClass('on');
+		} else {
+			$('.region').each(function(i, ele){
+				var div = $(ele);
+				var hasSelect = div.find('select').length;
+				if(hasSelect) {
+					removeEditForm(div.attr('id'), true);
+				}
+			});
+			$('.counties').addClass('hide2');
+			$('.toggleArrow').removeClass('on');
+		}
+	});
+
+	function replaceWithEditForm(parentElementId, toggleDisplay){
+		var select;
+		var parent = $('#' + parentElementId);
+		regionElement = parent.find('.region-title');
+		var regionDisabled = regionElement.hasClass('setting-disabled');
+		selects = parent.find('select');
+		if(selects.length){
+			return false;
+		}
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Save'); // Change button value
+		btn.prop('disabled', false);
+		btn.removeClass('disabled');
+
+		regionName = regionElement.text().replace(/"/g, '&quot;');
+		regionId = parentElementId.replace(/r/, '');
+		// regionCheckboxInput = ' <input type="checkbox" class="js-enable-region" value="1"' + (!regionDisabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+		regionElement.html('<input type="text" class="region-input' + (regionDisabled ? ' region-input-disabled' : '') + '" name="region[' + regionId + ']" data-id="' + regionId + '"' + (regionDisabled ? ' disabled="true"' : '') + '  value="' + regionName + '" />'); //  + regionCheckboxInput
+
+		if(regionDisabled){
+			regionElement.removeClass('setting-disabled');
+			btn.prop('disabled', true);
+			btn.addClass('disabled');
+			return;
+		}
+
+		ulElement = parent.find('ul');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			countyId = li.attr('data-county-id');
+			curIndex = index;
+			var select = getCountySelect(countyId);
+			newHtmlSelect = $('<div>' + select + '</div>');
+			select = newHtmlSelect.find('select');
+			select.attr('id', 'rc[' + regionId + ']');
+			select.attr('name', 'rc[' + regionId + ']');
+			tmpClass = li.attr('class');
+			li.removeClass('region-item-disabled');
+			disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			newClass = 'setting region-county' + (disabled ? ' region-input-disabled' : '');
+			select.attr('class', newClass);
+			if(disabled){
+				select.prop('disabled', true);
+			}
+			options = newHtmlSelect.find('option');
+			options.each(function(index){
+				option = $(this);
+				if(option.val() == countyId){
+					option.attr('selected', 'selected');
+				}
+			});
+			//$(this).html('<input name="rc[' + tmpId + ']" value="' + tmp + '" class="setting" style="width: 300px !important;" />');
+
+			// checkboxInput = ' <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+			countyId = $(this).attr('data-county-id');
+			if(countyId > 0){
+				$(this).html(newHtmlSelect.html()); //  + checkboxInput
+			} else {
+				$(this).remove();
+			}
+		});
+		select = $(getCountySelect(''));
+		select.attr('id', 'rc[0]').attr('name', 'rc[0]');
+		htmlSelect = $('<div></div>');
+		htmlSelect.append(select);
+		if(liElements.length){
+			// <li class="region-item" data-region-id="' + parentId + '" data-county-id="' + val.id + '">' + val.name + '</li>
+			liElements.last().after('<li class="region-item new-item" data-region-id="' + regionId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+		} else {
+			ulElement.append('<li class="region-item new-item" data-region-id="' + regionId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+		}
+		if(toggleDisplay){
+			if(!arrow.hasClass['on']){
+				ulElement.toggleClass('hide2');
+				arrow.toggleClass('on');
+			}
+		}
+	}
+
+	function removeEditForm(parentElementId, toggleDisplay){
+		parent = $('#' + parentElementId);
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Edit'); // Change button value
+		btn.removeClass('disabled');
+		btn.prop('disabled', false)
+
+		regionElement = parent.find('.region-title');
+		regionName = regionElement.find('input').val();
+		regionDisabled = regionElement.hasClass('setting-disabled');
+		disableClass = regionElement.find('input').prop('disabled') || regionDisabled ? 'setting-disabled' : '';
+		regionElement.html(regionName);
+		regionElement.removeClass('setting-disabled');
+		if(disableClass){
+			regionElement.addClass(disableClass);
+		}
+
+		ulElement = parent.find('ul.counties');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			// loop through the select options and get the text for the where the input value matches.
+			var select = li.find('select');
+			var disabled = select.prop('disabled');
+			if(disabled){
+				li.addClass('region-item-disabled');
+			}
+			if(select.length){
+				selectValue = select.val();
+				options = select.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == selectValue){
+						selectValue = option.text();
+					}
+				});
+				if(selectValue.trim()){
+					li.html(selectValue);
+				} else {
+					li.remove();
+				}
+			}
+		});
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	// $(document).on('click', '.js-enable-setting', function(){
+	// 	var li = $(this).closest('li');
+	// 	var input = $(this).prev();
+	// 	var regionId = li.data('region-id');
+	// 	var countyId = li.data('county-id');
+	// 	checkbox = $(this);
+	// 	var disabled = 1;
+	// 	if(checkbox.prop('checked')){
+	// 		disabled = 0;
+	// 	}
+	// 	json = '{"regionId":"' + regionId + '", "countyId":"' + countyId + '", "disabled": "' + disabled + '"}';
+
+	// 	$.post('index.php', { 'action' : 'region-counties', 'update' : 'true', 'json' : json }, function(data){
+	// 		if(data.success){
+	// 			if(disabled){
+	// 				input.attr('class', 'setting region-county region-input-disabled');
+	// 				input.prop('disabled', true);
+	// 			} else {
+	// 				input.attr('class', 'setting region-county');
+	// 				input.prop('disabled', false);
+	// 			}
+	// 		}
+	// 	});
+	// });
+
+	$(document).on('click', '.js-enable-region', function(){
+		var checkbox = $(this);
+		var input = checkbox.prev('input');
+		var div = input.closest('.region');
+		var disabled = 1;
+		if(checkbox.prop('checked')){
+			disabled = 0;
+		}
+		var regionId = input.data('id');
+
+		json = '{"id":"' + regionId + '", "value": "' + disabled + '"}';
+
+		$.post('index.php', { 'action' : 'setting', 'update' : 'true', 'json' : json }, function(data){
+			if(data.success){
+				if(disabled){
+					input.prop('disabled', true);
+					input.addClass('region-input-disabled');
+				} else {
+					input.prop('disabled', false);
+					input.removeClass('region-input-disabled');
+				}
+			}
+			div.find('.btn-cancel').click();
+		});
+	});
+
+	$(document).on('click', '.counties .btn-small', function(){
+
+		if($(this).val() == 'Edit'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			replaceWithEditForm(parentElementId);
+		} else if($(this).val() == 'Cancel'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			var toggleDisplay = true;
+			removeEditForm(parentElementId, toggleDisplay);
+		} else {
+			// Save Data
+			btn = $(this);
+			ulElement = btn.parents('ul');
+			parentDiv = ulElement.parent('div');
+  			arrow = parentDiv.find('.toggleArrow');
+			// Create a JSON string and post to model
+			// Create a new list of settings
+
+			regionElement = parentDiv.find('.region-title');
+			regionName = regionElement.find('input').val().replace(/"/g, '\\\"');
+
+			regionId = parentDiv.attr('id').replace('r','');
+			json = '{"id":"' + regionId + '","name":"' + regionName + '","counties":[';
+			liElements = ulElement.find('li');
+			addSeparator = false;
+			liElements.each(function(index){
+				tmpInput = $(this).find('select');
+				checkbox = tmpInput.next();
+				var disabled = 1;
+				if(checkbox.prop('checked') || checkbox.length === 0){
+					disabled = 0;
+				}
+				tmpId = tmpInput.val();
+				options = tmpInput.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == tmpId){
+						tmpVal = option.text();
+					}
+				});
+				if(tmpId){
+					json += (addSeparator ? ',' : '');
+					json += '{"id" : "' + tmpId + '", "name" : "' + tmpVal + '"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			$.post('index.php', { 'action' : 'region-counties', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					btn.val('Edit'); // Change button value
+					regionElement.html(regionName); // replace form element
+					liElements.remove(); // Remove input list items
+					var items = [];
+  					$.each(data, function(key, val) {
+    					$('<li class="region-item' + (val.disabled ==="1" ? ' region-item-disabled' : '') + '" data-region-id="' + regionId + '" data-county-id="' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+  					});
+					ulElement.toggleClass('hide2', 1000, "easeOutSine");
+					arrow.toggleClass('on');
+  				}
+			});
+		}
+	});
+	clicktimer = 0;
+	$('.region .clickable, .region .toggleArrow').on('click', function(e){
+		nodeType = e.target.nodeName;
+		if(nodeType == 'DIV'){
+			var parent = $(this).parent('div');
+			parentElementId = parent.attr('id');
+			arrow = parent.find('.toggleArrow');
+			if(clicktimer){
+				clearTimeout(clicktimer);
+			}
+			clicktimer = setTimeout(function(){
+				ul = parent.find('ul');
+				var toggleDisplay = true;
+				removeEditForm(parentElementId, toggleDisplay);
+			}, 300);
+		}
+	});
+
+	var allowDoubleClick = true;
+	$('.region .clickable, .region .toggleArrow').on('dblclick', function(e){
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		if(allowDoubleClick){
+			parentElementId = $(this).parent().attr('id');
+			// We don't want to toggle things if there already open
+			// We need to check to see if it's already open and if it is set toggleDisplay = false;
+			arrow = parent.find('.toggleArrow');
+			toggleDisplay = !arrow.hasClass('on');
+			replaceWithEditForm(parentElementId, toggleDisplay);
+			//allowDoubleClick = false;
+		}
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?print=true&' + postString, '');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		curLocation = window.location.href;
+		postString = curLocation + '&export=true';
+		window.open(postString, '');
+	});
+	$('ul.counties').on('change', '.new-item select', function(){
+		var selected = '';
+		var select = $(getCountySelect(selected));
+		select.attr('name', 'rs[0]');
+		htmlSelect = $('<div></div>');
+		htmlSelect.append(select);
+		ulElement = $(this).parents('ul.counties');
+		regionId = parentElementId.replace(/r/, '');
+		ulElement.append('<li class="region-item new-item" data-region-id="' + regionId + '" data-county-id="0">' + htmlSelect.html() + '</li>');
+	});
+
+	// Prevent default export button to submit the form when pressing
+	// enter in the filter form.
+    $('#filter-form').on('keypress', 'input:text', function(event){
+	    var keyCode = event.which;
+	    switch(keyCode){
+	        case 13:
+	        	$('#filter-btn').click();
+	        	return false;
+	        	break;
+	        default:
+        }
+    });
+});
+</script>
+<div class="pageTitleBar">
+	<h1>Region/County Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="settings" /><input type="submit" value="System Settings" class="btn-small" /></form>
+	</div>
+	<!-- <form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="referral-services" />
+	<input type="text" id="search" name="filters[referral]" value="<?=isset($_SESSION['referral-services']['filters']['referral']) ? $_SESSION['referral-services']['filters']['referral'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form> -->
+</div>
+
+<div>
+
+	<div class="titleBar">
+		<form id="filter-form" action="index.php" style="padding: 4px 3px 0 4px;"><input type="hidden" name="action" value="region-counties">
+			<input id="toggle-btn" type="button" value="Show/Hide All" class="btn-small" style="margin-left: 20px;" />
+		</form>
+	</div>
+
+	<?=(isset($message) ? '<div style="color: #c00; padding: 10px 5px;">' . $message . '</div>' : '')?>
+
+<? $regionId = null; $closeList = false; ?>
+<? if(is_array($regionCounties)) : ?>
+	<? foreach($regionCounties as $regionCounty) : ?>
+
+		<? if($regionCounty['region_id'] != $regionId) : ?>
+			<? if(!is_null($regionId)) : ?>
+					</ul>
+				</div>
+			<? endif ?>
+			<?
+			$regionId = $regionCounty['region_id'];
+			$count = 1;
+			?>
+			<div id="r<?=$regionCounty['region_id']?>" class="region" style="position: relative;">
+				<div class="toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+				<div style="font-size: 10pt; line-height: 18pt; color: #000;" class="region-title clickable <?=($regionCounty['region_disabled'] ? ' setting-disabled' : '')?>"><?= $regionCounty['region'] ?></div>
+				<ul class="counties hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+					<div class="setting-buttons">
+						<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+					</div>
+		<? endif ?>
+		<? if($regionCounty['county_id'] && !$regionCounty['setting_disabled']) : ?>
+			<li class="region-item <?=($regionCounty['setting_disabled'] ? ' region-item-disabled' : '')?>" data-region-id="<?=$regionCounty['region_id']?>" data-county-id="<?=$regionCounty['county_id']?>"><?= $regionCounty['county'] ?></li>
+		<? endif ?>
+			<? $count++; ?>
+
+	<? endforeach ?>
+
+		</ul>
+	</div>
+
+<? endif ?>
+
+</div>

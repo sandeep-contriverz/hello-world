@@ -1,0 +1,65 @@
+<div id="provider<?= $data['id'] ?>" class="providerData">
+	<div class="providerName"><b><?= (!empty($data['primary']) ? 'Primary ' : '') ?>Provider:</b> 
+		<input type="hidden" name="data[id]" value="<?= $data['id'] ?>" />
+		<input type="text" readonly style="width: 210px;" name="data[first_name]" value="<?= (!empty($data['first_name']) ? $data['first_name'] : '') ?>" placeholder="First Name" > <input type="text" readonly style="width: 210px;" name="data[last_name]" value="<?= (!empty($data['last_name']) ? $data['last_name'] : '') ?>" placeholder="Last Name">
+		<input type="text" readonly style="width: 210px;" name="data[title]" value="<?= (!empty($data['title']) ? $data['title'] : '') ?>" placeholder="Title">
+	</div>
+	<div class="providerData2">	
+		<div class="infoText"><span class="infoLabel">Provider Role:&nbsp;&nbsp;</span>
+		<?= $providerRole->displaySelect('data[role_id]', (!empty($data['role_id']) ? $data['role_id'] : ''), ' ', 23, false, null, true) ?>
+		</div>
+		<div class="infoText" style="margin-top: 5px;">
+			<span class="infoLabel">Permission to fax:&nbsp;&nbsp;</span>
+				<input type="radio" name="family_data[fax_permission]" value="1" <?= (!empty($data['fax_permission']) ? ' checked' : '') ?> /> Yes
+				<input type="radio" name="family_data[fax_permission]" value="0"  <?= (empty($data['fax_permission']) ? ' checked' : '') ?> /> No 
+		</div>
+		<div class="infoText"><span class="infoLabel">Specialty:&nbsp;&nbsp;</span>
+			<input type="text" readonly style="width: 210px;" name="data[specialty]" value="<?= (!empty($data['specialty']) ? $data['specialty'] : '') ?>" >
+		</div>
+		<div class="infoText"><span class="infoLabel">Clinic/Org:&nbsp;&nbsp;</span><input type="text" readonly style="width: 180px;" name="data[employer]" value="<?= (!empty($data['employer']) ? $data['employer'] : '') ?>" ></div>
+		<div class="infoText">
+			<span class="infoLabel">Address:&nbsp;&nbsp;</span><br />
+			<input type="text" readonly style="width: 210px;" name="data[address]" value="<?= (!empty($data['address']) ? $data['address'] : '') ?>" ><br />
+			<?= $city->displaySelect('data[city]', (!empty($data['city']) ? $data['city'] : ''), '', '', 'width: 220px;' ) ?>
+			<input type="text" readonly style="width: 20px; float: left; margin-right: 3px;" name="data[state]" value="<?= (!empty($data['state']) ? $data['state'] : '') ?>" >
+			<input type="text" readonly style="width: 32px; float: left;" name="data[zip]" value="<?= (!empty($data['zip']) ? $data['zip'] : '') ?>" >
+		</div>
+		<div class="infoText" style="clear: both; margin-top: 25px;">
+			<span class="infoLabel">Phone:&nbsp;&nbsp;</span>
+			<input type="text" readonly style="width: 100px;" name="data[phone]" value="<?= (!empty($data['phone']) ? $data['phone'] : '') ?>" >
+		</div>	
+		<div class="infoText" style="clear: both; margin-top: 3px;margin-left: 15px;">
+			<span class="infoLabel">Fax:&nbsp;&nbsp;</span>
+			<input type="text" readonly style="width: 100px;" name="data[phone]" value="<?= (!empty($data['fax']) ? $data['fax'] : '') ?>" >
+		</div>	
+		<div class="infoText">
+			<span class="infoLabel">Email:&nbsp;&nbsp;</span>
+			<input type="text" readonly style="width: 210px;"  name="data[email]" value="<?= (!empty($data['email']) ? $data['email'] : '') ?>">
+		</div>	
+		<div class="infoText">
+			<span class="infoLabel">Notes:&nbsp;&nbsp;</span>
+			<textarea name="data[notes]" readonly style="width: 215px" ><?= (!empty($data['notes']) ? $data['notes'] : '') ?></textarea>
+		</div>	
+		<div>&nbsp;<br><br></div>
+		<div style="position: absolute; bottom: 10px; right: 10px;">
+			<input type="hidden" id="h_role_id" name="data[role_id]" value="">
+			<input type="hidden" id="h_address" name="data[address]" value="">
+			<input type="hidden" id="h_city" name="data[city]" value="">
+			<input type="button" value="Cancel" class="btn-small cancelEditProvider" />
+			<input type="button" value="Save" class="btn-small saveProvider" data-provider-id="<?=$data['id']?>" />
+		</div>			
+	</div>
+</div>
+
+<script>
+$(document).ready(function(){
+	$('#h_role_id').val($('.providerData').find('select[name="data[role_id]"]').val());
+	$('#h_address').val($('.providerData').find('select[name="data[address]"]').val());
+	$('#h_city').val($('.providerData').find('select[name="data[city]"]').val());
+
+	$('.providerData').find('select[name="data[role_id]"]').prop('disabled', true);
+	$('.providerData').find('select[name="data[address]"]').prop('disabled', true);
+	$('.providerData').find('select[name="data[city]"]').prop('disabled', true);
+	
+});
+</script>

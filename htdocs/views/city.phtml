@@ -1,0 +1,27 @@
+<div>
+	<div style="float: right">
+		<form action="index.php"><input type="hidden" name="action" value="city" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add city" class="btn-small" />
+		</form>
+	</div>
+	<div>Cities</div>
+	<table>
+		<th>City</th>
+		<?php foreach ($Allcity as $c) {?>
+		<tr>
+			<td><?= $c['city'] ?></td>
+		</tr>
+		<?php }?>
+	</table>
+	<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalcity ?> cities
+	</div>
+	<div style="float: right;" id="gridPages">
+		<a href="index.php?action=city">First</a>
+		<?= ($pageNumber > 1 ? '<a href="index.php?action=city' .'&page= ' . ($pageNumber - 1) . '">&lt; Prev</a>' : '')?>
+		Page <?= $pageNumber ?> of <?= $numPages ?>
+		<?= ($pageNumber < $numPages ? '<a href="index.php?action=city' .'&page= ' . ($pageNumber + 1). '">Next &gt;</a>' : '')?>
+		<a href="index.php?action=city&page=<?= $numPages ?>">Last</a>
+	</div>
+</div>
+</div>

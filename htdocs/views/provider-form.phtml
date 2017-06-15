@@ -1,0 +1,172 @@
+
+<div class="infoMain">
+
+	<div class="titleBar">
+	<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="provider"  /><input type="hidden" name="id" value="<?= $data['id'] ?>" /><input type="submit" value="View Provider" class="btn-small" /></form> <form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="providers" /><input type="submit" value="Providers List" class="btn-small" /></form>
+	</div>
+		<div class="caption"><?= (!empty($data['first_name']) ? $data['first_name'] : '') . (!empty($data['last_name']) ? ' ' . $data['last_name'] : '') ?></div>
+	</div>
+
+	<?=(!empty($message) ? '<div style="color: #c00; padding: 10px 5px;">' . $message . '</div>' : '')?>
+
+	<form id="providerForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="provider" />
+		<input type="hidden" name="data[id]" value="<?=(!empty($data['id']) ? $data['id'] : '')?>" />
+
+			<div class="infoBody" style="">
+
+				<div class="infoColumn" style="padding: 0px 12px;">
+
+
+
+					<div class="infoPane" style="margin-top: 12px;">
+
+						<table class="" style="width: 100%;" cellpadding="0" cellspacing="0" border="0">
+
+							<tbody>
+
+							<tr>
+
+								<td colspan="2" class="infoTitle" style="width: 342px;"><h2>Primary Contact</h2></td>
+
+								<td colspan="2" class="infoTitle" style="width: 344px; padding-left: 12px;"><h2>Clinic/Organization</h2></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">First Name</td>
+
+								<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[first_name]" value="<?= (!empty($data['first_name']) ? $data['first_name'] : '') ?>" tabindex="10"></td>
+
+
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Clinic/Organization</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[employer]" value="<?= (!empty($data['employer']) ? $data['employer'] : '') ?>" tabindex="20"></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Last Name</td>
+
+								<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[last_name]" value="<?= (!empty($data['last_name']) ? $data['last_name'] : '') ?>" tabindex="11"></td>
+
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Phone</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[phone]" value="<?= (!empty($data['phone']) ? $data['phone'] : '') ?>" tabindex="21"></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Title:</td>
+
+								<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[title]" value="<?= (!empty($data['title']) ? $data['title'] : '') ?>" tabindex="12"></td>
+
+
+
+								<td class="infoLabel" style="width: 116px; padding: 4px 0px 4px 28px;">Fax:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[fax]" value="<?= (!empty($data['fax']) ? $data['fax'] : '') ?>" tabindex="22"></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Specialty:</td>
+
+								<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[specialty]" value="<?= (!empty($data['specialty']) ? $data['specialty'] : '') ?>" tabindex="13"></td>
+
+
+
+								<td class="infoLabel" style="width: 116px; padding: 4px 0px 4px 28px;">Provider Role:</td>
+
+								<td class="infoText" style="">
+									<?= $providerRole->displaySelect('data[role_id]', (!empty($data['role_id']) ? $data['role_id'] : ''), ' ', 23, false, null, true) ?>
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Address:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[address]" value="<?= (!empty($data['address']) ? $data['address'] : '') ?>" tabindex="14"></td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Email:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" tabindex="24" name="data[email]" value="<?= (!empty($data['email']) ? $data['email'] : '') ?>"></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">City:</td>
+
+								<td class="infoText" style="">
+									<?= $cities->displaySelect('data[city]', (!empty($data['city']) ? $data['city'] : ''), ' ', 15, false, NULL, false) ?>
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Notes:</td>
+
+								<td class="infoText" style=""><textarea name="data[notes]" style="width: 187px" tabindex="25"><?= (!empty($data['notes']) ? $data['notes'] : '') ?></textarea></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">State:</td>
+
+								<td class="infoText" style="">
+
+									<input type="text" style="width: 32px; float: left;" name="data[state]" value="<?= (!empty($data['state']) ? $data['state'] : '') ?>" tabindex="16">
+
+
+
+									<div class="infoLabel" style="float: left; padding-left: 19px; padding-right: 7px;">Zip Code:</div>
+
+									<input type="text" style="width: 60px; float: left;" name="data[zip]" value="<?= (!empty($data['zip']) ? $data['zip'] : '') ?>" tabindex="17">
+
+									<div style="clear: both;"></div>
+
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">&nbsp;</td>
+
+								<td class="infoText" style="">&nbsp;</td>
+
+							</tr>
+
+							<tr>
+								<td colspan="4" style="text-align: right;">
+									<input type="submit" name="save" value="Save" class="btn-small" tabindex="30" />
+									<? if(!empty($data['id']))		 : ?>
+									<input type="submit" name="delete" value="Delete" class="btn-small" onclick="return confirm('Are you sure you want to delete this provider?');" tabindex="40" />
+									<? endif; ?>
+								</td>
+							</tr>
+
+							<tr>
+
+								<td colspan="4" style="padding-top: 8px;"></td>
+
+							</tr>
+
+						</tbody></table>
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</form>
+
+
+</div>

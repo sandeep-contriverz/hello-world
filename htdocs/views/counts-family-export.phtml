@@ -1,0 +1,109 @@
+<? 
+$csv = "Counts: Family Demographics\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Families,Count,Pct%' . "\n";
+foreach($statusCounts as $row){
+	$csv .= $row['status'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Recurring Families,Count,Pct%' . "\n";
+foreach($recurringFamilyCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Who Called,Count,Pct%' . "\n";
+foreach($whoCalledCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Race,Count,Pct%' . "\n";
+foreach($raceCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Ethnicity,Count,Pct%' . "\n";
+foreach($ethnicityCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Call Reason,Count,Pct%' . "\n";
+foreach($callReasonCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'How Heard Category,Count,Pct%' . "\n";
+foreach($howHeardCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Reason for Closing,Count,Pct%' . "\n";
+foreach($closeReasonCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Follow-up Tasks,Count,Pct%' . "\n";
+foreach($FollowupsCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+echo $csv;
+?>
+
+					                         

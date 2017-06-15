@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Help Me Grow Utah</title>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" media="all" />
+  <link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
+  <link rel="stylesheet" type="text/css" href="css/font.css" media="all" />
+  <link rel="stylesheet" type="text/css" href="css/style_subs.css" />
+  <link rel="stylesheet" type="text/css" href="css/hmg.css" />
+  <link rel="stylesheet" type="text/css" href="css/colors.css" />
+  <link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox.css" media="screen" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" src="js/jquery-2.2.1.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui.js"></script>
+  <script type="text/javascript" src="fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="js/global2.js"></script>
+  <script type="text/javascript">
+    var expireTime = <?= strtotime('+20 minute') ?>;
+    sync_url = "<?php echo $GLOBALS['sync_url']; ?>";
+  </script>
+</head>
+<body class="html front not-logged-in one-sidebar sidebar-first page-node page-node- page-node-20 node-type-page" style="background: #fff;" >
+
+	<div id="mainWrapperDb"> <!-- BEGIN MAINWRAPPER -->
+      <div id="wrapper" class="clearfix"> <!-- BEGIN WRAPPER -->
+
+			<div id="headerDb" class="titleBar"> <!-- BEGIN HEADER -->
+        <div id="logged-in-hmg-worker" style="display: none;"><?= $_SESSION['user']['id'] ?></div>
+        <input type="hidden" id="logged-in-hmg-worker-id" value="<?= $_SESSION['user']['id'] ?>">
+				<div class="caption" style="float: right; margin-right: 5px;">Logged In: <?= $_SESSION['user']['hmg_worker'] ?></div>
+				<div class="caption">Help Me Grow Utah Demo Database</div>
+			</div> <!-- END HEADER -->
+
+			<div id="main-content" style="background: #fff; margin-top: 0; padding: 5px 5px;"> <!-- BEGIN CONTENT -->
+
+
+    		<?=$viewHtml?>
+
+
+			</div> <!-- END CONTENT -->
+		</div> <!-- END WRAPPER -->
+    </div> <!-- END MAINWRAPPER -->
+  <div id="confirmation" style="background-color: #cfc3c3; width: 500px; height: 200px; display: none;">
+    <div class="titleBar" style="padding-left: 10px;"><span class="caption">Session Expiration Notification</span></div>
+    <div style="padding: 20px;">
+      <p style="font-size: 15px; color: #000;"><span style="font-size: 15px; color: #f00; font-weight: bold;">Warning!</span> Your session will expire in 5 minutes! <br /><br />Click "Refresh Session" to stay logged in.</p>
+      <div style="text-align: center">
+        <input id="sessionExpire" type="button" class="btn" style="font-size: 15px !important; padding: 10px !important; font-weight: normal !important" value="Log Out" />
+        <input id="sessionRefresh" type="button" class="btn" style="font-size: 15px !important; padding: 10px !important; font-weight: normal !important" value="Refresh Session" />
+      </div>
+    </div>
+  </div>
+  </body>
+</html>
+<script src="assets/build/asq-sync.js" type="text/javascript"></script>

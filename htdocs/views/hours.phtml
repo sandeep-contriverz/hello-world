@@ -1,0 +1,56 @@
+					<table class="display infoTable">
+						<tbody>
+							<tr>
+								<thead>
+								<th style="padding-right: 0;">Date</th>
+								<th style="padding-right: 0;">Hours</th>
+								<th style="padding-right: 0;">
+									<div style="float: right; padding: 0 3px;"><input type="button" id="save-hours" class="btn-small" value="Save" /></div>
+									Type
+								</th>
+								</thead>
+							</tr>
+							<tr class="odd">
+								<td><input type="text" id="date" name="hoursData[date]" size="10" /></td>
+								<td><input type="text" id="hours" name="hoursData[hours]" size="4" /></td>
+								<td>
+								<select id="type" name="hoursData[type]" style="width: 110px;">
+								<?php if(!empty($volunteering_type)) { //211016
+										foreach($volunteering_type->settings as $type) {
+											//$replace = str_replace(' ', '_', strtolower($type['name']));
+											if(!empty($data['volunteering_type']))
+											$saved_types = explode(',', $data['volunteering_type']);
+											if(strtolower($type['name']) != 'other') {
+												if(!empty($saved_types) 
+											&& !in_array($type['id'], $saved_types)) {
+													continue;
+												}
+											}
+											echo '<option value="'.$type['id'].'">'.$type['name'].'</option>';
+										}
+									} ?>
+								<?php /* 
+									<option value="Other">Other</option>
+									<?=($data['family_event'] ? '<option value="Family Event">Family Event</option>' : '')?>
+									<?=($data['parent_mentor'] ? '<option value="Parent Mentor">Parent Mentor</option>' : '')?>
+									<?=($data['care_coordination'] ? '<option value="Care Coordination">Care Coordination</option>' : '')?>
+									<?=($data['eagle_scout'] ? '<option value="Eagle Scout">Eagle Scout</option>' : '')?>
+									<?=($data['special_projects'] ? '<option value="Special Projects">Special Projects</option>' : '')?>
+									*/ ?>
+								</select>
+								<input type="hidden" id="eid" value="0">
+								</td>
+							</tr>
+							<? if(is_array($hoursData)) : ?>
+								<? $class = 'odd'; ?>
+								<? foreach($hoursData as $entry) : ?>
+							<tr class="<?=$class?>">
+								<td><?= $entry['formattedDate'] ?></td>
+								<td><?= $entry['hours'] ?></td>
+								<td><span><?= $settingOb->getSettingById($entry['type']); //211016 ?></span>&nbsp;&nbsp;<a href="javascript:;" class="editVHrs" data-id="<?= $entry['id'] ?>">Edit</a></td>
+							</tr>
+								<? $class = ($class == 'odd' ? 'even' : 'odd') ?>
+								<? endforeach; ?>
+							<? endif; ?>
+						</tbody>
+					</table>

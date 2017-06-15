@@ -1,0 +1,340 @@
+Doctor ID,Dr Last Name,Dr First Name,Dr Title,Dr Address,Dr City,Dr State,Dr Zip,Dr Employer,Dr Fax,Dr Phone,Dr Email,Specialty,Provider Role
+1,Chidester,Todd,F.N.P.,1159 E200 N #200,AmericanFork,UT,84003,Utah Valley Pediatrics- American Fork,(801) 756-5200,(801) 756-5209,,,Child Care Provider
+2,Savage,Shelly,M.D.,1959 N State St,Provo,UT,84604,Grandview Family Medicine,801-373-4748,801-373-2001,,,Child Care Provider
+4,Takasaki,Roman,M.D.,325 West Center Street,SpanishFork,UT,84660,Spanish Fork Clinic,801-798-8513,801-798-7301,,,Child Care Provider
+5,Later,Richard,M.D.,1055 North 300 West #311,Provo,UT,84604,Utah Valley Pediatrics- Provo Physicians Plaza,801-357-7975,801-357-7883,flyfishdoc@yahoo.com,,Child Care Provider
+6,Adams,R. Mitchell,D.O.,"1355 North University Ave., #210",Provo,UT,84604,Utah Valley Pediatrics - Provo North,801-377-6811,801-373-8930,madams@uvpeds.com,,Child Care Provider
+7,Freestone,Phil,M.D.,"171 N 400 W, #C-12",Orem,UT,84057,Utah Valley Pediatrics-CherryTree Office,801-224-1057,801-224-4550,,,Child Care Provider
+10,McLay,Michael,M.D.,5 E 400 N,Springville,UT,84663,Art City Family Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+11,Kendall,Melissa,MD,716 West 800 North #300,Orem,UT,84057,Utah Valley Pediatrics - Timpanogos,801-224-0821,801-224-0421,mkendall@uvpeds.com,,Child Care Provider
+12,Stuart,Maury,,,,,,,,,,,Child Care Provider
+13,Clayton,Matthew,,1675 N. Freedom Blvd. Suite 9C,Provo,UT,84601,Clayton and Johnson Pediatrics,801-377-4041,801-377-4800,matthewjclayton@gmai.com,,Child Care Provider
+14,Christiansen,Marlin,M.D.,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+15,Hafen,Mark,D.O.,226 N 1100 E Suite A,AmericanFork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+16,Conner,Marcie,M.D.,1159 E 200 N #200,AmericanFork,UT,84003,Utah Valley Pediatrics - American Fork,801-756-5200,801-756-5609,mconner@uvpeds.com,,Child Care Provider
+17,Anderson,Laurie,NP,716 W 800 N #300,Orem,UT,84057,Utah Valley Pediatrics - Timpanogos,801-224-0821,801-224-0421,,,Child Care Provider
+18,Clement,Kimberly,F.N.P.,48 North 1100 East Suite C,American Fork,UT,84003,American Fork Pediatrics,801-492-4371,801-492-4333,,,Child Care Provider
+19,Whiting,Michael,M.D.,"48 North 1100 East, Suite C",American Fork,UT,84003,American Fork Pediatrics,801-492-4371,801-492-4333,afpediatrics@hotmail.com,,Child Care Provider
+20,Crump,Kenneth,M.D.,811 North 900 West,Orem,UT,84057,Lakeview Family Medicine,801-434-7604,801-812-3200,,,Child Care Provider
+21,Weipert,John,M.D.,212 S 1100 E,American Fork,UT,84003,North Valley Pediatrics,801-492-1285,801-756-8788,,,Child Care Provider
+22,Jensen,Jefferey,M.D.,"1355 North University Ave., #210",Provo,UT,84604,Utah Valley Pediatrics- North Provo Office,801-377-6811,801-373-8930,jjensen@uvpeds.com,,Child Care Provider
+24,Michalek,George,M.D.,269 East 400 South,Springville,UT,84663,Hobble Creek Medical Clinic,801-489-3141,801-491-9883,Other Fax: 801-489-4227,,Child Care Provider
+25,Miller,Garron,M.D.,"15 S 1000 E, Suite 200",Payson,UT,84651,Utah Valley Pediatrics- Payson,801-465-4770,801-465-2800,gmiller@uvpeds.com,,Child Care Provider
+26,Skousen,Gale,M.D.,97 S Professional Way Suite 2,Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4896,,,Child Care Provider
+28,Corry,EJ,M.D.,830 North 2000 West,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+29,Zollo,Kenneth A.,M.D.,1675 N. Freedom Blvd. Suite 3,Provo,UT,84604,,801-377-8001,801-377-8000,k_z0110@hotmail.com,,Child Care Provider
+30,Dr. Verara?,,,,Ogden,UT,,,,,,,Child Care Provider
+31,Staheli,John K.,M.D.,1055 N 500 W Suite 212,Provo,UT,84604,RBM,,801-374-2362,,,Child Care Provider
+32,Spencer,Weston,M.D.,1912 W 930 N,Pleasant Grove,UT,84062,Alpine Pediatrics - Pleasant Grove,801-492-1991,801-492-1999,westonspencer@gmail.com,,Child Care Provider
+33,Mumford,Scott H.,M.D.,1159 E 200 N #200,AmericanFork,UT,84003,Utah Valley Pediatrics- American Fork,801-756-5200,801-756-5609,smumford@uvpeds.com,,Child Care Provider
+34,Ralston,Charles,MD,5770 S 250 E Suite 290,Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+35,Paxton,Richard,M.D.,325 West Center Street,Spanish Fork,UT,84660,Spanish Fork Clinic,801-798-8513,801-798-7301,richard_p3@hotmail.com,,Child Care Provider
+36,Lytle,Carter,M.D.,325 West Center Street,Spanish Fork,UT,84660,Spanish Fork Clinic,801-798-8513,801-798-7301,,,Child Care Provider
+37,Knorr,Brett K.,MD,3231 N 1120 E,Lehi,UT,84043,Alpine Pediatrics - Lehi,801-766-5938,801-768-2800,,,Child Care Provider
+39,Jack,David B.,M.D.,11760 S 700 E Suite 111,Draper,UT,84020,Lone Peak Family Medicine,801-576-9800,801-576-8855,,,Child Care Provider
+40,Jones,Douglas,M.D.,475 West 940 North,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+41,Tovey,David,M.D.,762 West 400 South,Springville,UT,84663,Intermountain Springville Clinic,801-429-1290,801-429-1200,,,Child Care Provider
+42,Cope,David,M.D.,620 Medical Dr Suite E150,Bountiful,UT,84010,Cope Family Medicine,801-298-5397,801-598-4112,,,Child Care Provider
+43,Jackson,Daniel,,100 Mario Capecchi,Salt Lake City,UT,84113,Primary Children's Hospital,,801-662-3692,,,Child Care Provider
+44,Anderson,Bradley,M.D.,"1355 North University Ave., #210",Provo,UT,84604,Utah Valley Pediatrics- North Provo,801-377-6811,801-373-8930,,,Child Care Provider
+47,Holmes,Richard,M.D.,2230 N. University Ave Ste 1A,Provo,UT,84604,Cotton Tree Family Practice,801-655-1890,801-377-3413,,,Child Care Provider
+49,Knochel,Miguel,M.D.,15 S 1000 E Suite 100,Payson,UT,84651,Canyon View Pediatrics - Payson,801-465-9823,801-465-9480,miguelknochel@yahoo.com,,Child Care Provider
+51,Lynch,Steven,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+53,Chasson,Susan,NP,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+54,Wise,Dustin,MD,1888 W 800  N,Pleasant Grove,UT,84062,Lone Peak Pediatrics,801-492-7883,801-492-7851,drdustinwise@gmail.com,,Child Care Provider
+56,LeBras,Michael,DO,212 South  1100  East,American Fork,UT,84003,North Valley Pediatrics,801-492-1285,801-756-8788,,,Child Care Provider
+57,Willmore,Keith,MD,1750 N. Wymount Terr. Dr.,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+59,Hoggard,Timo,MD,226 N 1100 E,American Fork,UT,84003,The Clinic - American Fork,801-855-3854,(801) 763-3843,,,Child Care Provider
+60,Vargo,Beverly,MD,3231 N 1120 E,Lehi,UT,84043,Alpine Pediatrics - Lehi,801-766-5938,801-768-2800,bvargo@alpinepeds.com,,Child Care Provider
+61,Harrison,Heather,DO,"1055 N 500 W, Ste 212",Provo,UT,84604,Central Utah Clinic Family Practice - Provo,801-812-5034,801-812-5033,,,Child Care Provider
+62,Valdez,Orlando,MD,325 W. Center St.,Spanish Fork,UT,84660,Canyon View Pediatrics - Spanish Fork,801-798-8513,801-894-13333,,,Child Care Provider
+63,Nuttall,David,M.D.,120 N 1220 E Suite 1,American Fork,UT,84003,"David Nuttall, M.D.",801-756-5458,801-756-6092,,,Child Care Provider
+65,Pavach,Greg,MD,77 E Commerce Dr,Saratoga Springs,UT,84045,Alpine Pediatrics - Saratoga Springs,801-766-1758,801-922-9222,,,Child Care Provider
+66,Liddle,Melinda,MD,9500 S 1300 E,Sandy,UT,84094,Intermountain Sandy Clinic,(801)501-2107,(801)501-2150,,,Child Care Provider
+67,Barhorst,Donna,M.D.,4403 Harrison Blvd Ste 4875,Ogden,UT,84403,Intermountain Northern Utah Pediatrics,(801)387-4712,(801)387-4500,,,Child Care Provider
+68,Smith,Garrett,D.O.,275 W 200 N,Lindon,UT,84042,Tri-City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+69,Wilcox,Ryan,M.D.,1159 Ea200 N #200,American Fork,UT,84003,Utah Valley Pediatrics-American Fork,(801) 756-5200,(801) 756-5290,,,Child Care Provider
+70,Farnsworth,Richard,M.D.,1355 North University Ave #210,Provo,UT,84604,Utah Valley Pediatrics-North Provo Office,(801) 377-6811,(801) 373-8930,rfarnsworth@uvpeds.com,,Child Care Provider
+71,Cornish,Matthew,DO,716 W 800 N #300,Orem,UT,84057,Utah Valley Pediatrics  - Timpanogos,801-224-0821,801-224-0421,mcornish@uvpeds.com,,Child Care Provider
+72,Gibson,Michael,CNP,"1355 North University Ave., #210",Provo,UT,84604,Utah Valley Pediatrics-North Provo Office,(801) 377-6811,(801) 373-8930,mgibson@uvpdes.com,,Child Care Provider
+73,Bailey,Ernest,M.D.,716 W 800 N #300,Orem,UT,84057,Utah Valley Pediatrics - Timpanogos,(801) 224-0821,(801) 224-0421,baileyern@yahoo.com,,Child Care Provider
+74,Woodmansee,James,M.D.,"2230 N University Parkway, Suite A-1",Provo,UT,84604,Cotton Tree Family Practice,801-655-1890,801-377-3413,,,Child Care Provider
+75,Arnold,Brad,MD,1912 W. 930 N,Pleasant Grove,UT,84062,Alpine Pediatrics - Pleasant Grove,801-492-1991,801-492-1999,barnold@alpinepeds.com,,Child Care Provider
+76,Smith,Scott,M.D.,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical Clinic - Pleasant Grove,801-756-1705,801 756 3511,,,Child Care Provider
+77,Simmons,Daniel,M.D.,171 N 400 W #C-12,Orem,UT,84057,Utah Valley Pediatrics - Cherry Tree,801 224 1057,801 224 4550,dggsimmons@gmail.com,,Child Care Provider
+79,Bingham,Ronald,PA,2850 N 2000 W #102,Ogden,UT,84404,Farr West Pediatrics,801-732-0847,801-732-0780,,,Child Care Provider
+80,Edwards,William,M.D.,77 E Commerce Drive,Saratoga Springs,UT,84043,Alpine Pediatrics - Saratoga Springs,801-766-1758,801-922-9222,wedwardes@alpinepeds.com,,Child Care Provider
+81,Gerber,Zeromeh,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,Zeromeh.Campbell@imail.org,,Child Care Provider
+82,Shelton,Marie,DO,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+83,Carn,Thomas,MD,575 South State,Orem,UT,84058,Wasatch Medical Center,801-229-2420,801-225-2926,,,Child Care Provider
+84,Devenport,David,M.D.,269 East 400 South,Springville,UT,84663,Hoble Creek Medical Clinic - Springville,(801) 489- 4227,(801) 491-9883,,,Child Care Provider
+85,Behrmann,Gary L,MD,1172 E 100 N Ste # 2,Payson,UT,84651,Mountain View Pediatric Clinic,(801) 465- 4879,(801) 465-4877 () ?,,,Child Care Provider
+86,Ellis,Natalie,PA,1355 N University Ave Ste 210,Provo,UT,84604,Utah Valley Pediatrics - Provo North,801-377-6811,801-373-8930,,,Child Care Provider
+87,Broken Leg,Christine H.,"MPAS, PA-C",716 W 800 N Suite 300,Orem,UT,84057,Utah Valley Pediatrics,(801) 224-0821,801-224-0421,,,Child Care Provider
+88,Ryan,Jim,MD,1288 W 12700 S,Riverton,UT,84065,Parkway Pediatrics,801-253-5859,801-253-3500,,,Child Care Provider
+90,McCune,Brian,MD,1305 N. Commerce Dr.  #230,Saratoga Springs,UT,84045,Utah Valley Pediatrics - Saratoga Springs,801-407-6505,801-407-6500,,,Child Care Provider
+91,Woods,Rachel,MD,114 E 12450 S # 100,Draper,UT,84020-8059,Willow Creek Pediatrics - Draper,(801) 501-0048,801-523-3001,,,Child Care Provider
+92,Peterson,Jonathan,M.D.,15 S 1000 East Ste. 200,Payson,UT,84651,Utah Valley Pediatrics - Payson,801-465-4770,801-465-2800,jpeterson@uvpeds.com,,Child Care Provider
+93,Glade,Gordon,MD,1159 E 200 N #200,American Fork,UT,84003,Utah Valley Pediatrics - American Fork,801-756-5200,756-5209,Addtl. 801-855-4040,,Child Care Provider
+94,Davis,Brett,MD,1355 N. University Ave Ste. 220,Provo,UT,84604,Utah Valley Pediatrics - Provo North,801-377-6811,801-373-8930,bdavis@uvpeds.com,,Child Care Provider
+95,Hornyik,Galena,M.D.,"114 E 12450 S, Ste 100",Draper,UT,84020,Willow Creek Pediatrics - Draper,801-501-0048,801-523-3001,,,Child Care Provider
+96,Lauret,Michael H.,MD,1355 N University Ave # 210,Provo,UT,84601,Utah Valley Pediatrics - Provo North,(801) 377-6811,(801) 373-8930,mlauret@uvpeds.com,,Child Care Provider
+97,Berry,Steven L.,MD,173 North 400 West Suite C-11,Orem,UT,84057,Central Utah Clinic Family Practice - Orem,801-802-7733,801-802-7373,,,Child Care Provider
+99,Johnson,Joseph,MD,1675 N Freedom Blvd. Ste 9C,Provo,UT,84601,Clayton and Johnson Pediatrics,801-377-4041,801-377-4800,jmjohnson28@comcast.net,,Child Care Provider
+100,Valdez,Elisa,MD,555 E. Pikes Peak Ave  #200,Colorado Springs,CO,80903,,719-227-0840,719-633-3850,,,Child Care Provider
+101,Ashby,Sarah,MD,1159 E  200 N  #200,American Fork,UT,84003,Utah Valley Pediatrics - American Fork,801-756-5200,801-756-5609,,,Child Care Provider
+102,Clark,Nicole,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Family Medical Center,(801) 357-7014,(801) 357-7930,,,Child Care Provider
+103,Wonnacott,Monica,MD,12391 S 4000 W Ste 100,Riverton,UT,84065,Granger Medical Clinic,801-302-1714,801-302-1700,,,Child Care Provider
+104,Johnson,David,MD,1912 W 930 N,Pleasant Grove,UT,84062,Alpine Pediatrics - Pleasant Grove,801-492-1991,801-492-1999,djohnson@alpinepeds.com,,Child Care Provider
+105,Whiting,Todd D.,MD,3231 N 1120 E,Lehi,UT,84043,Alpine Pediatrics - Lehi,801-766-5938,801-768-2800,twhiting@alpinepeds.com,,Child Care Provider
+107,Alba,Jesse,MD,1912 W 930 N,Pleasant Grove,UT,84062,Alpine Pediatrics - Pleasant Grove,801-492-1991,801-492-1999,,,Child Care Provider
+108,Foster,Chris,MD,77 E Commerce Drive,Saratoga Springs,UT,84045,Alpine Pediatrics - Saratoga Springs,801-766-1758,801-922-9222,,,Child Care Provider
+109,Mortenson,Kimberly,FNP,"48 N 1100 E, Ste C",American Fork,UT,84003,American Fork Pediatrics,801-492-4371,801-492-4333,,,Child Care Provider
+110,Kirby,Anna,FNP,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+111,McBride,Brayden,MD,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+112,Huffaker,Crystal,FNP,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+113,Parker,Jessica,FNP,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+115,Taylor,John,MD,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+116,Penrod,Marc,MD,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+117,Dahl,Mike,PA,5 E 400 N,Springville,UT,84663,Art City Medical Center,801-489-6378,801-489-8464,,,Child Care Provider
+118,Frampton,Alan,PA,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+119,Morrison,Craig,MD,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+120,Brown,David,DO,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+121,Blackwell,Elizabeth,MD,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+122,Patten,Joy,MD,1750 N Wymount,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+123,Tanner,Leslie,APRN,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+124,Evans,Mary,APRN,1750 N Wymount,Provo,UT,84601,BYU Health Center,801-4220761,801-422-2771,,,Child Care Provider
+125,Sheffield,Polly,MD,1750 N Wymount Terr,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+126,Sampson,Richard,MD,1750 N Wymount,Provo,UT,84601,BYU Health Center,801-422-0761,801-422-2771,,,Child Care Provider
+127,Lylte,Carter,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+128,Hogensen,Eric,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+129,"Rose, Jr.",James,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+130,Juchua,Jeffery,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+131,Mohlman,Susan,FNP,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+132,Frandsen,Tracy,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Medical Group - Spanish Fork,801-798-8513,801-798-7301,,,Child Care Provider
+134,Bennett,John,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Pediatrics - Spanish Fork,801-798-8513,801-894-1333,jbennett@canyonviewmed.com,,Child Care Provider
+135,Pazton,Richard,MD,325 W Center St,Spanish Fork,UT,84660,Canyon View Pediatrics - Spanish Fork,801-798-8513,801-894-1333,,,Child Care Provider
+136,Hawks,Amy,FNP,"1055 N 500 W, Ste 212",Provo,UT,84604,Central Utah Clinic Family Practice - Provo,801-812-5034,801-812-5033,,,Child Care Provider
+137,Jones,Justin,MD,"1055N 500 W, Ste 212",Provo,UT,84604,Central Utah Clinic Family Practice - Provo,801-812-5034,801-812-5033,,,Child Care Provider
+138,Freestone,Allen,MD,"620 Medical Dr, Ste 150",Bountiful,UT,84010,Cope Family Medicine,801-298-5397,801-598-4112,,,Child Care Provider
+139,Christian,Mark,MD,"620 Medical Dr, Ste 150",Bountiful,UT,84010,Cope Family Medicine,801-298-5397,801-598-4112,,,Child Care Provider
+140,Ward,Raymond,MD,"620 Medical Dr, Ste 150",Bountiful,UT,84010,Cope Family Medicine,801-298-5397,801-598-4112,,,Child Care Provider
+141,Sandberg,Rebecca,FNP,"620 Medical Dr, Ste 150",Bountiful,UT,84010,Cope Family Medicine,801-298-5397,801-598-4112,,,Child Care Provider
+142,Bean,Barbara,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+143,Chapman,Dale,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+144,Hurley,David,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+145,Wall,John,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+146,Brogli,Julia,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+147,Barrett,Mark,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+148,Ridge,Nathanael,PA,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+149,Wirkus,Paul,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-747-8701,801-747-8700,,,Child Care Provider
+150,Omura,Terry,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Wasatch Pediatrics,801-474-8701,801-474-8700,,,Child Care Provider
+151,Cosgrove,William,MD,"5770 S 250 E, Ste 290",Murray,UT,84107,Cottonwood Pediatrics,801-474-8701,801-474-8700,,,Child Care Provider
+152,Lloyd,Carey,MD,2850 N 2000 W #102,Ogden,UT,84404,Farr West Pediatrics,801-732-0847,801-732-0780,,,Child Care Provider
+153,Buchanan,Marcus,MD,2850 N 2000 W #102,Ogden,UT,84404,Farr West Pediatrics,801-732-0847,801-732-0780,,,Child Care Provider
+154,Robinson,Aaron,DO,1959 N State St,Provo,UT,84604,Grandview Family Medicine,801-373-4748,801-373-2001,,,Child Care Provider
+155,Pledger,Haley,PA,1959 N State St,Provo,UT,84604,Grandview Family Medicine,801-373-4748,801-373-2001,,,Child Care Provider
+156,Stubbs,Lisa,PA,1959 N State St,Provo,UT,84604,Grandview Family Medicine,801-373-4748,801-373-2001,,,Child Care Provider
+157,Hill,Debbie,FNP,269 E 400 S,Springville,UT,84663,Hobble Creek Medical Clinic - Springville,801-489-3141,801-491-9883,,,Child Care Provider
+158,Devenport,Mark,MD,269 E 400 S,Springville,UT,84663,Hobble Creek Medical Clinic - Springville,801-489-4227,801-491-9883,,,Child Care Provider
+159,Olsen,Allen,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+160,Rowley,Barbara,PA,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+161,Harward,Cory,DO,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+162,Stacey,Darrell,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+163,Baxter,Jae,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+164,McCarter,John,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+165,Bingham,Joseph,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+166,Udall,Marc,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+167,Rogers,Randy,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+168,Young,Wayne,MD,505 W 400 N,Orem,UT,84054,Intermountain Central Orem Clinic,801-714-3420,801-714-3450,,,Child Care Provider
+169,Bowcut,Don,MD,762 W 400 S,Springville,UT,84663,Intermountain Healthcare Clinic - Springville,801-429-1290,801-429-1200,,,Child Care Provider
+170,Gale,Micheal,MD,762 W 400 S,Springville,UT,84663,Intermountain Healthcare Clinic - Springville,801-429-1290,801-429-1200,,,Child Care Provider
+171,Hall,Micheal,MD,762 W 400 S,Springville,UT,84663,Intermountain Healthcare Clinic - Springville,801-429-1290,801-429-1200,,,Child Care Provider
+172,Stokes,Catherine,MD,"4403 Harrison Blvd, Ste 4875",Ogden,UT,84403,Intermountain Northern Utah Pediatrics,801-387-4712,801-387-4500,,,Child Care Provider
+173,Nefcy,Christine,MD,"4403 Harrison Blvd, Ste 4875",Ogden,UT,84403,Intermountain Northern Utah Pediatrics,801-387-4712,801-387-4500,,,Child Care Provider
+174,Hom,King,MD,"4403 Harrison Blvd, Ste 4875",Ogden,UT,84403,Intermountain Northern Utah Pediatrics,801-387-4712,801-387-4500,,,Child Care Provider
+175,Rafferty,Tricia,MD,"4403 Harrison Blvd, Ste 4875",Ogden,UT,84403,Intermountain Northern Utah Pediatrics,801-387-4712,801-387-4500,,,Child Care Provider
+176,Valentine,D Mark,MD,9500 S 1300 E,Sandy,UT,84094,Intermountain Sandy Clinic,801-501-2107,801-501-2150,,,Child Care Provider
+177,Palmieri,Lisa,MD,9500 S 1300 E,Sandy,UT,84094,Intermountain Sandy Clinic,801-501-2107,801-501-2150,,,Child Care Provider
+178,Jackson,Tanya,MD,9500 S 1300 E,Sandy,UT,84094,Intermountain Sandy Clinic,801-501-2107,801-501-2150,,,Child Care Provider
+179,Nordby,Benjamin,MD,762W 400 S,Springville,UT,84663,Intermountain Springville Clinic,801-429-1290,801-429-1200,,,Child Care Provider
+180,Tovey,Daniel,MD,762W 400 S,Springville,UT,84663,Intermountain Healthcare Clinic - Springville,801-429-1290,801-429-1200,,,Child Care Provider
+181,Allen,D. Waine,MD,228 W 200S,Kamas,UT,84036,Kamas Health Center,435-783-2919,,,,Child Care Provider
+182,Stoddard,Breony,PA,"11760 S 700 E, Ste 111",Draper,UT,84020,Lone Peak Family Medicine,801-576-9800,801-576-8855,,,Child Care Provider
+183,Food,Joe,PA,"11760 S 700 E, Ste 111",Draper,UT,84020,Lone Peak Family Medicine,801-576-9800,801-576-8855,,,Child Care Provider
+184,Andersen,Matthew,MD,"11760 S 700 E, Ste 111",Draper,UT,84020,Lone Peak Family Medicine,801-576-9800,801-576-8855,,,Child Care Provider
+185,Schaat,Timothy,MD,"11760 S 700 E, Ste 111",Draper,UT,84020,Lone Peak Family Medicine,801-576-9800,801-576-8855,,,Child Care Provider
+186,Ramirez,Elizabeth,MA,1888 W 800 North,Pleasant Grove,UT,84062,Lone Peak Pediatrics,801-492-7883,801-492-7851,,,Child Care Provider
+189,Rasmussen,Ryan,FNP,1888 W 800 North,Pleasant Grove,UT,84062,Lone Peak Pediatrics,801-492-7883,801-492-7851,,,Child Care Provider
+190,Elmer,Stacie,MA,1888 W 800 North,Pleasant Grove,UT,84062,Lone Peak Pediatrics,801-492-7883,801-492-7851,,,Child Care Provider
+191,Flinders,David,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+192,Springer,Karyn,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+193,Steinfeldt,Matthew,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,Matthew.Steinfeldt@imail.org,,Child Care Provider
+194,Rhodes,Michael,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7930,801-357-7930,,,Child Care Provider
+195,Armstrong,Robert,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+196,Osguthorpe,Russell,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,Russ.Osguthorpe@imail.org,,Child Care Provider
+197,Daley,Sarah,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+198,Outsen,Shad,MD,475 W 940 N,Provo,UT,84604,Merrill Gappmayer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+200,Tew,Johnathan,MD,1288 W 12700 S,Riverton,UT,84065,Parkway Pediatrics,801-253-5859,801-253-3500,,,Child Care Provider
+203,Zollo,Kenneth,MD,"1675 N Freedom Blvd, Ste 212",Provo,UT,84604,Pediatric Care,801-377-8001,801-377-8000,,,Child Care Provider
+204,Blad,Kent,DNP,"1675 N Freedom Blvd, Ste 212",Provo,UT,84604,Pediatric Care,801-377-8001,801-377-8000,,,Child Care Provider
+205,Bingham,Jared,MD,94 W Main,Santaquin,UT,84655,Santaquin Medical Clinic,801-754-0197,801-754-3122,,,Child Care Provider
+206,Keller,Merle,MD,94 W Main,Santaquin,UT,84655,Santaguin Medical Clinic,801-754-0197,801-754-3122,,,Child Care Provider
+208,Bott,Wesley,DO,94 W Main,Santaquin,UT,84655,Santaquin Medical Clinic,801-754-0197,801-754-3122,,,Child Care Provider
+209,Haynes,Ann,FNP,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+210,Hafe,David,MD,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+211,Mower,Douglas,MD,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+212,Noonan,Erika,MD,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+213,Murdock,Joe,MD,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+214,Chapa,Larry,PA,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+215,Cosgrave,Michael,MD,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+216,Ruiz,Steven,PA,"226 N 1100 E, Ste A",American Fork,UT,84003,The Clinic - American Fork,801-855-3854,801-763-3843,,,Child Care Provider
+217,Elswood,Aaron,PA,680 E Main,Lehi,UT,84043,The Clinic - Lehi,801-768-4526,801-768-1699,,,Child Care Provider
+218,Johnson,Cheryl,MD,680 E Main,Lehi,UT,84043,The Clinic - Lehi,801-768-4526,801-768-1699,,,Child Care Provider
+219,Nagatuvai,Jim,MD,680 E Main,Lehi,UT,84043,The Clinic - Lehi,801-768-4526,801-768-1699,,,Child Care Provider
+220,McManus,Shawn,DO,680 E Main,Lehi,UT,84043,The Clinic - Lehi,801-768-4526,801-768-1699,,,Child Care Provider
+221,MacArthur,Toran,MD,680 E Main,Lehi,UT,84043,The Clinic - Lehi,801-768-4526,801-768-1699,,,Child Care Provider
+222,Curis,Michael,MD,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+223,Archibald,Randy,PA,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+224,Brockbank,Roger,MD,275 W 200 N,Lindon,UT,84043,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+225,Cherrington,Steven,MD,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+227,Fuller,Glen,MD,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+228,Liddle,Joseph B.,MD,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+229,Midgley,Melinda,MD,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+230,Crockett,Randall,PA,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+231,Miller,Sandra,NP,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+232,Doyle,Sean,DO,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+233,Barkdull,Thad,MD,830 N 2000 W,Pleasant Grove,UT,84062,Tri City Medical - Pleasant Grove,801-756-1705,801-756-3511,,,Child Care Provider
+234,Anderson,Esme,FNP,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+235,Wright,Kirk,PT,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+236,Curtis,Michael,MD,275 W 200 N,Lindon,UT,84042,Tri City Medical - Lindon,801-796-0625,801-796-1333,,,Child Care Provider
+237,Clayson,Brett L.,PA,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+238,Hillman,David R.,MD,145 W University Pkwy,Orem,UT,84058,University of Utah Healthcare,,801-234-8585,,,Child Care Provider
+239,Hough,Kevin A.,PA,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+240,Ogden,Linda,MD,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+241,Kennedy,Michael S.,MD,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+242,Akoum,Nazem,MD,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+243,Badger,Rodney S.,MD,145 W University Pkwy,Orem,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+244,Larson,Scott A.,MD,145 W University Pkwy,Ogden,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+245,Beresford,Zach M.,MD,145 W University Pkwy,Ogden,UT,84058,University of Utah Health Care,,801-234-8585,,,Child Care Provider
+246,Christensen,Brian,FNP,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+247,Tanner,Carol,PA,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+248,Tipton,David,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+249,Dayton,Elizabeth,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+250,Archer,Frank,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+251,Baker,George,PA,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+252,Kinikini,Lyle,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+253,Sorensen,Marilyn,FNP,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+254,Crouch,Max,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+255,Money,Nolan,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+256,Clark,Robert,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,robclarkmd@outlook.com,,Child Care Provider
+257,Burnett,Virginia,MD,"97 Professional Way, Ste 2",Payson,UT,84651,Utah County Medical Group - Payson,801-465-4107,801-465-4897,,,Child Care Provider
+258,Hacking,Douglas,MD,171 N 400 W #C-12,Orem,UT,84057,Utah Valley Pediatrics - Cherry Tree,801-224-1057,801-224-4550,dhacking40@yahoo.com,,Child Care Provider
+259,Wynn,John R.,MD,171 N 400 W #C-12,Orem,Ut,84057,Utah Valley Pediatrics - Cherry Tree,801-224-1057,801-224-4550,wynnjk@gmail.com,,Child Care Provider
+260,Lauritzen,Benjamin,MD,"15 S 1000 E, Suite 200",Payson,UT,84651,Utah Valley Pediatrics - Payson,801-465-4770,801-465-2800,benlauritzen@hotmail.com,,Child Care Provider
+261,Grover,Bruce,MD,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+262,Peterson,Clarissa,PA,589 S State St,Provo,UT,84606,Mounainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+263,Delaney,George,MD,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+265,Memmott,Martin,PA,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+266,Bench,Paul,MD,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+267,Fernandez,Salvador,MD,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+268,White,Vernon,MD,589 S State St,Provo,UT,84606,Mountainlands Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+269,Duran,Micki,Nurse,1159 E  200 N  #200,American Fork,UT,84003,Utah Valley Pediatrics - American Fork,801-756-5200,801-756-5609,,,Child Care Provider
+270,Anderson,Vickie,NP,1159 E  200 N  #200,American Fork,UT,84003,Utah Valley Pediatrics - American Fork,801-756-5200,901-756-5609,,,Child Care Provider
+271,Farnes,Cherie,FNP,1355 N University Ave #210,Provo,UT,84604,Utah Valley Pediatrics - Provo North,801-377-6811,801-377-8930,,,Child Care Provider
+273,Ice,Kristi K.,PA,1055 N  300 W  #311,Provo,UT,84601,Utah Valley Pediatrics - Provo Physicians Plaza,801-357-7975,801-357-7883,,,Child Care Provider
+274,Christensen,Sue Ann,NP,1055 N  300 W  #311,Provo,UT,84601,Utah Valley Pediatrics - Provo Physicians Plaza,801-357-7975,801-357-7883,sue773@aol.com,,Child Care Provider
+275,Wynn,Gregory S.,MD,"716 W 800 N, Ste 300",Orem,UT,84057,Utah Valley Pediatrics - Timpanogos,801-224-0821,801-224-0421,gwynn@uvpeds.com,,Child Care Provider
+276,Peterson,Scott D.,MD,575 S State St,Orem,UT,84058,Wasatch Medical Center,801-229-2420,801-225-2926,,,Child Care Provider
+278,Stampfl,Dan,MD,"114 E 12450 S, Ste 100",Draper,UT,84020,Willow Creek Pediatrics - Draper,801-501-0048,801-523-3001,,,Child Care Provider
+279,Clayton,Daniel,MD,"114 E 12450 S, Ste 100",Draper,Ut,84020,Willow Creek Pediatrics - Draper,801-501-0048,801-523-3001,,,Child Care Provider
+280,Feindt,Karla,MD,"114 E 12450 S, Ste 100",Draper,UT,84020,Willow Creek Pediatrics - Draper,801-501-0048,801-523-3001,,,Child Care Provider
+281,Hansen,Kimberly,MD,"114 E 12450 S, Ste 100",Draper,UT,84020,Willow Creek Pediatrics - Draper,801-501-0048,801-523-3001,,,Child Care Provider
+282,Memmott,Jim,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+283,Jopling,Joe,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+284,O'Mara,Kathy,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-944-1865,801-942-1800,,,Child Care Provider
+285,Chamberlain,Michelle,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+286,Donnelly,Ryan,MD,7138 Highland MD #106,Salt Lake City,UT,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+287,Ring,Shellie,MD,7138 Highland MD #106,Salt Lake City,Ut,84121,Willow Creek Pediatrics - Salt Lake City,801-942-1865,801-942-1800,,,Child Care Provider
+288,Fullmer,Michael P,DO,"15 S 1000 E, Ste 200",Payson,UT,84651,Utah Valley Pediatrics - Payson,801-465-4770,801-465-2800,mfullmer@uvpeds.com,,Child Care Provider
+289,Walton,Matthew,DO,325 W Center St,Spanish Fork,UT,84660,Spanish Fork Clinic,801-798-8513,801-798-7301,,,Child Care Provider
+290,Murphy,Melanie,PA-C,1888 W 800 N,Pleasant Grove,UT,84062,Lone Peak Pediatrics,801-492-7883,801-492-7851,,,Child Care Provider
+291,Schmidt,Jeffrey,MD,9500 S 1300 E,Sandy,UT,84094,Intermountain Sandy Clinic,801-501-2107,801-501-2150,,,Child Care Provider
+292,Norlin,Ernest Charles,MD,50 N Medical Dr,Salt Lake City,UT,84132,University Hospital Pediatrics Clinic 6,,801-581-2205,,,Child Care Provider
+293,Broadbent,David H.,MD,1275 N. University Ave,Provo,UT,84602,Utah Valley Regional Medical Center,,801-373-4649,,,Child Care Provider
+294,Mountainland Family Health,,,589 S State St,Provo,UT,84606,Mountainland Family Health Center,801-429-2001,801-429-2000,,,Child Care Provider
+295,Moore,Judith,D.O.,210 East Main St.  Ste. 101,Midway,UT,84049,self,,135-657-1777,,,Child Care Provider
+296,Rasmussen,Isaac,MD,475 W.  940 N.,Provo,UT,84604,Merrill Gappmeyer Clinic,801-357-7014,801-357-7930,,,Child Care Provider
+297,Gehle,Kim,MD,9720 S 1300 E Ste E-100,Sandy,UT,84094,Mountain View Pediatrics,801-571-1689,801-571-8550,,,Child Care Provider
+298,Sandvig,Jenifer L.,MD,1140 E 3900 S Suite 360,Salt Lake City,UT,84124,St. Mark's Hospital,801-264-8962,801-264-8686,,,Child Care Provider
+299,Abrams,Jeff,PA,1912 W 930 N,Pleasant Grove,Ut,84062,Alpine Pediatrics,801-492-1991,801-492-1999,,,Child Care Provider
+300,Gessel,Marie,MD,1380 E Medical Center Dr #3100,St. George,UT,84790,Redrock Pediatrics,435-251-2741,435-251-2740,,,Child Care Provider
+301,Dalling,Ana,PA-C,77 East Commerce Drive,Saratoga Springs,Ut,84045,Alpine Pediatrics,801-766-1758,801-922-9222,,,Child Care Provider
+302,Swensen,Paul,MD,508 E South Temple Ste 310,Salt Lake City,UT,84102,Intermountain Pediatrics,801-355-6267,801-355-4316,,,Child Care Provider
+303,Knorr,Brett,MD,3231 North 1120 East,Lehi,UT,84043,Alpine Pediatrics,801-766-5938,801-768-2800,bknorr@alpinepeds.com,,Child Care Provider
+304,Holbrook,Suzanne,MD,"1060 East 100 South, Suite 400",Salt Lake City,UT,84102,Alpine Medical Group,801-363-6407,801-521-2640,,,Child Care Provider
+305,Ormsby,Sarah,MD,1140 E 3900 S Ste 360,Salt Lake City,UT,84124,Wasatch Pediatrics Inc. at St. Marks,801-264-8962,801-264-8686,,,Child Care Provider
+306,Jolma,Catherine,MD,1140 East 3900 South,Salt Lake City,UT,84124,Wasatch Pediatrics at St. Marks,801-264-8962,801-264-8686,,,Child Care Provider
+307,Smith,Elizabeth,MD,"University Hospital Pediatrics, Clinic 6, 50 N Medical Dr",Salt Lake City,UT,84132,University of Utah Hospital,801-585-6846,801-581-2205,,,Child Care Provider
+308,McElligott,Kathleen,MD,4546 South 815 West,Taylorsville,UT,84123,Comfot Care Pediatrics,,801-595-8844,,,Child Care Provider
+309,Cox,Jennifer,MD,"1060 East 100 South, Suite 400",Salt Lake City,UT,84102,Alpine Medical Group,801-363-6407,801-595-8899,,,Child Care Provider
+310,Embley,Steven,DO,95 East Center,Gunnison,UT,84634,Gunnison Valley Hospital,,435-528-7246,,,Child Care Provider
+311,Wilkerson,Julie,MD,3725 West 4100 South,West Valley City,UT,84120,Granger Medical Clinic,801-965-3564,801-965-3448,,,Child Care Provider
+312,Dimick,Roland,MD,2000 S 900 E,Salt Lake City,UT,84105,Intermountain Medical Center,801-464-7656,801-464-7600,,,Child Care Provider
+313,Durrans,Robert,MD,501 E 770 N,Orem,UT,84097,Mountain Peaks Family Practice,801-235-1509,888-751-4399,,,Child Care Provider
+314,Ormond,Dallen,NP,1268 W South Jordan PKWY Ste 201,South Jordan,UT,84095,Family First Pediatrics,801-254-9755,801-254-9700,,,Child Care Provider
+315,Davis,R. Neal,MD,2180 E 4500 S Ste 210,Salt Lake City,UT,84117,Intermountain Holladay Pediatrics,801-272-8579,801-947-4242,,,Child Care Provider
+316,Davis,R. Neal,MD,5063 Cottonwood St Ste 160,Murray,UT,84107,Intermountain Hillcrest Pediatrics,801-507-1875,801-507-1850,,,Child Care Provider
+317,Schriewer,Sharon,MD,"1060 E 100 S, Suite 400",Salt Lake City,UT,84102,Alpine Medical Group,801-363-6407,801-521-2640,,,Child Care Provider
+318,Daley,Kyle,FP,461 South 400 East,Salt Lake City,UT,84111,Central City Health Center,801-537-7238,801-539-8617,,,Child Care Provider
+319,Costello,Leah,MD,2000 S 900 E,Salt Lake City,UT,84105,Memorial Medical Clinic,801-464-7656,801-464-7600,,,Child Care Provider
+320,Wright,Jeffrey,ND,3311 N University Ste 100,Provo,UT,84604,Utah Valley Health Clinic,801-374-5675,801-374-5677,,,Child Care Provider
+321,Szalkowski-Lehane,Veronica,M.D.,220 Millpond Rd. #100,Stansbury Park,UT,84074,Stansbury Health Center,435-843-3015,435-843-3096,,,Child Care Provider
+322,Christensen,Robert,M.D.,354 W State Rd. 73,Saratoga Springs,UT,84045,Intermountain Saratoga Springs Clinic,801-341-5297,801-341-5252,,,Child Care Provider
+323,Vierra,Virginia,M.D.,2180 E 4500 S Ste 210,Salt Lake City,UT,84117,Intermountain Holladay Pediatrics,801-272-8579,801-947-4242,,,Child Care Provider
+324,Broadbent,Kenneth,M.D.,1140 East 3900 South Ste 360,Salt Lake City,UT,84121,Wasatch Pediatrics at St. Marks,801-264-8962,801-264-8686,,,Child Care Provider
+326,Martin,Suzanne,"DNP, NP-C",50 N. Medical Drive,Salt Lake City,UT,84132,"Clinic 6, University of Utah Hospital",801-585-3946,801-581-6432,suzanne.martin@utah.edu,,Child Care Provider
+327,Petersen,Anna,"PA-C, MPAS","6360 S 3000 E, Ste 100",Salt Lake City,UT,84121,Foothill Family Clinic,801-365-1033 or 1036,801-365-1032,,,Child Care Provider
+328,Johnson,Cathy,BA NP,267 E Traverse Point Drive,Draper,UT,84020,South Summit Pediatrics,801-553-8301,801-553-8300,,,Child Care Provider
+329,Loftus,Amy,NP,4403 Harrison Blvd Ste 4815,Ogden,UT,84403,Intermountain Wasatch,801-387-8355,801-387-8350,,,Child Care Provider
+330,Tanner,Boyd,PA-C,2230 N University Pkwy Ste 1A,Provo,UT,84604,Cottontree Family Practice,801-655-1890,801-377-3413,,,Child Care Provider
+331,Cox,Gina,M.D.,"6360 S 3000 E, Ste 100",Salt Lake City,UT,84121,Foothill Family Clinic,801-365-1033,801-365-1032,,,Child Care Provider
+332,Volunteer Care Clinic,,,148 N 100 W,Provo,UT,84606,Volunteer Care Clinic,Give to Marie S.,801-812-8094,,,Child Care Provider
+333,Blackbun,Marcus,MD,3723 W 12600 Ste 450,Riverton,UT,84065,Intermountain Southridge Pediatrics,801-285-4540,801-285-4543,,,Child Care Provider
+334,Vierra,Virgina,M.D.,5063 Cottonwood St Ste 160,Murray,UT,84107,Intermountain Hillcrest Pediatrics,801-507-1875,801-507-1850,,,Child Care Provider
+335,Brown,Edward,M.D.,4650 Harrison Blvd,Ogden,UT,84403,Ogden Clinic,801-475-3001,801-475-3130,,,Child Care Provider
+336,Fox,Rita,M.D.,4546 South 815 West St.204,Taylorsville,UT,84123,Comfort Care Pediatrics,801-506-0188,801-595-8844,,,Child Care Provider
+337,Lash,Kevin,M.D.,9071 S 1300 W #301,West Jordan,UT,84088,Southpoint Pediatrics,801-565-1168,801-565-1162,,,Child Care Provider
+338,Kelly,Colin,M.D.,"1250 East 3900 Sout, Ste. 250",Salt Lake City,UT,84124,St. Mark's Hospital,801-263-3583,801-268-6283,,,Child Care Provider
+339,Nash,Karen,N.P.,3725 W 4100 S,West Valley City,UT,84120,Granger Medical Clinic,801-965-3748,801-965-3448,,,Child Care Provider
+340,Griffin,Katherine,N.P.,3725 West 4100 South,West Valley City,UT,84120,Granger Medical Clinic,801-965-3564,801-965-3448,,,Child Care Provider
+341,Kasteler,Douglas,M.D.,390 N Main St.,Bountiful,UT,84010,,801-292-8369,801-294-1020,,,Child Care Provider
+342,Loftus,Clark,M.D.,620 Medical Dr. #100,Bountiful,UT,84010,Grow Up Great Pediatrics-Wasatch Pediatrics Inc,801-295-0311,801-295-2888,,,Child Care Provider
+343,Lei,Paul,Dr.,267 Traversepoint Drive,Draper,UT,84020,South Summit Pediatrics,801-553-8301,801-553-8300,,,Child Care Provider
+345,Nagle,Marisa,M.D.,3723 W. 12600 S. Ste. 450,Riverton,UT,84065,Intermountain Southridge Pediatrics,801-285-4540,801-285-4543,,,Child Care Provider
+346,Harkness,Gordan,M.D.,3200 N Canyon Rd Ste. D,Provo,UT,84604,IHC North Canyon Family Practice,801-354-7900,801-373-3300,,,Child Care Provider
+347,Bostworth,Darren,Dr.,9071 South 1300 West,West Jordan,UT,84088,Southpoint Pediatrics,801-565-1168,801-565-1162,,,Child Care Provider
+348,Lee,Suzanne,MD,3336 S. Pioneer Parkway Ste. 201,West Valley City,UT,84120,Exodus Healthcare Network,801-250-3204,801-250-9638,,,Child Care Provider
+349,Baar,Rachel,MD,2000 S. 900 E.,Salt Lake City,UT,84105,Memorial Clinic,801-464-7656,801-464-7500,rachel.baar@imail.org,,Child Care Provider
+350,Brasher,Craig,MD,3725 West 4100 South,West Valley City,UT,84120,Granger Medical West Valley,801-965-3748,801-965-3448,,,Child Care Provider
+351,Braher,Craig,MD,3181 West 9000 South,West Jordan,UT,84088,Granger Medical West Jordan,801-965-3748,801-965-3448,,,Child Care Provider
+352,Buchanan,Brian,MD,9071 S 1300 W Ste 301,West Jordan,UT,84088,Southpoint Pediatrics,801-565-1168,801-565-1162,,,Child Care Provider
+353,Whittaker,Carl,Dr.,461 South 400 East,Salt Lake City,UT,84111,Community Health Centers,801-325-9586,801-539-8617,,,Child Care Provider
+354,Whittaker,Carl,Dr.,461 South 400 East,Salt Lake City,UT,84115,Community Health Centers,801-325-9586,801-539-8617,,,Child Care Provider
+355,Harrison,Reid,MD,12391 South 4000 Wes,Riverton,UT,84065,Granger Medical Clinic,801-302-1714,801-302-1700,,,Child Care Provider
+356,Flynn,Michael,MD,3730 West 4700 South,West Valley City,UT,84118,University Health Care-Westridge Health Center,801-213-9202,801-213-9200,,,Child Care Provider
+357,Hull,Maggie,M.D.,"4546 South 815 West, Suite 204",Taylorsville,UT,84123,Comfort Care Pediatrics,801-506-0188,801-595-8844,info@comfortcarepediatrics.com,,Child Care Provider
+358,Zarbock,Zachary,MD,1268 W South Jordan Parkway Suite 201,South Jordan,UT,84095,Family First Pediatrics,801-254-9755,801-254-9700,,,Child Care Provider
+359,Fox,Jesse,MD,389 South 900 East,Salt Lake City,UT,84102,Bryner Pediatrics,385-282-2326,385-282-2325,,,Child Care Provider
+360,Shapiro,Mary,M.D.,,West Valley City,UT,,Westridge Health Center,,801-213-8843,,,Child Care Provider
+361,Stipleman,Carole,M.D.,50 N Medical Drive,Salt Lake City,UT,84113,"Univeristy Hospital Pediatrics, Clinic 6",,801-581-2205,,,Child Care Provider
+362,Lynch,Kristin,M.D.,5063 CottonWood St Ste 160,Murray,UT,84107,Intermountain Medical Group,801-507-1875,801-507-1850,,,Child Care Provider
+363,Rhanitios,Valarie,,8822 Redwood Rd Suite C211,West Jordan,UT,84088,Southwest Children's Clinis,,801-563-1975,,,Child Care Provider
+364,Anderson,Brad,M.D.,1355 N University Ave #210,Provo,UT,84604,Utah Valley Pediatrics,,801-373-8930,banderson@uvpeds.com,,Child Care Provider
+365,Bartholomew,Jonathen,D.O.,171 N 400 W #C12,Orem,UT,84057,Utah Valley Pediatrics,801-224-1057,801-224-4550,jbartholomew@hotmail.com,,Child Care Provider
+366,Duffy,Tim,Dr,3723 W 12600 S,Riverton,UT,84065,,801-285-4540,801-285-4543,,,Child Care Provider
+367,Duffy,J. Timothy,MD,3723 W 12600 S Ste 450,Riverton,UT,84065,Southridge Pediatrics,801-285-4540,801-285-4543,,,Child Care Provider
+368,Strong,Richard,M.D.,9720 S 1200 E Suite E100,Sandy,Ut,84094,Mountain View Pediatrics,801-571-1689,801-571-8550,,,Child Care Provider
+369,nielson,Nathan,MD,,,,,,,,,,Primary Care Physician
+370,No Permission to Fax,,,,,,,,,,,,
+371,Nelson,Bryan,MD,6360 South 3000 East Suite 100,Salt Lake City,UT,84121,Foothill Family Clinic,801-365-1033,801-365-1032,,,Child Care Provider

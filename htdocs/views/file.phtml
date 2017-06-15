@@ -1,0 +1,51 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="/css/style.css" media="all" />
+	<link rel="stylesheet" type="text/css" href="/css/print.css" media="print" />
+	<link rel="stylesheet" type="text/css" href="/css/font.css" media="all" />
+	<link rel="stylesheet" type="text/css" href="/css/style_subs.css" />
+	<link rel="stylesheet" type="text/css" href="/css/hmg.css" />
+	<style>
+	body {
+		margin: 0;
+	}
+
+	.choose-file-input {
+		font: 9px 'Century Gothic', Arial, Helvetica, Sans Serif !important; 
+		width: 150px; 
+		margin-left: 10px; 
+		border: 1px solid #ccc;
+	}
+
+	.choose-file-input::-ms-browse {
+		width: 40px;
+	}
+
+	.attachment-upload {
+		display: inline-block;
+		font-size: 11px/11px !important;
+		padding: 1px 6px !important;
+	}
+	</style>
+</head>
+<body>
+	<form enctype="multipart/form-data" action="index.php" class="attachment-form" method="post" style="margin 5px;">
+	<input type="hidden" name="action" value="file" />
+	<input type="hidden" name="id" value="<?=(is_numeric($_REQUEST['id']) ? $_REQUEST['id'] : $id)?>" />
+	<input type="hidden" name="type" value="<?=(isset($_REQUEST['type']) ? $_REQUEST['type'] : $type)?>" />
+    <input name="file" type="file" class="choose-file-input" />
+    <input type="submit" class="btn-small attachment-upload" value="Upload" />
+</form>
+</body>
+</html>
+<?php
+if (is_numeric($_REQUEST['id'])) {
+?>
+<script type="text/javascript">
+	window.onload = function() {
+		window.parent.reloadAttachments(<?=$_REQUEST['id']?>, <?=$showFiles?>);
+	}
+</script>
+<?php
+}
+?>

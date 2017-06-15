@@ -1,0 +1,78 @@
+<?php
+
+use Hmg\Models\Setting;
+
+$setting = new Setting();
+?><div class="title"><h2>Family Screening</h2></div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0" id="table-follow-up">
+						<thead>
+						<tr>
+							<th style="padding-right: 0px;">Type/Interval</th>
+							<th style="padding-right: 0px;">Date Completed</th>
+							<th style="padding-right: 0px;">Overall Score</th>
+							<th style="padding-right: 0px;">Notes</th>
+							<th style="padding-right: 0px;">
+								<a href="#child-developmental-screening" class="fancybox"><input type="submit" id="add-new-screening" value="Add New" class="btn-small" style="float: right; margin: 3px 3px 0 3px;" /></a>
+								
+							</th>
+						</tr>
+						</thead>
+							
+						<tbody>
+
+						<? $row = 'odd'; ?>
+						<? if(is_array($developmentalScreenings)) : ?>
+						<? foreach ($developmentalScreenings as $key => $developmentalScreening) : ?>
+
+						<tr id="devlopmentalScreeningRow_<?= $developmentalScreening['id'] ?>" class="clickable <?=$row?>">
+							<td style="white-space: nowrap; padding-right: 30px;">
+								<div class="toggleArrow" style="height: 12px;"></div>
+								<?= $setting->getValue($developmentalScreening['type']); ?>  <?= $setting->getValue($developmentalScreening['type_interval']) ?>
+							</td>
+							<td style="white-space: nowrap;"><?= ($developmentalScreening['date_sent_formatted'] != '00/00/00' ? $developmentalScreening['date_sent_formatted'] : '') ?></td>
+							<td><?= $developmentalScreening['score'] ?></td>
+							<td><?= $developmentalScreening['notes'] ?></td>
+							<td><a target="_blank" href="index.php?action=family-screening&pdf=true&screening_id=<?= $developmentalScreening['id'] ?>&parent_id=<?= $developmentalScreening['family_id'] ?>" class="fancybox"><input type="submit" value="Create Fax Sheet" class="btn-small" style="float: right; margin: 3px 3px 0 3px;" /></a></td>
+						</tr>
+
+						<tr id="developmentalRow_details_<?= $developmentalScreening['id'] ?>" class="hidden <?=$row?>">
+							<td style="white-space: nowrap;">
+								&nbsp;								
+							</td>
+							<td colspan="4" style="border-top: 1px solid #D9DAE1; border-right: 1px solid #fff;">
+
+								<div style="float: left; margin-right: 40px;">
+								<p><b>Date Completed:</b> <?= ($developmentalScreening['date_sent_formatted'] != '00/00/00' ? $developmentalScreening['date_sent_formatted'] : '') ?></p>
+								<p><b>Faxed fo provider:</b> <?= ($developmentalScreening['date_sent_provider_formatted'] != '00/00/00' ? $developmentalScreening['date_sent_provider_formatted'] : '') ?></p>
+								
+								</div>
+
+								<div>
+								<p><b>Numerical Score:</b> <?= $developmentalScreening['ed_score']   ?></p>
+								<div style="margin-top: 5px;">
+									<div style="float: left; margin-right: 5px;"><b>Attachments:</b></div>
+									<div style="float: left;">
+									<? if(is_array($developmentalScreening['attachments'])) : ?>
+									<? $looped = false; ?>
+									<? foreach($developmentalScreening['attachments'] as $attachment) : ?>
+										<?= ($looped ? '<br>' : '') ?>
+										<a href="/index.php?action=screening-attachments&attachmentId=<?=$attachment['id']?>&download=1" target="_blank"><?=$attachment['attachment_name']?></a>
+									<? $looped = true; ?>
+									<? endforeach; ?>
+									<? endif ?>
+									</div>
+								</div>
+								</div>
+
+								<a href="#child-developmental-screening" class="fancybox"><input type="button" class="btn-small edit-screening" id="edit_<?= $developmentalScreening['id'] ?>" value="Edit" style="float: right;" /></a>
+							</td>
+						</tr>
+							
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+							
+						<? endforeach; ?>
+						<? endif; ?> 
+						</tbody>
+					</table>
+

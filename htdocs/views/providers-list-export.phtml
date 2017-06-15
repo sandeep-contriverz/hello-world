@@ -1,0 +1,40 @@
+<?php
+
+if (is_array($providers)) {
+    $export = 'Clinic/Organization,First Name,Last Name,Title,Specialty,Role,Address,City,State,Zip,Phone,Fax,Email' . "\n";
+    foreach ($providers as $provider) {
+    
+        $export .= $provider['employer'] . ','
+            . ucfirst(strtolower($provider['first_name'])) . ', '
+            . ucfirst(strtolower($provider['last_name'])) . ','
+            . $provider['title'] . ','
+            . $provider['specialty'] . ', '
+            . $provider['role'] . ','
+            . $provider['address'] . ', '
+            . $provider['city'] . ','
+            . $provider['state'] . ','
+            . $provider['zip'] . ','
+            . $provider['phone'] . ','
+            . $provider['fax'] . ','
+            . $provider['email']  . "\n";
+        
+    }
+}
+
+$export .= ',,,,,,,,,,,,,' . "\n";
+
+$filteredBy = '';
+foreach ($filters as $filter => $value) {
+    if ($value) {
+        if (is_array($value)) {
+            $value = implode($value, ', ');
+        }
+        $filteredBy .=($filteredBy ? '' : 'Active Filters:,,,,,,,,,,,'
+            . "\n") . ','
+            . ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . ',,,,,,,,,,,' . "\n";
+    }
+}
+
+$export .= $filteredBy;
+
+echo $export;

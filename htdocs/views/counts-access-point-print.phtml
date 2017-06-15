@@ -1,0 +1,223 @@
+<script>
+$(function(){
+	$('th.sort').click(function(){
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+		}
+		else {
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+		}
+	    var table = $(this).parents('table').eq(0)
+	    var lastRow = table.find('tr:last');
+	    lastRowLabel = lastRow.find('td:first').text();
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	    	lastRow.remove();
+	    }
+	    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+	    this.asc = !this.asc
+	    if (this.asc){rows = rows.reverse()}
+	    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	   		table.append(lastRow);
+	   	}
+	   	// Fix odd/event class on sorted elements
+	   	rowClass = 'even';
+	   	table.find('tr:gt(0)').each(function(index){
+	   		curRow = $(this);
+	   		curRow.attr('class', rowClass);
+	   		if(rowClass == 'even'){
+	   			rowClass = 'odd';
+	   		} else {
+	   			rowClass = 'even';
+	   		}
+	   	});
+	});
+	function comparer(index) {
+	    return function(a, b) {
+	        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+	        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+	    }
+	}
+	function getCellValue(row, index){ return $(row).children('td').eq(index).html() }
+
+	$('#multi-zip').on('change', function(e){
+		var checkbox = this;
+		$('.select').attr('multiple',checkbox.checked);
+	 	if(checkbox.checked){
+	 		$('.select').attr('name','filters[zip][]');
+	 		$('.select').attr('size','11');
+	 	} else {
+	 		$('.select').attr('name','filters[zip]');
+	 		$('.select').attr('size','1');
+	 	}
+	});
+});
+</script>
+
+<?
+
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+?>
+
+<?= $headerHtml ?>
+<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+
+<div id="counts-column4">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Families Assigned</th>
+		<th class="sort sorting_asc">Active</th>
+		<th class="sort sorting_asc">Inactive</th>
+		<th class="sort sorting_asc">Open Inquiry</th>
+		<th class="sort sorting_asc">Closed Inquiry</th>
+		<th class="sort sorting_asc">Total</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($statusByWorkerCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+<? $total = $row['Active'] + $row['Inactive'] + $row['Open Inquiry'] + $row['Closed Inquiry']; ?>
+<? $percent = 0 ?>
+	<tr class="<?= $class ?>">
+		<td><?= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') ?></td>
+		<td><?= ($row['Active'] ? $row["Active"] : 0) ?></td>
+		<td><?= ($row['Inactive'] ? $row["Inactive"] : 0) ?></td>
+		<td><?= ($row['Open Inquiry'] ? $row["Open Inquiry"] : 0) ?></td>
+		<td><?= ($row['Closed Inquiry'] ? $row["Closed Inquiry"] : 0) ?></td>
+		<td class="center"><?= ($row['total'] ? $row["total"] : 0) ?></td>
+		<td class="center"><?= ($row['percent'] ? $row["percent"] : 0) ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<!-- <br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th>Follow Up Tasks by Worker</th>
+		<th class="center">Active</th>
+		<th class="center">Inactive</th>
+		<th class="center">Inquiry</th>
+		<th class="center">Total</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($followUpByWorkerCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+<? $total = $row['Active'] + $row['Inactive'] + $row['Inquiry']; ?>
+<? $percent = 0 ?>
+	<tr class="<?= $class ?>">
+		<td><?= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') ?></td>
+		<td><?= ($row['Active'] ? $row["Active"] : 0) ?></td>
+		<td><?= ($row['Inactive'] ? $row["Inactive"] : 0) ?></td>
+		<td><?= ($row['Inquiry'] ? $row["Inquiry"] : 0) ?></td>
+		<td class="center"><?= ($row['total'] ? $row["total"] : 0) ?></td>
+		<td class="center"><?= ($row['percent'] ? $row["percent"] : 0) ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table> -->
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Special Tasks</th>
+		<th class="sort sorting_asc">Connected</th>
+		<th class="sort sorting_asc">Give Screening Results</th>
+		<th class="sort sorting_asc">Relay Information</th>
+		<th class="sort sorting_asc">Research</th>
+		<th class="sort sorting_asc">Update Family Information</th>
+		<th class="sort sorting_asc">Verify Receipt of Screening</th>
+		<th class="sort sorting_asc">Other</th>
+		<th class="sort sorting_asc">Total</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($tasksByWorkerCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= $row['hmg_worker'] ?></td>
+		<td class="center"><?= $row['Connected'] ?></td>
+		<td class="center"><?= $row['Give Screening Results'] ?></td>
+		<td class="center"><?= $row['Relay Information'] ?></td>
+		<td class="center"><?= $row['Research'] ?></td>
+		<td class="center"><?= $row['Update Family Information'] ?></td>
+		<td class="center"><?= $row['Verify Receipt of Screening'] ?></td>
+		<td class="center"><?= $row['Other'] ?></td>
+		<td class="center"><?= $row['Total'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+</div>
+
+<br />
+
+<div id="counts-column1">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th>Family by Level</th>
+		<th class="sort sorting_asc">Level 1</th>
+		<th class="sort sorting_asc">Level 2</th>
+		<th class="sort sorting_asc">Level 3</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($workerCCLevelCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+<? $percent = 0 ?>
+	<tr class="<?= $class ?>">
+		<td><?= ($row['hmg_worker'] ? $row["hmg_worker"] : 'Unassigned') ?></td>
+		<td><?= ($row['Level1'] ? $row["Level1"] : 0) ?></td>
+		<td><?= ($row['Level2'] ? $row["Level2"] : 0) ?></td>
+		<td><?= ($row['Level3'] ? $row["Level3"] : 0) ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+
+

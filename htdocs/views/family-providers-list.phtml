@@ -1,0 +1,21 @@
+<div id="addNewProvider" class="input">
+	<input id="providerListSearch" name="search" placeholder="Type provider name" autocomplete="off" />
+	<div id="providerList"><ul></ul></div>
+	<div id="editProviderList" style="float: right;">
+		<input type="button" id="cancelList" name="cancelList" value="Cancel" class="btn-small cancelList" />
+		<input type="button" id="saveList" name="saveList" value="Save" class="btn-small" />
+	</div>
+</div>
+<? if(is_array($providerList)) : ?>
+<? foreach($providerList as $provider) : ?>
+<div id="provider<?= $provider['id'] ?>" class="providerData">
+     <div class="providerName"><?= $provider['first'] . ' ' . $provider['last'] . ($provider['title'] ?','.$provider['title']:'') ?>
+		<div class="" style="float: right; margin-right: -5px;">	
+			<input type="hidden" name="primary[<?= $provider['id'] ?>]" value="0" />
+			<input type="checkbox" name="primary[<?= $provider['id'] ?>]" value="1"<?= ($provider['primary'] ? ' checked' : '') ?> />
+			<a href="#" class="removeProvider" data-provider-id="<?= $provider['id'] ?>">[X]</a>
+		</div>
+	</div>
+</div>
+<? endforeach; ?>
+<? endif; ?>

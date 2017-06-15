@@ -1,0 +1,286 @@
+<?
+
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Family;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+$family = new Family();
+
+$relationships = new Setting('relationships');
+$language      = new Setting('language');
+$familyHeard   = new Setting('how_heard_category');
+$callReason    = new Setting('call_reason');
+$race          = new Setting('race');
+$ccLevel       = new Setting('cc_level');
+$ethnicity     = new Setting('ethnicity');
+$issues        = new Setting('issues');
+$status        = new Setting('status');
+$city          = new Setting('city');
+$county        = new Setting('county');
+$region        = new Setting('region');
+$zip           = new zip();
+
+$schoolDistrict = new schoolDistrict();
+$filterHelper = new FilterHelper();
+$filters = $filterHelper->getFamilyFilters();
+?>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no',
+		afterClose: function(){
+	      // fancybox is closed, run custom code
+	      $('.providerAutoCompList').hide();
+	    }
+	});
+	
+	$('.enable-multi-select').on('change', function(e){
+		var checkbox = $(this);
+		var select = checkbox.prev();
+		if(checkbox.prop('checked')){
+			select.attr('multiple', true);
+			select.attr('size', 5);
+			var name = select.attr('name');
+			select.attr('name', name + '[]');
+			select.find(':first-child').remove();
+		} else {
+			select.attr('multiple', false);
+			select.attr('size', '');
+			var name = select.attr('name');
+			select.attr('name', name.replace('[]', ''));
+		}
+	});
+	$('.js-toggle-worker-select').on('change', function(e){
+		var checkbox = $(this);
+		var hiddenHmgWorkerSelect = $('.hide-hmg-worker');
+		var hmgWorkerSelect = $('.hmg_worker');
+		hmgWorkerSelect.removeClass('hmg_worker').addClass('hide-hmg-worker');
+		hmgWorkerSelect.prop('disabled', true);
+		hiddenHmgWorkerSelect.addClass('hmg_worker').removeClass('hide-hmg-worker');
+		hiddenHmgWorkerSelect.prop('disabled', false);
+	});
+	
+});
+</script>
+<script type="text/javascript" src="js/autoCompleteProviders.js"></script>
+
+<div id="advanced-search">
+	<div class="titleBar" style="padding-left: 10px;"><span class="caption" style="">Family Advanced Search/Filter List</span></div>
+	<form class="search-form" action="index.php" method="get">
+		<input type="hidden" name="action" value="families">
+		<input type="hidden" name="filters[quick]" value="<?= isset($filters['quick']) ? $filters['quick'] : ''  ?>" />
+		<table id="search-form-table">
+			<tbody>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<h2>Search</h2>
+					</td>
+					<td>&nbsp;</td>
+					<td>
+						<h2>Filter</h2>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">First Name: </td>
+					<td>
+						<input type="text" name="filters[first_name_1]" value="<?= isset($filters['first_name_1']) ? $filters['first_name_1'] : ''  ?>" />
+					</td>
+					<td class="label">Status: </td>
+					<td>
+						<?= $status->displaySelect('filters[status]', $filters['status'], ' ', '', false, NULL, false, true) ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Last Name: </td>
+					<td>
+						<input type="text" name="filters[last_name_1]" value="<?= isset($filters['last_name_1']) ? $filters['last_name_1'] : ''  ?>" />
+					</td>
+					<td class="label">Start Date: </td>
+					<td>
+						<input type="text" class="date" id="adv-start-date" name="filters[start_date]" value="<?= $filters['start_date'] ?>" placeholder="Start Date" />
+						<input type="text" class="date" id="adv-end-date" name="filters[end_date]" value="<?= $filters['end_date'] ?>" placeholder = "End Date" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Child First Name: </td>
+					<td>
+						<input type="text" name="filters[child_first_name]" value="<?= isset($filters['child_first_name']) ? $filters['child_first_name'] : ''  ?>" />
+					</td>
+					<td class="label">Worker: </td>
+					<td>
+						<?= $family->displayHmgWorkerSelect('filters[hmg_worker]', $filters['hmg_worker'], 'all') ?>
+						<?= $family->displayHmgWorkerSelect('filters[hmg_worker]', $filters['hmg_worker'], 'all', '', 'hide-hmg-worker', true) ?>
+						<input type="checkbox" class="js-toggle-worker-select"> All
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Child Last Name: </td>
+					<td>
+						<input type="text" name="filters[child_last_name]" value="<?= isset($filters['child_last_name']) ? $filters['child_last_name'] : ''  ?>" />
+					</td>
+					
+					<td class="label">Language: </td>
+					<td>
+						<?= $language->displaySelect('filters[language_id]', $filters['language_id'], ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Family ID: </td>
+					<td>
+						<input type="text" name="filters[family_code]" value="<?= isset($filters['family_code']) ? $filters['family_code'] : ''  ?>" />
+					</td>
+					
+					<td class="label">Race: </td>
+					<td>
+						<?= $race->displaySelect('filters[race_id]', $filters['race_id'], ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Child ID: </td>
+					<td>
+						<input type="text" name="filters[child_id]" value="<?= isset($filters['child_id']) ? $filters['child_id'] : ''  ?>" />
+					</td>
+					
+					<td class="label">Ethnicity: </td>
+					<td>
+						<?= $ethnicity->displaySelect('filters[ethnicity_id]', $filters['ethnicity_id'], ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Primary Phone: </td>
+					<td>
+						<input type="text" name="filters[primary_phone]" value="<?= isset($filters['primary_phone']) ? $filters['primary_phone'] : ''  ?>" />
+					</td>
+					<td class="label">Success Story: </td>
+					<td>
+						<select id="filters[success_story]" name="filters[success_story]">
+							<option value=""></option>
+							<option value="Yes" <?php echo isset($filters['success_story']) && $filters['success_story'] == 'Yes' ? 'selected="selected"' : ''; ?>>Yes</option>
+							<option value="No" <?php echo isset($filters['success_story']) && $filters['success_story'] == 'No' ? 'selected="selected"' : ''; ?>>No</option>
+						</select>
+					</td>
+
+				</tr>
+				<tr>
+					<td class="label">Email: </td>
+					<td>
+						<input type="text" name="filters[email]" value="<?= isset($filters['email']) ? $filters['email'] : ''  ?>" />
+					</td>
+					<td class="label">How Heard Category: </td>
+					<td>
+						<?= $familyHeard->displaySelect('filters[family_heard_id]', $filters['family_heard_id'], ' ') ?>
+					</td>
+					
+				</tr>
+				<tr>
+					<td class="label">Zip: </td>
+					<td>
+						<?= $zip->displaySelect('filters[zip]', isset($filters['zip']) ? $filters['zip'] : '', ' ', '', false, '', true) ?>
+						<input type="checkbox" class="enable-multi-select" <?= is_array($filters['zip']) ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+					<td class="label">Reason for Call: </td>
+					<td>
+						<?= $callReason->displaySelect('filters[call_reason_id]', $filters['call_reason_id'], ' ') ?>
+					</td>
+					
+				</tr>
+				<tr>
+					<td class="label">City: </td>
+					<td>
+						<?
+							$cityMulti = false;
+							if(is_array($filters['city'])){
+								$selected = array();
+								foreach($filters['city'] as $cityName){
+									if(! is_numeric($filters['city'])){
+										$selected[] = $setting->getSettingIdByName($cityName);
+									}
+								}
+								$cityMulti = true;
+							} else {
+								$selected = $setting->getSettingIdByName($filters['city']);
+							}
+						?>
+						<?= $city->displaySelect('filters[city]', $selected, ' ', '', false, '', true) ?>
+						<input type="checkbox" class="enable-multi-select" <?= $cityMulti ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+					<td class="label" style="vertical-align: top">Referral Issue: </td>
+					<td style="vertical-align: top">
+						<?= $issues->displaySelect('filters[issue]', (isset($filters['issue']) ? $filters['issue'] : ''), ' ') ?>
+					</td>
+					
+				</tr>
+				<tr>
+					<td class="label">County: </td>
+					<td>
+						<?
+							$countyMulti = false;
+							if(is_array($filters['county'])){
+								$selected = array();
+								foreach($filters['county'] as $countyName){
+									if(! is_numeric($filters['county'])){
+										$selected[] = $setting->getSettingIdByName($countyName);
+									}
+								}
+								$countyMulti = true;
+							} else {
+								$selected = $setting->getSettingIdByName($filters['county']);
+							}
+						?>
+						<?= $county->displaySelect('filters[county]', $selected, ' ') ?>
+						<input type="checkbox" class="enable-multi-select" <?= $countyMulti ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+					<td class="label">CC Level: </td>
+					<td>
+						<?= $ccLevel->displaySelect('filters[cc_level]', $filters['cc_level'], ' ', '', false, null, false) ?>
+					</td>
+					
+				</tr>
+				<tr>
+					<td class="label">Provider/Clinic Name: </td>
+					<td>
+						<input type="text" class="providerAutoComp" autocomplete="off" name="filters[provider_or_clinic]" value="<?= isset($filters['provider_or_clinic']) ? $filters['provider_or_clinic'] : ''  ?>" placeholder="Type provider/clinc name" />
+						<div class="providerAutoCompList"></div>
+					</td>
+					
+					<td class="label" style="vertical-align: top">Region </td>
+					<td style="vertical-align: top">
+						<?
+							if (isset($_SESSION['user']['region_id'])) {
+								$regionName = $setting->getSettingById($_SESSION['user']['region_id']);
+								echo $regionName;
+								echo '<input type="hidden" name="filters[region_id]" value="' . $_SESSION['user']['region_id'] . '" />';
+							} else {
+								echo $region->displaySelect('filters[region_id]', $filters['region_id'], ' ');
+							}
+						?>
+					</td>
+					
+					<!--<td class="label" style="vertical-align: top">&nbsp;</td>
+					<td style="vertical-align: top">
+						&nbsp;
+					</td>-->
+				</tr>
+				<tr>
+					<td class="label" style="vertical-align: top">Children Age: </td>
+					<td style="vertical-align: top">
+						Min: <input type="text" name="filters[age_min]" value="<?= isset($filters['age_min']) ? $filters['age_min'] : ''  ?>" style="width: 20px; text-align: center;" />
+						Max: <input type="text" name="filters[age_max]" value="<?= isset($filters['age_max']) ? $filters['age_max'] : ''  ?>" style="width: 20px; text-align: center;" /><br /><span style="font-size:7pt">Enter age in months</span>
+					</td>
+					<td class="label">School District </td>
+					<td>
+						<?= $schoolDistrict->displaySelect("filters[school_district]", (isset($filters['school_district']) ? $filters['school_district'] : ''), 'School District') ?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" style="text-align: right"><input type="submit" id="search-submit" value="Filter" class="btn-small" /> <input type="submit" name="clearFilters" value="Clear" class="btn-small" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</div>

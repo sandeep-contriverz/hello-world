@@ -1,0 +1,267 @@
+<script type="text/javascript">
+
+var newChildCurrentIndex = 0;
+$("document").ready(function(){
+
+	$("#referral-reports").on('click', "#searchListInput", function(e){
+		$(document).unbind('keydown');
+		$(this).select();
+	});
+	$("#referral-reports").on('keyup', "#searchListInput", function(e){
+		var keycode = e.which;
+		if(keycode == 40){
+			// Move focus to first element in Div
+			var searchList = $("#referral-reports #searchList");
+			var firstItem = searchList.find('a:first-child');
+			firstItem.addClass('hover').focus();
+			// Disable scrolling while in the auto-suggest
+            $(document).keydown(function(e) {
+                e.preventDefault();
+            });
+		} else {
+			if(keycode == 13 || keycode == 9){
+				// check to see if we have an id
+				// if we do, then submit the form
+				var id = $('#searchListInputId').val();
+				// submit the form
+				$('#create-report').click();
+				return;
+			}
+			var searchValue = $(this).val();
+			reportType = $(this).parents('form').find('#reportType').val();
+			switch (reportType) {
+				case 'agency-referrals-family':
+					postString = 'action=referral-services&search=' + searchValue;
+					break;
+				case 'agency-referrals-child':
+					postString = 'action=referral-services&search=' + searchValue;
+					break;
+				case 'issue-referrals':
+					postString = 'action=setting&type=issues&search=' + searchValue;
+					break;
+				case 'service-referrals':
+					postString = 'action=setting&type=referred_to_service&search=' + searchValue;
+					break;
+				case 'county-referrals':
+					postString = 'action=setting&type=county&search=' + searchValue;
+					break;
+				case 'zip-referrals':
+					postString = 'action=referral-services&search=' + searchValue;
+					break;
+			}
+			$.post(
+				'index.php', postString, function(data){
+				if(! $.isEmptyObject(data)){
+					searchList = $('#searchList');
+					searchList.find('a').remove(); // resets the list
+					curClass = '';
+					$.each(data, function(key, val) {
+						if(curClass == 'odd'){
+							curClass = 'even';
+						} else {
+							curClass = 'odd';
+						}
+						$('<a href="#" class="pitem ' + curClass + '" data-id="' + val.id + '">' + val.name + '</a>').appendTo(searchList);
+					});
+					if(searchValue){
+						$('#searchListInputId').val(' ');
+						$('#searchList').show();
+					} else {
+						$('#searchList').hide();
+					}
+				} else {
+					$('#searchList').hide();
+				}
+			});
+		}
+	});
+	function displayCountySelect(){
+		searchList = $('#searchList');
+		$('#searchList').hide();
+		var select = $('<select name="counties[]" class="reports search-input" multiple></select>');
+		postString = 'action=setting&type=county&search=' + '';
+		$.post('index.php', postString, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					$('<option data-id="' + val.id + '">' + val.name + '</option>').appendTo(select);
+				});
+			}
+		});
+		return select;
+	}
+	function displayZipCodeSelect(){
+		searchList = $('#searchList');
+		$('#searchList').hide();
+		var select = $('<select name="zipcodes[]" class="reports search-input" multiple></select>');
+		postString = 'action=zip&search=1';
+		$.post('index.php', postString, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					$('<option data-id="' + key + '">' + val + '</option>').appendTo(select);
+				});
+			}
+		});
+		return select;
+	}
+    $('#referral-reports').on('keydown', '.pitem', function(event){
+	    var keyCode = event.which;
+	    var currentNode = $(this);
+	    switch(keyCode){
+	        case 40:
+	             // stop when we get to the end.
+	        	if(currentNode.attr('data-id') == $('#searchList a:last-child').attr('data-id')){
+	        		break;
+	        	}
+	            nextNode = currentNode.next();
+	            if(nextNode){
+	                currentNode.removeClass('hover');
+	                nextNode.focus().addClass('hover');
+	            }
+	            break;
+	        case 38:
+	            prevNode = currentNode.prev();
+	            if(prevNode){
+	                currentNode.removeClass('hover');
+	                prevNode.focus().addClass('hover');
+	                if(currentNode.attr('data-id') == $('#searchList a:first-child').attr('data-id')){
+	                    $('#searchList').hide();
+	                    $('#searchListInput').focus();
+	                }
+	            }
+	            break;
+	        case 13:
+	        case 9:
+	        	$(this).click();
+	        	break;
+	        default:
+        }
+    });
+	$("#referral-reports").on('click', "#searchList a", function(e){
+		e.preventDefault();
+		var id = $(this).attr('data-id');
+		var name = $(this).text();
+		$('#searchListInput').val(name);
+		$('#searchListInputId').val(id);
+		$('#searchList').hide();
+		$('#searchListInput').focus();
+		$(document).unbind('keydown');
+	});
+
+	function displaySearchInput(inputType){
+		searchInputDefault = $('<input id="searchListInput" name="search" class="search-input" placeholder="Enters an agency name" autocomplete="off" />');
+		$('.search-input').replaceWith(searchInputDefault);
+		switch (inputType) {
+			case 'agency-referrals-family':
+			case 'agency-referrals-child':
+				placeholder = 'Enter an agency name';
+				break
+			case 'issue-referrals':
+				placeholder = 'Enter an issue';
+				break;
+			case 'service-referrals':
+				placeholder = 'Enter a service term';
+				break;
+			case 'county-referrals':
+				placeholder = 'Enter a county';
+				$('#searchListInput').replaceWith(displayCountySelect());
+				break;
+			case 'zip-referrals':
+				placeholder = 'Enter a zip code.';
+				$('#searchListInput').replaceWith(displayZipCodeSelect());
+				break;
+			default:
+				placeholder = 'Enter a report filter';
+		}
+		// reset form fields
+		$('#searchListInputId').val('');
+		$('#searchListInput').attr('placeholder', placeholder);
+	}
+
+	$('#reportType').on('change', function(e){
+		displaySearchInput($(this).val());
+	});
+
+	$('#clear-filters').on('click', function(e){
+		e.preventDefault();
+		// reset form fields
+		$('.filter').val('');
+	});
+
+	$('#create-report').on('click', function(e){
+		e.preventDefault();
+		var id = $('#searchListInputId').val();
+		id = parseInt(id);
+		valuesSelected = $('.reports.search-input').find(":checked").length >= 1;
+		if(id || valuesSelected){
+			$('.message').html('');
+			form = $('#referral-form');
+			form.find('#export').val('0');
+			form.attr('target', '_blank');
+			form.submit();
+		} else {
+			$('.message').html('Error: Missing provider or agency information');
+		}
+	});
+
+	$('#export-report').on('click', function(e){
+		e.preventDefault();
+		var id = $('#searchListInputId').val();
+		id = parseInt(id);
+		valuesSelected = $('.reports.search-input').find(":checked").length >= 1;
+		if(id || valuesSelected){
+			$('.message').html('');
+			form = $('#referral-form');
+			form.find('#export').val('1');
+			form.attr('target', '_blank');
+			form.submit();
+		} else {
+			$('.message').html('Error: Missing provider or agency information');
+		}
+	});
+
+	selectedInputValue = $('#reportType').val();
+	displaySearchInput(selectedInputValue);
+
+	// initialize date picker
+	$('.date').datepicker();
+
+});
+
+</script>
+<form id="referral-form">
+<input type="hidden" name="action" value="reports" />
+<input type="hidden" name="type" value="referral" />
+<input id="export" type="hidden" name="export" value="0" />
+<div class="pageTitleBar" style="position: relative;">
+	<a href="index.php?action=reports"><h1>Referral Reports</h1></a>
+	<div id="filter-form" action="index.php" style="position: absolute; left: 200px; top: 6px;">
+		<?= $region->displaySelect('filters[region_id]', $filters['region_id'], 'Region', false, null, 'filter') ?>
+		<?= $statusSetting->displaySelect('filters[status]', $status, 'Status', false, null, 'filter') ?>
+		<input type="text" class="date filter" id="start-date" name="filters[start_date]" value="<?= $start_date ?>" placeholder="Start Date" />
+		<input type="text" class="date filter" id="end-date" name="filters[end_date]" value="<?= $end_date ?>" placeholder = "End Date" />
+		<input type="button" id="clear-filters" name="clearFilters" value="Clear" class="btn-small" />
+		<input type="submit" id="create-report" value="Create Report" class="btn-small" />
+		<input type="submit" id="export-report" value="Export Report" class="btn-small" />
+	</div>
+</div>
+
+<div id="referral-reports">
+	<div class="message"><?= $message ?></div>
+	<div class="reportTitle">Select a report</div>
+	<select id="reportType" name="report">
+		<option value="agency-referrals-family"<?=(isset($_GET['report']) && $_GET['report'] == 'agency-referrals-family' ? ' selected' : '')?>>Family Referrals by Agency</option>
+		<option value="agency-referrals-child"<?=(isset($_GET['report']) && $_GET['report'] == 'agency-referrals-child' ? ' selected' : '')?>>Child Referrals by Agency</option>
+		<option value="issue-referrals"<?=(isset($_GET['report']) && $_GET['report'] == 'issue-referrals' ? ' selected' : '')?>>Referrals by Issue</option>
+		<option value="service-referrals"<?=(isset($_GET['report']) && $_GET['report'] == 'service-referrals' ? ' selected' : '')?>>Referrals by Service Term</option>
+		<option value="county-referrals"<?=(isset($_GET['report']) && $_GET['report'] == 'county-referrals' ? ' selected' : '')?>>Referrals by County</option>
+		<option value="zip-referrals"<?=(isset($_GET['report']) && $_GET['report'] == 'zip-referrals' ? ' selected' : '')?>>Referrals by Zip Codes</option>
+	</select>
+	<br />
+	<br />
+	<div class="reportTitle">Enter a report filter</div>
+	<input type="hidden" id="searchListInputId" name="id" />
+	<input id="searchListInput" name="search" class="search-input" placeholder="Enters an agency name" autocomplete="off" />
+	<div id="searchList"></div>
+
+</div>
+</form>

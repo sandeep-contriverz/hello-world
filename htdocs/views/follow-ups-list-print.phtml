@@ -1,0 +1,145 @@
+<script type="text/javascript">
+$("document").ready(function(){
+
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(/ /g, '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		} 
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		if(field == 'best_time'){
+			field = 'best_times';
+		}
+		if(field == 'referral'){
+			field = 'referred_to';
+		}
+		if(field == 'contact'){
+			field = 'contact';
+		}
+		if(field == 'follow-up_task'){
+			field = 'follow_up_task';
+		}
+		if(field == 'follow-up_date'){
+			field = 'follow_up_date';
+		}
+		location.href=window.location+"&field="+field+"&sort="+fieldsort;
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		curLocation = window.location.href;
+		postString = curLocation + '&print=true';
+		window.open(postString, '');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?export=true&' + postString, '');
+	});
+});
+</script>
+
+<? if(is_array($followUps)) : ?>
+
+<? 
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	if($filter == 'done'){ continue; }
+	if($filter == 'hmg_worker'){
+		$filter = 'HMG Worker';
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value)){
+		$value = $setting->getValue($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+$filteredBy .= ' &mdash; ' . ($filters['done'] == 'All' ? 'Either' : ($filters['done'] == '1' ? 'Done' : 'Not Done' ));
+?>
+	
+
+	<?= $headerHtml ?>
+	<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=(isset($sorts['parent_name']) && $sorts['parent_name'] ? '_' . strtolower($sorts['parent_name']) : '')?>">Parent Name</th>
+			<th class="sort sorting<?=(isset($sorts['child_name']) && $sorts['child_name'] ? '_' . strtolower($sorts['child_name']) : '')?>">Child Name</th>
+			<th class="sort sorting<?=(isset($sorts['language']) && $sorts['language'] ? '_' . strtolower($sorts['language']) : '')?>">Language</th>
+			<th class="sort sorting<?=(isset($sorts['best_times_days']) && $sorts['best_times_days'] ? '_' . strtolower($sorts['best_times_days']) : '')?>">Days</th>
+			<th class="sort sorting<?=(isset($sorts['best_times_start']) && $sorts['best_times_start'] ? '_' . strtolower($sorts['best_times_start']) : '')?>">Start Time</th>
+			<th class="sort sorting<?=(isset($sorts['best_times_end']) && $sorts['best_times_end'] ? '_' . strtolower($sorts['best_times_end']) : '')?>">End Time</th>
+			<th class="sort sorting<?=(isset($sorts['contact']) && $sorts['contact'] ? '_' . strtolower($sorts['contact']) : '')?>">Contact</th>
+			<th class="sort sorting<?=(isset($sorts['referral']) && $sorts['referral'] ? '_' . strtolower($sorts['referral']) : '')?>">Referral</th>
+			<th class="sort sorting<?=(isset($sorts['follow_up_task']) && $sorts['follow_up_task'] ? '_' . strtolower($sorts['follow_up_task']) : '')?>">Follow-up Task</th>
+			<th class="sort sorting<?=(isset($sorts['follow_up_date']) && $sorts['follow_up_date'] ? '_' . strtolower($sorts['follow_up_date']) : '')?>">Follow-up Date</th>
+			<th style="padding-right: 0px;">Done</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; ?>
+	<? foreach($followUps as $followUp) : ?>
+
+		<tr id="<?=$followUp['type']?>FollowUp_<?=$followUp['family_id']?>_<?=$followUp['child_id']?>" class="followUp <?=$row?>">
+			<td><?=$followUp['parent_name']?></td>
+			<td><?=ucwords(strtolower($followUp['child_name']))?></td>
+			<td><?=$followUp['language']?></td>
+			<td class="best-times-days"><?=ucwords($followUp['best_times_days'])?></td>
+			<td class="best-times-start"><?=$followUp['best_times_start']?></td>
+			<td class="best-times-end"><?=$followUp['best_times_end']?></td>
+			<td>
+			<?
+				$contact = array();
+				if($followUp['contact_phone']){
+					$contact[] = 'Phone';
+				}
+				if($followUp['contact_text']){
+					$contact[] = 'Text';
+				}
+				if($followUp['contact_email']){
+					$contact[] = 'Email';
+				}
+				echo implode(', ', $contact);
+			?>
+			</td>
+			<td><?php if( $followUp['referred_to_type']  == 'info'){
+				  echo $setting->getValue($followUp['referred_to_id']);							    
+				}else{ echo $followUp['referred_to']; } ?></td>
+			<td><?=$followUp['follow_up_task'] ?></td>
+			<td><?=$followUp['follow_up_date_formatted'] ?></td>
+			<td><input type="checkbox" disabled <?=($followUp['done'] ? ' checked' : '')?> /></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalFollowUps ?> follow-ups
+	</div>
+</div>
+<? else : ?>
+<p><br /><em>No result found.</em></p>
+<? endif; ?>

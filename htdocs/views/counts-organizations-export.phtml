@@ -1,0 +1,90 @@
+<?php
+
+$csv = "Counts: Organizations Demographics\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Organization,Count,Pct%' . "\n";
+foreach($statusCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Type of Organization,Count,Pct%' . "\n";
+foreach($typeCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Partnership Level,Count,Pct%' . "\n";
+foreach($partCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Signed MOU,Count,Pct%' . "\n";
+foreach($mouCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Resource Database,Count,Pct%' . "\n";
+foreach($resCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= 'Mode of Initial Contact,Count,Pct%' . "\n";
+foreach($modeCounts as $row){
+	$csv .= (!empty($row['status']) ? ( is_numeric($row['status']))?$setting->getValue($row['status']):$row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+
+
+echo $csv;
+
+

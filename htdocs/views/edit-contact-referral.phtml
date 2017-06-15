@@ -1,0 +1,75 @@
+<? 
+namespace Hmg\Models;
+$userObj = new User();
+?>
+<tr id="referralRow_<?= $referral['id'] ?>" class="<?=$rowClass?>">
+							<td style="white-space: nowrap;">
+								<? $userD = $userObj->setById((int)$referral['hmg_worker']);?>
+								<?= !empty($userObj->user['hmg_worker']) ? $userObj->user['hmg_worker'] : 'unknown' ?><br />
+								<?= $referral['referral_date_formatted'] ?>
+							</td>
+							<td> <?= $issues->displaySelect('referral[' . $referral['id'] . '][issue_id]', $referral['issue_id'],'Issue') ?></td>
+							<td>
+							<?php
+							$siteSeprate = '';
+							if($referral['site_name']){
+								$siteSeprate = ': '.$referral['site_name'];
+							}
+							?>
+							
+								<input type="hidden"
+									class="autosuggest-value edit-referral-referred-to"
+									name="<?= 'referral[' . $referral['id'] . '][referred_to_id]' ?>"
+									value="<?= $referral['referred_to_id'] ?>" />
+									<input type="hidden"
+									class="autosuggest-type edit-referral-referred-type"
+									name="<?= 'referral[' . $referral['id'] . '][referred_to_type]' ?>"
+									value="<?= $referral['referred_to_type'] ?>" />
+								<input
+									class="autosuggest-input rounded"
+				    				placeholder="Type referral name"
+				    				value="<?= $referral['organization_name'].$siteSeprate . ($referral['referred_to_disabled'] ? ' (Inactive)' : '') ?>"
+									data-query-string="action=referral-services&search="
+									autocomplete="off" />
+								<div class="autosuggest-selection-container"></div>
+							</td>
+							<td><?= $referralServices->displayServiceSelect('referral[' . $referral['id'] . '][service_id]', $referral['service_id'], 'Service', '', '', 'edit-referral-service', true, false) ?></td>
+							<td>
+								<?= $referral_outcome->displaySelect('referral[' . $referral['id'] . '][outcomes]', $referral['outcomes'], 'Outcome', '', false, NULL, true) //191016 ?>
+							</td>
+						</tr>
+
+						<tr id="referralRow_details_<?= $referral['id'] ?>" class="<?=$rowClass?>">
+							<td>&nbsp;</td>
+							<td colspan="4">
+								<table style="border: none;">
+									<tr>
+										<td style="border: none; width: 250px; text-align: right;"><b>HMG Worker:</b> <?= $organization->displayHmgWorkerSelect('referral[' . $referral['id'] . '][hmg_worker]', ($referral['hmg_worker'] ? $referral['hmg_worker'] : 'unknown'), ' ', '', 'setting', false, true) ?>
+										</td>
+										<td style="border: none; text-align: right;"><b>Referral Date:</b></td>
+										<td style="border: none;"><input type="text" class="date" id="referral-date" name="referral[<?= $referral['id'] ?>][referral_date]" value="<?= $referral['referral_date_formatted'] ?>" placeholder = "Referral Date" /></td>
+										<td style="border: none;" rowspan="2">
+											<input type="hidden" name="referral[<?= $referral['id'] ?>][based_screening]" value="0" />
+											<div style="display: inline-block; line-height: 12px; vertical-align: middle;">Based on screening</div> <input type="checkbox" id="referral[<?= $referral['id'] ?>][based_screening]" name="referral[<?= $referral['id'] ?>][based_screening]" value="1"<?= ($referral['based_screening'] ? ' checked' : '') ?> />
+										</td>
+									</tr>
+									<tr>
+										<td style="border: none; width: 250px; text-align: right;"><b>Gaps:</b> <?= $gaps->displaySelect("referral[" . $referral['id'] . "][gap]", $referral['gap'], ' ') ?></td>
+										<td style="border: none; text-align:right;"><b>Barriers:</b></td>
+										<td style="border: none;"><?= $barriers->displaySelect("referral[" . $referral['id'] . "][barrier]", $referral['barrier'], ' ') ?></td>
+									</tr>
+									<tr>
+										<td colspan="3" style="border: none;">
+											<b>Notes:</b> <textarea style="width: 100%" id="referral[<?= $referral['id'] ?>][notes]" name="referral[<?= $referral['id'] ?>][notes]" cols="120" rows="6" style="vertical-align: text-top;"><?= $referral['notes'] ?></textarea>
+										</td>
+										<td style="width: 60px; text-align: right; border: none;">
+											<input type="button" id="save_<?= $referral['id'] ?>" class="btn-small save-referral" value="Save" />
+											<br />
+											<input type="button" id="delete_<?= $referral['id'] ?>" style="margin-top: 3px;" class="btn-small delete-referral" value="Delete" />
+											<br />
+											<input type="button" class="btn-small cancel-edit-referral" style="margin-top: 3px;" id="cancel_<?= $referral['id'] ?>" value="Cancel" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>

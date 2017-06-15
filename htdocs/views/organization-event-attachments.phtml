@@ -1,0 +1,9 @@
+<? if(is_array($attachmentList)) : ?>
+<? foreach($attachmentList as $attachment) :
+  
+?>
+	<div class="file-name"><div style="float: right;"><a href="#" id="<?= $attachment['event_id']?>" class="remove-file" data-id="<?=$attachment['id']?>">[X]</a></div><a href="index.php?action=organization-event-attachments&attachmentId=<?=$attachment['id']?>&download=1" target="_blank"><?=$attachment['attachment_shortname']?></a></div>
+<? endforeach; 
+
+?>
+<? endif; ?>

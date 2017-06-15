@@ -1,0 +1,67 @@
+<? 
+$csv = "Counts: Volunteer\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Volunteers,Count,Pct%' . "\n";
+foreach($volunteerStatusCounts as $row){
+	$csv .= (!empty($row['status']) ? $row['status'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Volunteer by Specialty,Pct%' . "\n";
+foreach($volunteerSpecialtyCounts as $row){
+	$csv .= (!empty($row['name']) ? $row['name'] : 'Uncoded') . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Volunteer Hours,Count,Pct%' . "\n";
+foreach($volunteerHourCounts as $row){
+	$csv .= (!empty($row['name']) ? (($row['name'] == 'Totals') ? $row['name'] : $settingOb->getSettingById($row['name'])) : 'Uncoded') . ','; //241016
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+echo $csv;
+?>
+
+					                         

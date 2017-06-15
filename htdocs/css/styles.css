@@ -1,0 +1,334 @@
+.hr { 
+	clear: both;
+	height: 1px;
+	border: none;
+	font-size: 1px;
+	margin: 0px;
+	padding: 0px;
+	line-height: 1px;
+	display: block;
+}
+
+.subLabel {
+	width: 48px;
+	float: left;
+}
+
+.subField {
+	width: 30px;
+	margin-right: 14px;
+	float: left;
+}
+
+.narrowReportBox {
+	width: 98%;
+	background: white;
+	margin: auto;
+	border: 1px solid #CCCACB;
+	padding: 37px 5px 5px;
+}
+
+.narrowReport {
+	
+}
+
+.editFields {
+	padding: 5px;
+	border-top: 1px solid white;
+}
+
+.editElement {
+	padding: 0px;
+	margin: 0px;
+	float: right;
+	display: block;
+	text-decoration: none;
+	background-repeat: no-repeat;
+	font-size: 1px;
+	width: 18px;
+}
+
+.dataRowEdit {
+	float: left;
+	background-image: url(images/subforsanta/editButton.png) !important;
+	width: 16px;
+}
+
+
+.dataEdit {
+	background-position: top left;
+}
+
+.gridEdit {
+	background-position: -16px top;
+}
+
+.spaceEdit {
+	background-position: -32px top;
+}
+
+.pageBreakEdit {
+	background-position: -47px top;
+}
+
+.editElement {
+	background-image: url(images/subforsanta/elementEditButtons.png);
+	width: 15px;
+}
+
+.editElement div {
+	width: 14px;
+	/*height: 16px;*/
+	height: auto;
+	display: block;
+	font-size: 1px;
+}
+
+
+.editElement:hover {
+	cursor: hand;
+}
+
+.editField {
+	font-size: 9pt;
+	line-height: 20px;
+	height: 20px;
+}
+
+.reportFieldSetBox {
+	padding: 5px;
+	border: 1px solid white;
+	line-height: 16px;
+	font-size: 1px;
+}
+
+.reportFieldSet {
+	/*border: 1px solid red;*/
+}
+
+.dataRow {
+	clear: both;
+	float: left;
+	padding-top: 2px;
+	width: 643px;
+}
+
+.dataRow:first-child {
+	padding-top: 0px;
+}
+
+.editRowElement {
+	float: left;
+	padding: 6px 0 0 5px;
+	height: 19px;
+}
+
+.dataRowElementsBox {
+	float: left;
+	background-color: #DAE2E5;
+	border: 1px solid #CCD3D6;
+	width: 645px;
+}
+
+.dataRowElements {
+	float: left;
+	display: block;
+	height: 24bpx;
+	width: 620px;
+	padding: 2px;
+}
+
+.dataRowTextBox {
+	float: left;
+	background-color: #E8F0F7;
+	border: 1px solid #B6B8BF;
+	margin-right: 4px;
+	cursor: move;
+}
+
+.dataRowText {
+	/*line-height: 19px;*/
+	color: #232323;
+	/*padding: 0 3px 0 3px;*/
+}
+
+.dataRowFieldBox {
+	float: left;
+	background-color: #FFFFFF;
+	border: 1px solid #ABADB3;
+	margin-right: 4px;
+	cursor: move;
+}
+
+.dataRowField {
+	overflow: hidden;
+	line-height: 19px;
+	height: 19px;
+	color: #808184;
+	text-indent: 3px;
+}
+
+.editRow {
+	float: left;
+	width: 730px;
+	height: 24px;
+}
+
+.fieldLabel {
+	float: left;
+}
+
+.deleteElementButton {
+	height: 50px;
+}
+
+.handle {
+	cursor: move;
+}
+
+.totalTrack {
+	float: left;
+	/*height: 30px;*/
+}
+
+.track {
+	float: left;
+	width:200px;
+	background-color:#ccc;
+	height:10px;
+}
+
+.trackHandle {
+	width:10px;
+	height:15px;
+	background-color:#f00;
+	cursor:move;
+}
+
+.widthText {
+	float: left;
+}
+
+.x-grid3-hd-btn {
+	display: none !important;
+}
+
+.mainReportBuilderBox {
+	/*margin: -15px -15px -15px -15px;*/
+	padding: 0px;
+}
+
+.reportBuilderComponents {
+	padding: 0 0 0 10px;
+	background: #FEFEFE;
+	height: 34px;
+}
+
+.reportBuilderEditorBox {
+	background: #355A68;
+	padding-left: 5px;
+}
+
+.reportBuilderEditor {
+	background: #E8F0F7;
+	border-top: 1px solid #CECECE;
+	min-height: 62px;
+}
+
+.reportBuilderEditor input[type="button"]{
+    padding:5px;
+}
+
+.reportBox {
+	background: #DEDCDD;
+	margin: 0px auto;
+	padding: 9px 0 9px 0;
+	min-height: 400px;
+	overflow: auto;
+}
+
+.reportHeaderBox {
+	min-height: 30px;
+	padding: 0 36px 0 36px;
+}
+
+.reportHeader {
+	height: 21px;
+	color: #232323;
+	border-bottom: 1px solid #232323;
+}
+
+.reportTitle {
+	float: left;
+	font-size: 11pt;
+	line-height: 18px;
+}
+
+.generatedOn {
+	float: right;
+	font-size: 8pt;
+	font-style: italic;
+}
+
+.componentTitle {
+	float: left;
+	font-size: 11pt;
+	padding-right: 5px;
+	line-height: 28px;
+}
+
+
+.gridHelvetica * {
+	font-family: Helvetica, sans-serif;
+}
+
+.gridTimes * {
+	font-family: Times, serif;
+}
+
+.gridCourier * {
+	font-family: Courier, serif;
+}
+
+.gridPalatino * {
+	font-family: Palatino, serif;
+}
+
+.grid8pt * {
+	font-size: 8pt;
+}
+
+.grid9pt * {
+	font-size: 9pt;
+}
+
+.grid10pt * {
+	font-size: 10pt;
+}
+
+.grid11pt * {
+	font-size: 11pt;
+}
+
+.grid12pt * {
+	font-size: 12pt;
+}
+
+.grid14pt * {
+	font-size: 14pt;
+}
+
+.grid16pt * {
+	font-size: 16pt;
+}
+
+.grid18pt * {
+	font-size: 18pt;
+}
+
+.grid20pt * {
+	font-size: 20pt;
+}
+
+#Edit_reportBuilder_popupBox{width:100% !important;}
+#Edit_reportBuilder_popupBox .contentBox{width:100% !important;}

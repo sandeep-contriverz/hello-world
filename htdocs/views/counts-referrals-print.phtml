@@ -1,0 +1,268 @@
+<script>
+$(function(){
+	$('th.sort').click(function(){
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+		}
+		else {
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+		} 
+	    var table = $(this).parents('table').eq(0)
+	    var lastRow = table.find('tr:last');
+	    lastRowLabel = lastRow.find('td:first').text();
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	    	lastRow.remove();
+	    }
+	    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+	    this.asc = !this.asc
+	    if (this.asc){rows = rows.reverse()}
+	    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	   		table.append(lastRow);
+	   	}
+	   	// Fix odd/event class on sorted elements
+	   	rowClass = 'even';
+	   	table.find('tr:gt(0)').each(function(index){
+	   		curRow = $(this);
+	   		curRow.attr('class', rowClass);
+	   		if(rowClass == 'even'){
+	   			rowClass = 'odd';
+	   		} else {
+	   			rowClass = 'even';
+	   		}
+	   	});
+	});
+	function comparer(index) {
+	    return function(a, b) {
+	        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+	        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+	    }
+	}
+	function getCellValue(row, index){ return $(row).children('td').eq(index).html() }
+});
+</script>
+
+<? 
+
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+?>
+
+<?= $headerHtml ?>
+<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+
+<div id="counts-column1">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Referrals (all)</th>
+		<th class="sort sorting_asc" style="width:15%;">Comm</th>
+		<th class="sort sorting_asc" style="width:15%;">Info</th>
+		<th class="sort sorting_asc" style="width:15%;">Count</th>
+		<th class="center" style="width:15%;">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($referralCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td style="width:15%;" class="center"><?= $row['os_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['info_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Family Referrals</th>
+		<th class="sort sorting_asc" style="width:15%;">Comm</th>
+		<th class="sort sorting_asc" style="width:15%;">Info</th>
+		<th class="sort sorting_asc" style="width:15%;">Count</th>
+		<th class="center" style="width:15%;">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($familyReferralCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td style="width:15%;" class="center"><?= $row['os_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['info_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Child Referrals</th>
+		<th class="sort sorting_asc" style="width:15%;">Comm</th>
+		<th class="sort sorting_asc" style="width:15%;">Info</th>
+		<th class="sort sorting_asc" style="width:15%;">Count</th>
+		<th class="center" style="width:15%;">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($childReferralCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td style="width:15%;" class="center"><?= $row['os_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['info_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc" style="width:40%;">Number Of Provider Referrals</th>
+		<th class="sort sorting_asc" style="width:15%;">Comm</th>
+		<th class="sort sorting_asc" style="width:15%;">Info</th>
+		<th class="sort sorting_asc" style="width:15%;">Count</th>
+		<th class="center" style="width:15%;">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($providerReferralCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td style="width:40%;"><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td style="width:15%;" class="center"><?= $row['os_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['info_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+<div id="counts-column2">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Referrals by Issue (all)</th>
+		<th class="sort sorting_asc" style="width:15%;">Comm</th>
+		<th class="sort sorting_asc" style="width:15%;">Info</th>
+		<th class="sort sorting_asc" style="width:15%;">Count</th>
+		<th class="center" style="width:15%;">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($referralIssueCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td style="width:15%;" class="center"><?= $row['os_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['info_cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['cnt'] ?></td>
+		<td style="width:15%;" class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+</div>
+
+<div id="counts-column3">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Gaps</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($gapCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Barriers</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($barrierCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>

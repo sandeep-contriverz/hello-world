@@ -1,0 +1,110 @@
+<?
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+?>
+
+<?= $headerHtml ?>
+<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+
+<div id="counts-column1">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Issues by Child</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($childIssueCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+</div>
+
+<div id="counts-column2">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Child Referrals</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($childReferralCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+<br />
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Number of Child Referrals<br>(Based on screening)</th>
+		<th class="sort sorting_asc">Count</th>
+		<th class="center">Pct%</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; ?>
+<? foreach($childReferralScreeningCounts as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= (!empty($row['name']) ? $row['name'] : 'Uncoded') ?></td>
+		<td class="center"><?= $row['cnt'] ?></td>
+		<td class="center"><?= $row['percent'] ?></td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+
+</div>
+
+<div id="counts-column3">
+
+</div>
+

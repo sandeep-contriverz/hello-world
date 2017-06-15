@@ -1,0 +1,105 @@
+<? 
+$csv = "Counts: Family and Child Referrals\n\n";
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Number of Referrals (all),Comm,Info,Count,Pct%' . "\n";
+foreach($referralCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['os_cnt'] . ',';
+	$csv .= $row['info_cnt'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Number of Family Referrals,Comm,Info,Count,Pct%' . "\n";
+foreach($familyReferralCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['os_cnt'] . ',';
+	$csv .= $row['info_cnt'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Number of Child Rerrals,Comm,Info,Count,Pct%' . "\n";
+foreach($childReferralCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['os_cnt'] . ',';
+	$csv .= $row['info_cnt'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Referrals by Issue (all),Comm,Info,Count,Pct%' . "\n";
+foreach($referralIssueCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['os_cnt'] . ',';
+	$csv .= $row['info_cnt'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Gaps,Count,Pct%' . "\n";
+foreach($gapCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Barriers,Count,Pct%' . "\n";
+foreach($barrierCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+$csv .= "\n" . 'Number Of Provider Referrals,Comm,Info,Count,Pct%' . "\n";
+foreach($providerReferralCounts as $row){
+	$csv .= $row['name'] . ',';
+	$csv .= $row['os_cnt'] . ',';
+	$csv .= $row['info_cnt'] . ',';
+	$csv .= $row['cnt'] . ',';
+	$csv .= $row['percent'] . "\n";
+}
+
+echo $csv;
+?>
+
+					                         

@@ -1,0 +1,1024 @@
+<? 
+namespace Hmg\Models;
+$userObj = new User();
+?>
+
+<style>
+a.btn-small { background: #ccc none repeat scroll 0 0 !important; border: 2px outset #998997 !important; border-radius: 7px; color: #555 !important; cursor: pointer; font: bold 12px/12px arial,helvetica,san-serif !important; padding: 2px 5px; }
+#referralDiv select.setting {
+    width: 195px;
+}
+</style>
+<script type="text/javascript">
+
+confirmBackspaceNavigations();
+
+$(document).ready(function(){
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no'
+	});
+
+	$(document).on('click', '#viewOrgLink', function(){
+		$('#viewOrg').trigger('click');
+	});
+
+	$(document).on('click', '.edit_chnotes', function(e){
+		$(this).parents('div.edit_notes').after('<div><textarea style="width: 80%; height: 70px;" name="child_notes" id="child_notes">'+$(this).parents('div.edit_notes').find('span.chnotes_text').text()+'</textarea><br><a href="javascript:;" class="update_ch_notes btn-small">Update</a></div>');
+		$(this).parents('div.edit_notes').hide();
+	});
+
+	$(document).on('click', '.delete_chnotes', function(e){
+		if(confirm('Are you sure to delete this note')) {
+			//ajax call delete note
+			var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+			var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+			var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '" }';
+			$.ajax({
+				type		: "POST",
+				data		: { 'action' : 'contact', 'delete_note' : 'true', 'json' : json },
+				url			: 'index.php',
+				dataType	: 'json',
+				beforeSend	: function() {},
+				error		: function() {},
+				success		: function( result ) {
+					if(result && result.msg == 'deleted') {
+						$('#childRow_details_'+cid).find('.edit_notes').remove();
+					}
+				}
+			});
+		}
+	});
+
+	$(document).on('click', '.update_ch_notes', function(e){
+		//ajax call to save notes
+		var note  = $.trim($('#child_notes').val());
+		var fid   = $(this).parents('td').find('a.edit_chnotes').attr('data-fid');
+		var cid   = $(this).parents('td').find('a.edit_chnotes').attr('data-id');
+		var json  = '{ "id" : "' + cid + '", "parent_id" : "' + fid + '", "note" : "' + note + '" }';
+		$.ajax({
+			type		: "POST",
+			data		: { 'action' : 'contact', 'save' : 'true', 'json' : json },
+			url			: 'index.php',
+			dataType	: 'json',
+			beforeSend	: function() {},
+			error		: function() {},
+			success		: function( result ) {
+				if(result && result.msg == 'updated') {
+					$('#childRow_details_'+cid).find('span.chnotes_text').text($.trim($('#child_notes').val()));
+					$('#childRow_details_'+cid).find('span.chnotes_text').parents('div.edit_notes').show();
+					$('#childRow_details_'+cid).find('.update_ch_notes').parent().remove();
+				}
+			}
+		});
+	});
+	$('.infoColumn').on('click', '.infoHdrButton', function(e)
+	{
+		h2 = $(this).find('h2');
+		if(h2.length){
+			h2.toggleClass('down');
+			sib = $(this).next();
+			sib.slideToggle(500);
+		}
+		if($(this).attr('id') == 'attachment-info-hdr') {
+			//$('.attachment-container .file-name').toggle();
+			//$('.attachment-container').toggle();
+			$('#contact-file-upload-window').toggle();
+		}
+	});
+	$('#child-info-hdr').on('click', function(e){
+		e.preventDefault;
+		window.open('?action=contact&type=pdf&contact_id=' + $('.row_selected').attr('id').slice(9), '_blank');
+	});
+	$('#certificate-hdr').on('click', function(e){
+		e.preventDefault;
+		window.open('?action=contact&type=cert&contact_id=' + $('.row_selected').attr('id').slice(9), '_blank');
+	});
+	$('#create-fax-sheet').on('click', function(e){
+		e.preventDefault;
+		select = $('select#provider-id');
+		providerId = select.val();
+		window.open('/?action=contact&type=fax&contact_id=' + $('.row_selected').attr('id').slice(9) + '&provider_id=' + providerId, '_blank');
+	});
+	$('.child-name').on('click', function(e){
+		e.stopPropagation();
+		location.href = $(this).attr('href');
+	});
+	$('#note').on('keydown', function(e){
+		if(e.keyCode == 13){
+			$('#add-note').click();
+		}
+	});
+	$('#add-note').on('click', function(){
+		var ele = $(this);
+		ele.attr('disabled', true);
+		note = $('#note').val().replace(/"/g, '\\"').replace(/\n/g, '\\n');
+		contact_id = $('#contact-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(contact_id && hmg_worker && note){
+			json = '{ "contact_id" : "' + contact_id + '", "hmg_worker" : "' + hmg_worker + '", "note" : "' + note + '" }';
+			$.post('index.php', { 'action' : 'contact-note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					newNote = data[0];
+					$('<div class="noteText-child">' + newNote.note + '</div>').insertAfter($('#add-note-form'));
+					$('<div class="noteTitle" data-id="' + newNote.id + '"><div class="toggleArrow"></div>' + newNote.hmg_worker + ' - ' + newNote.formatted_date + '</div>').insertAfter($('#add-note-form'));
+					$("#note").val('');
+  				}
+			}).done(function(data){
+				ele.attr('disabled', false);
+			});
+		}
+	});
+	$(".child-note-container").on('click', '.toggleArrow', function(e){
+		e.preventDefault();
+		$(this).toggleClass('on');
+		$(this).parent('div').next('.noteText-child').toggle();
+	});
+	$(".child-note-container").on('mouseover', '.noteTitle', function(e){
+		e.preventDefault();
+		$(this).css({ 'cursor' : 'pointer'});
+	});
+	var tH;
+	$(".child-note-container").on('click', '.noteTitle', function(e){
+		if(tH){
+			return false;
+		}
+		ele = $(this);
+		tH = setTimeout(function(){
+			if(ele.find('.toggleArrow').length >= 1){
+				ele.find('.toggleArrow').toggleClass('on');
+				noteElement = ele.next('.noteText-child');
+				noteText = noteElement.text();
+				noteElement.text(noteText);
+				noteElement.toggle();
+				tH = null;
+			}
+    	}, 300);
+	});
+	$(".child-note-container").on('dblclick', '.noteTitle', function(e){
+		if(tH){
+    		clearTimeout(tH);
+    		tH = null;
+    	}
+		ele = $(this);
+		noteId = ele.data('id');
+		if(ele.find('.toggleArrow').length >= 1){
+			var arrow = ele.find('.toggleArrow');
+			var arrowOn = arrow.hasClass('on');
+			noteElement = ele.next('.noteText-child');
+			noteText = noteElement.text();
+			noteElement.html('<div style="float: right; width: 52px; text-align: center;"><input type="button" class="btn-small saveNote" value="Save" data-id="' + noteId + '" /><input type="button" class="btn-small deleteNote" style="margin-top:2px;" value="Delete" data-id="' + noteId + '" /></div><textarea cols="5" rows="5" class="edit-note" name="note" style="width: 160px; height: 40px; line-height: 16px; padding: 3px;">' + noteText + '</textarea>');
+			if(!arrowOn){
+				arrow.toggleClass('on');
+				noteElement.toggle();
+			}
+		}
+	});
+	$(".child-note-container").on('click', '.saveNote', function(e){
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		noteInput = noteContainer.find('textarea');
+		noteRaw = noteInput.val();
+		note = noteRaw.replace(/\n/g, '\\n');
+		contact_id = $('#contact-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(contact_id && hmg_worker && note){
+			var json = {
+				 contact_id : contact_id,
+				 hmg_worker : hmg_worker,
+				 id : noteId,
+				 note : note
+			};
+			$.post('index.php', { 'action' : 'contact-note', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					// toggle note form
+					noteInput.text(noteRaw);
+					noteContainer.prev().click();
+  				}
+			});
+		}
+	});
+	$(".child-note-container").on('click', '.deleteNote', function(e){
+		confirmDelete = confirm("Are you sure you want to delete this note permanently?");
+		if(!confirmDelete){ return false; }
+		noteId = $(this).data('id');
+		noteContainer = $(this).parent().parent();
+		$.post('index.php', { 'action' : 'contact-note', 'delete' : 'true', 'id' : noteId }, function(data){
+			// remove from view
+			noteContainer.prev().remove();
+			noteContainer.remove();
+		});
+	});
+	var showAll = false;
+	$(".child-note-container").on('click', '.show-hide-all', function(e){
+		e.preventDefault();
+		if(! showAll){
+			$(this).parent('.child-note-container').find('.toggleArrow').addClass('on');
+			$(this).parent('.child-note-container').find('.noteText-child').show();
+			$(this).text('- Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = true;
+		} else {
+			$(this).parent('.child-note-container').find('.toggleArrow').removeClass('on');
+			$(this).parent('.child-note-container').find('.noteText-child').hide();
+			$(this).text('+ Show/Hide All').css({ 'font-weight' : 'bold' });
+			showAll = false;
+		}
+	});
+	$('#referralDiv').on('click','#add-referral', function(e){
+		e.preventDefault();
+		contact_id = $('#contact-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		if(contact_id){
+			referral = 'action=contact-referral&contact_id=' + contact_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				$('#add-referral-fields').find('*').serialize() + '&save=true';
+			$.post('index.php', referral, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#referralDiv').html(data);
+  				}
+			}).done(function(){
+				request = 'action=contact-follow-up&contact_id=' + contact_id + '&get-list=true';
+				$.post('index.php', request, function(data){
+					if(! $.isEmptyObject(data)){
+						$('#followUpDiv').html(data);
+					}
+				});
+			});
+		}
+	});
+    $("#referralDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#referralDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=contact-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+			}
+		});
+    });
+	$("#referralDiv").on('click', ".edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=contact-referral&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".cancel-edit-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowClass = row.attr('class');
+		request = 'action=contact-referral&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralRow_details_' + id).remove();
+				$('#referralRow_' + id).replaceWith(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".save-referral", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=contact-referral&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".delete-referral", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this referral?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		row = $('#referralRow_' + id);
+		rowInputs = $('#referralRow_' + id + ' :input');
+		detailRowInputs = $('#referralRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=contact-referral&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#referralDiv').html(data);
+			}
+		});
+	});
+	$("#referralDiv").on('click', ".show-all-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-referrals').addClass('hide-extra-referrals');
+		$(this).text("Hide extra referrals.");
+
+	});
+	$("#referralDiv").on('click', ".hide-extra-referrals", function(e){
+		e.preventDefault();
+		extras = $("#referralDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-referrals').addClass('show-all-referrals');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " referrals.");
+
+	});
+	$("#referralDiv").on('change', '.referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = $('.referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#referralDiv").on('change', '.edit-referral-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-referral-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$('#followUpDiv').on('click','#add-follow-up', function(e){
+		e.preventDefault();
+		contact_id = $('#contact-id').val();
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		followUpTable = $("#table-follow-up");
+		tbody = followUpTable.find('tbody:first');
+		firstRow = followUpTable.find('tbody tr');
+		firstRowClass = firstRow.attr('class');
+		rowClass = firstRowClass=='odd'?'even':'odd';
+		formElements = $('#add-follow-up-fields').find('*').not('.done');
+		if(contact_id){
+			request = 'action=contact-follow-up&contact_id=' + contact_id +
+				'&hmg_worker=' + hmg_worker + '&' +
+				formElements.serialize() +
+				'&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+					$('.date').datepicker();
+  				}
+			});
+		}
+	});
+    $("#followUpDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	singleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#followUpDiv").on('dblclick', ".clickable", function(e){
+    	if(singleClickTimer){
+    		clearTimeout(singleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		row.removeClass('clickable');
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=contact-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', true);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+    });
+	$("#followUpDiv").on('click', ".edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		rowClass = row.attr('class');
+		hmg_worker = $('#logged-in-hmg-worker-id').val();
+		request = 'action=contact-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-form=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+				setTimeout(function(){
+					$('.date').datepicker();
+				}, 300);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".cancel-edit-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		rowClass = row.attr('class');
+		request = 'action=contact-follow-up&id=' + id + '&rowClass=' + rowClass + '&get-view=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpRow_details_' + id).remove();
+				$('#followUpRow_' + id).replaceWith(data);
+				$('#followUpRow_' + id).find('.done-check-box').prop('disabled', false);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".edit-done-checkbox", function(e){
+		e.stopPropagation;
+		// Update the date input with today's value
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		followUpRow = $('#followUpRow_' + id);
+		if($(this).prop('checked')){
+			dateObj = new Date();
+			todaysDate = pad(2, (dateObj.getMonth() + 1).toString(), 0) + '/' + pad(2, dateObj.getDate().toString(), 0) + '/' + dateObj.getFullYear().toString().substring(2);
+
+			//console.log(todaysDate);
+			followUpRow.find('input.date').val(todaysDate);
+		}
+
+	});
+	$("#followUpDiv").on('click', ".done-check-box", function(e){
+		e.stopPropagation;
+		id = $(this).attr('name').replace(/[^\d]+/g, '');
+		doneField = $(this).prev();
+		doneValue = $(this).is(':checked') ? '1' : '0';
+		saveId = '#save_' + id;
+		saveBtn = $(saveId);
+		if(saveBtn.length){
+			detailRow = $('#followUpRow_details_' + id);
+			if(doneValue === '1'){
+				detailRow.find('input:checkbox').prop('checked', true);
+			} else {
+				detailRow.find('input:checkbox').prop('checked', false);
+			}
+			saveBtn.trigger('click');
+		} else {
+			if(doneValue === '1'){
+				formFields = $(this).serialize();
+			} else {
+				formFields = doneField.serialize();
+			}
+			formFields += '&' + escape('followUp[' + id + '][follow_up_date]') + '=<?=date('Y-m-d')?>';
+			parentRowEle = $(this).parent('td').parent('tr');
+			rowClass = parentRowEle.attr('class');
+			id = parentRowEle.attr('id').split('_')[1];
+			request = 'action=contact-follow-up&id=' + id + '&' + formFields + '&rowClass=' + rowClass + '&save=true';
+			$.post('index.php', request, function(data){
+				if(! $.isEmptyObject(data)){
+					$('#followUpDiv').html(data);
+				}
+			});
+		}
+	});
+	$("#followUpDiv").on('click', ".save-follow-up", function(e){
+		id = $(this).attr('id').split('_')[1];
+		row = $('#followUpRow_' + id);
+		rowInputs = $('#followUpRow_' + id + ' :input');
+		detailRowInputs = $('#followUpRow_details_' + id + ' :input');
+		rowClass = row.attr('class');
+		request = 'action=contact-follow-up&id=' + id + '&' + rowInputs.serialize() + '&' + detailRowInputs.serialize() + '&rowClass=' + rowClass + '&save=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".delete-follow-up", function(e){
+		confirmDelete = confirm("Are you sure you wan't to delete this follow-up?");
+		if(!confirmDelete){
+			return false;
+		}
+		id = $(this).attr('id').split('_')[1];
+		request = 'action=contact-follow-up&id=' + id + '&delete=true';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$('#followUpDiv').html(data);
+			}
+		});
+	});
+	$("#followUpDiv").on('click', ".show-all-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.removeClass('hidden');
+		$(this).removeClass('show-all-follow-ups').addClass('hide-extra-follow-ups');
+		$(this).text("Hide extra follow ups.");
+
+	});
+	$("#followUpDiv").on('click', ".hide-extra-follow-ups", function(e){
+		e.preventDefault();
+		extras = $("#followUpDiv").find(".extra");
+		extras.addClass('hidden');
+		$(this).removeClass('hide-extra-follow-ups').addClass('show-all-follow-ups');
+		$(this).text("Show All " + (extras.length - 1 + 5) + " follow ups.");
+
+	});
+	$("#followUpDiv").on('change', '.follow-up-referred-to', function(){
+		var select = $(this);
+		var serviceSelect = $('.follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('change', '.edit-follow-up-referred-to', function(e){
+		e.stopPropagation();
+		var select = $(this);
+		var serviceSelect = select.closest('tr').find('.edit-follow-up-service');
+		serviceSelect.find('option').not(':first').remove();
+		var referredToId = select.val();
+		var referredToType = '';
+		if( select.parent().find('.autosuggest-type') !== undefined ){
+			referredToType = select.parent().find('.autosuggest-type').val();
+		}
+		var request = 'action=referral-services&referredToType='+referredToType+'&referralId=' + referredToId;
+		
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$.each(data, function(key, val) {
+					if(val.disabled === "0" && val['setting-disabled'] === "0"){
+						$('<option value="' + val.id + '">' + val.name + '</li>').appendTo(serviceSelect);
+					}
+				});
+			}
+		});
+	});
+	$("#followUpDiv").on('click', '.edit-follow-up-service', function(e){
+		e.stopPropagation();
+	});
+
+	$('#letter-form').on('click', '#create-letter', function(e){
+		contact_id = $('#contact-id').val();
+		pos = $('#pos').val();
+		letter = $('#letter').val();
+		postString = 'index.php?action=contact&contact_id=' + contact_id + '&pos=' + pos + '&letter_id=' + letter;
+		window.open(postString, '', '');
+	});
+	$("#resourceDiv").on('click', '#showPriorResource', function(e){
+		$(this).parents('#addNewResource').toggleClass('input');
+		$(this).parent().toggleClass('hide');
+		$(this).parent().next().toggleClass('hide');
+	});
+	$("#resourceDiv").on('click', '#cancelAddPriorResource', function(e){
+		$(this).parents('#addNewResource').toggleClass('input');
+		$(this).parents('#resourceForm').prev().toggleClass('hide');
+		$(this).parents('#resourceForm').toggleClass('hide');
+	});
+	$("#resourceDiv").on('click', '#addPriorResource', function(e){
+		contact_id = $('#contact-id').val();
+		resourceService = $('#resource-service-type').val();
+		resourceDate = $('#resource-date').val();
+		resourceNote = $('#resource-note').val().replace(/"/g, '\\"');
+		var matchDate = resourceDate.match(/^(\d{2}\/){2}\d{4}$/g);
+		postString = 'action=contact-prior-resource&json={"contact_id":"' + contact_id + '","service_type":"' + resourceService + '","date_enrolled":"' + resourceDate + '","notes":"' + resourceNote + '"}' + '&save=true';
+		if(resourceService != '' && matchDate != null){
+			$.post('index.php', postString, function(data){
+				$('#resourceDiv').html(data);
+				$('#resourceDiv').find('h2').toggleClass('down');
+				$('#resourceContainer').css({ display: 'block' });
+			}).done(function(data){
+				$('.date').datepicker();
+			});
+		} else {
+			var message = '';
+			if (!resourceService) {
+				message = "You have not selected a service!";
+			}
+			if (matchDate === null) {
+				message = message + (message ? "\n" : '') + "Date is not in the right format mm/dd/yyyy!";
+			}
+			if (message) {
+				message = "Please fix the following errors:\n\n" + message;
+			}
+			alert(message);
+		}
+	});
+	$("#resourceDiv").on('click', '.editPriorResource', function(e){
+		resourceId = $(this).data('resource-id');
+		postString = 'action=contact-prior-resource&id=' + resourceId + '&get-form=true';
+		$.post('index.php', postString, function(data){
+			$('#resource' + resourceId).replaceWith(data);
+			$('#resource' + resourceId).toggleClass('input');
+		}).done(function(data){
+			$('.date').datepicker();
+		});
+	});
+	$("#resourceDiv").on('click', '.deletePriorResource', function(e){
+		resourceId = $(this).data('resource-id');
+		postString = 'action=contact-prior-resource&id=' + resourceId + '&delete=true';
+		$.post('index.php', postString, function(data){
+			$('#resourceDiv').html(data);
+			$('#resourceDiv').find('h2').toggleClass('down');
+			$('#resourceContainer').css({ display: 'block' });
+		}).done(function(data){
+			$('.date').datepicker();
+		});
+	});
+	$("#resourceDiv").on('dblclick', '.clickable', function(e){
+		resourceId = $(this).data('resource-id');
+		postString = 'action=contact-prior-resource&id=' + resourceId + '&get-form=true';
+		$.post('index.php', postString, function(data){
+			$('#resource' + resourceId).replaceWith(data);
+			$('#resource' + resourceId).toggleClass('input');
+		}).done(function(data){
+			$('.date').datepicker();
+		});
+	});
+	$("#resourceDiv").on('click', '.savePriorResource', function(e){
+		resourceId = $(this).data('resource-id');
+		contact_id = $('#contact-id').val();
+		var myContainer = $(this).parent().parent();
+		resourceService = myContainer.find('.resource-service-type').val();
+		resourceDate = myContainer.find('.resource-date').val();
+		resourceNote = myContainer.find('.resource-note').val().replace(/"/g, '\\"');
+		var matchDate = resourceDate.match(/^(\d{2}\/){2}\d{4}$/g);
+		postString = 'action=contact-prior-resource&json={"id":"' + resourceId + '","contact_id":"' + contact_id + '","service_type":"' + resourceService + '","date_enrolled":"' + resourceDate + '","notes":"' + resourceNote + '"}' + '&save=true';
+		$.post('index.php', postString, function(data){
+			$('#resourceDiv').html(data);
+			$('#resourceDiv').find('h2').toggleClass('down');
+			$('#resourceContainer').toggleClass('hide');
+		}).done(function(data){
+			$('.date').datepicker();
+		});
+	});
+	$("#resourceDiv").on('click', '.cancelEditPriorResource', function(e){
+		contact_id = $('#contact-id').val();
+		postString = 'action=contact-prior-resource&id=' + resourceId + '&get-view=true';
+		$.post('index.php', postString, function(data){
+			$('#resource' + resourceId).replaceWith(data);
+		});
+	});
+	$('.show-family').on('click', function(e){
+		e.preventDefault();
+		location.href = '/index.php?action=' + $(this).data('action') + '&pos=' + $(this).data('pos') + '&id=' + $(this).data('id');
+	});
+	var sdSingleClickTimer = null;
+    $("#screeningDiv").on('click', ".clickable", function(e){
+    	ele = $(this);
+    	if(sdSingleClickTimer){
+    		clearTimeout(sdSingleClickTimer);
+    	}
+    	sdSingleClickTimer = setTimeout(function(){
+    		detail = ele.next();
+	    	detail.toggleClass('hidden');
+	    	ele.find('div').toggleClass('on');
+    	}, 300);
+    });
+    $("#screeningDiv").on('dblclick', ".clickable", function(e){
+    	if(sdSingleClickTimer){
+    		clearTimeout(sdSingleClickTimer);
+    	}
+    	id = $(this).attr('id').split('_')[1];
+		request = 'action=contact-developmental-screening&id=' + id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('#edit_' + id).parent().trigger('click');
+				$('.date').datepicker();
+			}
+		});
+    });
+	$('#screeningDiv').on('click', '#add-new-screening', function(e){
+		contact_id = $('#contact-id').val();
+		request = 'action=contact-developmental-screening&contact_id=' + contact_id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('.date').datepicker();
+				$.fancybox.open(
+					'#child-developmental-screening', 
+					{
+						padding : '0px', scrolling : 'no'
+					}
+				);
+			}
+		});
+		return false;
+	});
+	$("#child-developmental-screening").on('click', '.save-developmental-screening', function(e){
+		e.preventDefault();
+		postString = $('#developmental-screening-form').serialize() + '&save=true';
+		$.post('index.php', postString, function(data){
+			if(! $.isEmptyObject(data)){
+				var iframe = $("#child-developmental-screening").find('iframe').contents();
+				iframe.find('input[name=id]').val(data.id);
+				iframe.find('input[name=type]').val('screening');
+				iframe.find('form').submit();
+			}
+		}).done(function(data){
+			setTimeout(function(){
+				postString = $('#developmental-screening-form').serialize() + '&get-list=true';
+				$.post('index.php', postString, function(data){
+				}).done(function(data){
+					if(! $.isEmptyObject(data)){
+						$('#screeningDiv').html(data);
+					}
+					$.fancybox.close();
+				});
+			}, 500);
+		});
+	});
+	$('#screeningDiv').on('click', '.edit-screening', function(e){
+		id = $(this).attr('id').split('_')[1];
+		request = 'action=contact-developmental-screening&id=' + id + '&get-form=1';
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				$("#child-developmental-screening").html(data);
+				$('#edit_' + id).parent().trigger('click');
+				$('.date').datepicker();
+			}
+		});
+		return false;
+	});
+	
+	$("#child-developmental-screening").on('click', '.delete-developmental-screening', function(e){
+		e.preventDefault();
+		postString = $('#developmental-screening-form').serialize() + '&delete=true';
+		$.post('index.php', postString, function(data){
+		}).done(function(data){
+			if(! $.isEmptyObject(data)){
+				postString = $('#developmental-screening-form').serialize() + '&get-list=true';
+				$.post('index.php', postString, function(data){
+				}).done(function(data){
+					if(! $.isEmptyObject(data)){
+						$('#screeningDiv').html(data);
+					}
+					$.fancybox.close();
+				});
+			}
+		});
+	});
+	$("#child-developmental-screening").on('click', '.clear-developmental-screenings', function(e){
+		e.preventDefault();
+		$("#child-developmental-screening").find('input[type=radio]').attr('checked', false);
+	});
+	$('.date').datepicker();
+
+	$(".attachment-container").on('click', '.remove-file', function(e){
+		e.preventDefault();
+		var contact_id = '<?=$_REQUEST['contact_id']?>';
+		var confirmDelete = confirm('Are you sure you want to remove this file?');
+		if(confirmDelete){
+			$.post('index.php', "action=contact-attachments&attachmentId=" + $(this).data('id'), function(data){
+				if(! $.isEmptyObject(data)){
+					reloadAttachmentsContact(data.contact_id, true);
+				}
+			});
+		}
+	});
+	
+});
+
+function reloadAttachmentsContact(id, showFiles) {
+	var request = 'action=contact-attachments';
+	request += '&id=' + id;
+	request += '&get-attachments=1';
+	$.post('index.php', request, function(data){
+		if(! $.isEmptyObject(data)){
+			$('.attachment-container').html(data);
+		} else {
+			$('.attachment-container').empty();
+		}
+	});
+}
+</script>
+<script type="text/javascript" src="js/autosuggestReferral.js"></script>
+<div class="pageTitleBar">
+	<h1>Organization Search</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="organization" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Organization" class="btn-small" /></form>
+	</div>
+
+	<div style="float: right;">
+	<a href="#advanced-search" class="fancybox" style="font-size: 10px !important; line-height: 10px; font-weight: bold; display: inline-block; padding-top: 7px; text-align: center;">Advanced<br /> Search</a>
+	</div>
+
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="organizations" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['families']['filters']['quick']) ? $_SESSION['families']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+</div>
+
+<div class="infoMain">
+
+	<div class="titleBar" style="overflow:hidden;">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<?php if(isset($_GET['pos'])) { echo (isset($data['id']) && is_numeric($data['id']) ? '<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="organization"  /><input type="hidden" name="id" value="' .  $data['organization_sites_id'] . '" /><input type="hidden" name="pos" value="' . $pos . '" />' . (isset($clearFilters) ? '<input type="hidden" name="clearFilters" value="1" />' : '') . '<input type="submit" value="View Organization" id="viewOrg" class="btn-small" /></form>' : ''); } else{ echo (isset($data['id']) && is_numeric($data['id']) ? '<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="organization"  /><input type="hidden" name="id" value="' .  $data['organization_sites_id'] . '" />' . (isset($clearFilters) ? '<input type="hidden" name="clearFilters" value="1" />' : '') . '<input type="submit" value="View Organization" id="viewOrg" class="btn-small" /></form>' : ''); } ?>
+		</div>
+		<div class="caption">
+			<a href="javascript:;" id="viewOrgLink" class="show-family" data-action="family" data-id="<?=$data['id']?>" data-pos="<?=$pos?>"><?=($data['name'] ? $data['name'] : '')?></a>
+			(<?= $data['organization_sites_id'] ?>)
+
+			<div style="display: inline-block; margin-left: 12px; font-size: 80%;">
+				Phone: <?= $data['primary_phone'] ?>
+			</div>
+			<? $website = str_replace('#', ' ', trim($data['website']));
+				/*if(!empty($website) && substr($website, 0) != '#') {
+					$website .= '#'.$website;
+				}
+				if(!empty($website) && substr($website, -1) != '#') {
+					$website .= $website.'#';
+				}*/
+			?>
+			<div style="display: inline-block; margin-left: 12px; font-size: 80% !important;">
+				Website: <a style="color: #f1585c;font-size: 100% !important;" target="_blank" href="<?= $website ?>"><?= $website ?></a>
+			</div>
+			
+		</div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+	<form id="familyForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="family" />
+		<input type="hidden" id="pos" name="pos" value="<?= ($pos?$pos:'0') ?>" />
+		<input type="hidden" id="contact-id" name="contact_id" value="<?= $contact_id ?>" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+	</form>
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px; width: 830px; border-right: 1px solid #CACBCE; float: left;">
+
+				<div id="childrenDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+					<div class="title"><h2>Provider Details</h2></div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0"  id="grid">
+
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th style="padding-right: 0px;">Gender</th>
+							<th style="padding-right: 0px;">Title</th>
+							<th style="padding-right: 0px;">Email</th>
+							<th style="padding-right: 0px;">Phone</th>
+							
+						</tr>
+						</thead>
+
+						<tbody>
+
+						<? $row = 'odd'; ?>
+						<? if(is_array($data['contacts'])) : ?>
+						<? foreach($data['contacts'] as $contact) : ?>
+						<?
+						if($contact['id'] == $contact_id){
+							$rowSelected = ' row_selected';
+						} else {
+							$rowSelected = '';
+						}
+						?>
+
+						<tr id="childRow_<?= $contact['id'] ?>" class="<?=$row?><?=$rowSelected?>" onclick="">
+							<td class="center">
+								
+
+								<a href="index.php?action=contact&contact_id=<?= $contact['id'] ?>&pos=<?= $pos ?>" class="child-name"><?= ucfirst($contact['first']) . ' ' . ucfirst($contact['last']) ?> (<?=$contact['id'] ?>)</a>
+							</td>
+							<td class="center"><?= $contact['gender'] ?></td>
+							<td class="center"><?= $contact['title'] ?></td>
+							<td class="center">
+								<a style="color: #000;" href="mailto:<?= $contact['email'] ?>"><?= $contact['email'] ?> </a>
+							</td>
+							<td class="center">
+								<?= $contact['cell_phone'] ?>
+							</td>
+							
+						</tr>
+						<? /* 231216  Deleted on reuqest of client
+						<tr id="childRow_details_<?= $contact['id'] ?>" class="hidden <?=$row?>">
+							<td>&nbsp;</td>
+							<td colspan="7" style="padding: 4px 6px;">
+								<div class="infoText"><span class="infoLabel" style="font-weight: bold;">&nbsp;&nbsp;</span>
+									</div>
+								<div class="infoText edit_notes"><span class="infoLabel" style="font-weight: bold;">Notes <?php if(!empty($contact['notes'])) { ?>( <a href="javascript:;" class="edit_chnotes btn-small" data-id="<?= $contact['id']; ?>" data-fid="<?= $contact['organization_id']; ?>">edit</a>&nbsp;&nbsp;<a href="javascript:;" class="delete_chnotes btn-small" data-id="<?= $contact['id']; ?>" data-fid="<?= $contact['organization_id']; ?>">delete</a> )<?php } ?>:&nbsp;&nbsp;</span><span class="chnotes_text"><?= $contact['notes'] ?></span></div>
+							</td>
+						</tr>
+						*/ ?>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? endforeach; ?>
+						<? endif; ?>
+
+						</tbody>
+					</table>
+				</div>
+
+				<!--div id="screeningDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?//=$developmentalScreeningsHtml?>
+				</div !-->
+
+				<div id="referralDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$referral_content?>
+				</div>
+
+				<div id="followUpDiv" class="infoPane" style="padding-bottom: 20px; border-bottom: 1px solid silver; margin-top: 12px;">
+				<?=$followup_content?>
+				</div>
+
+				<br />
+			</div>
+
+			<div class="infoColumn" style="float: left; height: 100%; width: 238px;">
+
+				<div class="infoPane">
+					<div id="child-info-hdr" class="infoTitle infoHdrButton"><h2 style="background:none;">Provider Information Sheet</h2></div>
+				</div>
+				<div class="infoPane" id="attachment_infoPane">
+					<? /*
+					<div id="certificate-hdr" class="infoTitle infoHdrButton"><h2 style="background:none;">Certificate of Completion</h2></div>
+					*/ ?>
+					<div id="attachment-info-hdr" class="infoTitle infoHdrButton"><h2 style="background:none;">Attachments</h2></div>
+					<div class="attachment-container hide" style="padding: 5px;"></div>
+					<iframe id="contact-file-upload-window" src="index.php?action=contact-attachments&id=<?=$_REQUEST['contact_id']?>&type=contact" style="display:none; border: none; width: 260px; height: 50px; margin: 0 -10px;"></iframe>
+				</div>
+				<div class="infoPane">
+					<div class="infoTitle infoHdrButton"><h2>Provider Notes</h2></div>
+					<div class="hide child-note-container">
+						<div id="" class="show-hide-all"><a href="#" style="color: #464646; font-weight: bold; text-decoration: none;">+ Show/Hide All</a></div>
+						<div id="add-note-form" class="infoHdrButton">
+							<input id="add-note" type="button" class='btn-small' style="float: right; margin: 10px 10px 0 0;" value="Add" />
+							<textarea cols="5" rows="5" id="note" name="note" style="width: 165px; height: 40px; line-height: 16px; padding: 3px;"></textarea>
+						</div>
+						<? if(is_array($notes)) : ?>
+						<? foreach($notes as $note) : ?>
+							<div class="noteTitle" data-id="<?= $note['id'] ?>">
+								<div class="toggleArrow"></div>
+								<?= $note['hmg_worker']  . ' - ' . $note['formatted_date'] ?>
+							</div>
+							<div class="noteText-child"><?= $note['note'] ?></div>
+						<? endforeach; ?>
+						<? endif; ?>
+						<div id="end-notes" style="border-top: 1px solid silver;"></div>
+					</div>
+					<div id="end-notes" style="border-top: 1px solid silver;"></div>
+				</div>
+				<div style="clear: both;"></div>
+			</div>
+		</div>
+
+		<div style="clear: both;"></div>
+
+	</div>
+
+
+</div>
+
+<div id="child-developmental-screening" style="display: none"></div>
+
+<? include_once(VIEW_PATH . '/organizations-advanced-search.phtml'); ?>

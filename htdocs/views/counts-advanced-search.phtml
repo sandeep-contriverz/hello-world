@@ -1,0 +1,202 @@
+<?
+
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Family;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+$family = new Family();
+
+$setting       = new Setting();
+$region        = new Setting('region');
+$status        = new Setting('status');
+$language      = new Setting('language');
+$city          = new Setting('city');
+$county        = new Setting('county');
+$ccLevel       = new Setting('cc_level');
+$familyHeard   = new Setting('how_heard_category');
+$zip           = new zip();
+
+$schoolDistrict = new schoolDistrict();
+$filterHelper = new FilterHelper();
+$filters = $filterHelper->getCountFilters();
+?>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+
+	$('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no',
+		afterClose: function(){
+	      // fancybox is closed, run custom code
+	      $('.providerAutoCompList').hide();
+	    }
+	});
+
+	$('.enable-multi-select').on('change', function(e){
+		var checkbox = $(this);
+		var select = checkbox.prev();
+		if(checkbox.prop('checked')){
+			select.attr('multiple', true);
+			select.attr('size', 5);
+			var name = select.attr('name');
+			select.attr('name', name + '[]');
+			select.find(':first-child').remove();
+		} else {
+			select.attr('multiple', false);
+			select.attr('size', '');
+			var name = select.attr('name');
+			select.attr('name', name.replace('[]', ''));
+		}
+	});
+	$('.js-toggle-worker-select').on('change', function(e){
+		var checkbox = $(this);
+		var hiddenHmgWorkerSelect = $('.hide-hmg-worker');
+		var hmgWorkerSelect = $('.hmg_worker');
+		hmgWorkerSelect.removeClass('hmg_worker').addClass('hide-hmg-worker');
+		hmgWorkerSelect.prop('disabled', true);
+		hiddenHmgWorkerSelect.addClass('hmg_worker').removeClass('hide-hmg-worker');
+		hiddenHmgWorkerSelect.prop('disabled', false);
+	});
+	var countType = document.getElementById('count-family').value;
+	$('#count-type').val(countType);
+});
+</script>
+<script type="text/javascript" src="js/autoCompleteProviders.js"></script>
+
+<div id="counts-advanced-search">
+	<div class="titleBar" style="padding-left: 10px;"><span class="caption" style="">Counts Advanced Filter</span></div>
+	<form class="search-form" action="index.php" method="get">
+		<input type="hidden" name="action" value="counts">
+		<input type="hidden" id="count-type" name="type" value="">
+		<input type="hidden" name="drillheading" value="<?php if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) echo implode(', ' , $this->drillheading); ?>">
+		<input type="hidden" name="substatus" value="<?php if(isset($this->substatus) && !empty($this->substatus)) echo $this->substatus; ?>">
+		<input type="hidden" name="subvalue" value="<?php if(isset($this->subvalue) && !empty($this->subvalue)) echo $this->subvalue; ?>">
+		<table id="search-form-table">
+			<tbody>
+				<tr>
+					<td >
+						<h2 style="text-align: right;">Filter</h2>
+					</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr>
+					<td class="label" style="vertical-align: top">Region </td>
+					<td style="vertical-align: top">
+						<?
+							if (isset($_SESSION['user']['region_id'])) {
+								$regionName = $setting->getSettingById($_SESSION['user']['region_id']);
+								echo $regionName;
+								echo '<input type="hidden" name="filters[region_id]" value="' . $_SESSION['user']['region_id'] . '" />';
+							} else {
+								echo $region->displaySelect('filters[region_id]', $filters['region_id'], ' ');
+							}
+						?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Status: </td>
+					<td>
+						<?= $status->displaySelect('filters[status]', $filters['status'], ' ', '', false, null, false, true) ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Start Date: </td>
+					<td>
+						<input type="text" class="date" id="adv-start-date" name="filters[start_date]" value="<?= $filters['start_date'] ?>" placeholder="Start Date" />
+						<input type="text" class="date" id="adv-end-date" name="filters[end_date]" value="<?= $filters['end_date'] ?>" placeholder = "End Date" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">HMG Worker: </td>
+					<td>
+						<?= $family->displayHmgWorkerSelect('filters[hmg_worker]', $filters['hmg_worker'], ' ') ?>
+						<?= $family->displayHmgWorkerSelect('filters[hmg_worker]', $filters['hmg_worker'], ' ', '', 'hide-hmg-worker', true) ?>
+						<input type="checkbox" class="js-toggle-worker-select"> All
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Language: </td>
+					<td>
+						<?= $language->displaySelect('filters[language_id]', $filters['language_id'], ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">City: </td>
+					<td>
+						<?
+							$cityMulti = false;
+							if(is_array($filters['city'])){
+								$selected = array();
+								foreach($filters['city'] as $cityName){
+									if(! is_numeric($filters['city'])){
+										$selected[] = $setting->getSettingIdByName($cityName);
+									}
+								}
+								$cityMulti = true;
+							} else {
+								$selected = $filters['city'];
+							}
+						?>
+						<?= $city->displaySelect('filters[city]', $selected, ' ', '', false, null, false) ?>
+						<input type="checkbox" class="enable-multi-select" <?= $cityMulti ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Zip: </td>
+					<td>
+						<?= $zip->displaySelect('filters[zip]', isset($filters['zip']) ? $filters['zip'] : '', ' ', '', false, '', true) ?>
+						<input type="checkbox" class="enable-multi-select" <?= is_array($filters['zip']) ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+				</tr>
+				<tr>
+					<td class="label">County: </td>
+					<td>
+						<?
+							$countyMulti = false;
+							if(is_array($filters['county'])){
+								$selected = $filters['county'];
+								$countyMulti = true;
+							} else {
+								$selected = $filters['county'];
+							}
+						?>
+						<?= $county->displaySelect('filters[county]', $selected, ' ', '', false, null, false) ?>
+						<input type="checkbox" class="enable-multi-select" <?= $countyMulti ? ' checked="checked"' : '' ?> /> Multi
+					</td>
+				</tr>
+				
+				<tr>
+					<td class="label">Provider/Clinic Name: </td>
+					<td>
+						<input type="text" class="providerAutoComp" autocomplete="off" name="filters[provider_or_clinic]" value="<?= isset($filters['provider_or_clinic']) ? $filters['provider_or_clinic'] : ''  ?>" placeholder="Type provider/clinc name" />
+						<div class="providerAutoCompList"></div>
+					</td>
+				</tr>
+
+				<tr>
+					<td class="label">School District </td>
+					<td>
+						<?= $schoolDistrict->displaySelect("filters[school_district]", (isset($filters['school_district']) ? $filters['school_district'] : ''), 'School District') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">CC Level: </td>
+					<td>
+						<?= $ccLevel->displaySelect('filters[cc_level]', $filters['cc_level'], ' ', '', false, null, false) ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">How Heard Category: </td>
+					<td>
+						<?= $familyHeard->displaySelect('filters[family_heard_id]', $filters['family_heard_id'], ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" style="text-align: right"><input type="submit" id="search-submit" value="Filter" class="btn-small" /> <input type="submit" name="clearFilters" value="Clear" class="btn-small" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</div>

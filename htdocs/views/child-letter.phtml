@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+  "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="css/font.css" media="all" />
+    <style>
+    body {
+        font-family: arial, helvetica, "san-serif";
+    }
+    .source-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 700px;
+      height: auto;
+      display: none;
+    }
+    p {
+        margin: .75em 0 .75em;
+    }
+    ul {
+        margin: 0 0 0 35px;
+        list-style: initial;
+        list-style-type: disc;
+        margin-before: .75em;
+        margin-after: .75em;
+    }
+    ol {
+        margin: 0 0 0 35px;
+        list-style: initial;
+        list-style-type: decimal;
+        margin-before: .75em;
+        margin-after: .75em;
+    }
+    .letter {
+        position: absolute;
+        top: 0; left: 0;
+        width: 630px;
+        height: 695px;
+        margin: 130px 15px 15px 15px;
+        font-size: 1.1em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .footer {
+        position: absolute;
+        top: 855px;
+        width: 630px;
+        margin: 0 15px;
+        text-align: center;
+        font-size: 11px;
+    }
+    #buttons {
+        position: absolute;
+        top: 0;
+        left: 700px;
+        margin: 20px;
+    }
+    @media print {
+     #buttons {
+            display: none;
+        }
+    }
+    </style>
+    <script type="text/javascript" src="/js/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+        tinymce.init({
+            selector: "div.letter",
+            fontsize_formats: "8pt 9pt 10pt 11pt 12pt 26pt 36pt",
+            forced_root_block : false,
+            theme: "modern",
+                inline: true,
+                plugins: [
+                    "textcolor colorpicker link"
+                ],
+            menubar: false,
+            toolbar1: "undo redo | bold italic | forecolor backcolor | bullist numlist outdent indent | alignleft aligncenter alignright alignjustify",
+            toolbar2: "fontselect | fontsizeselect"
+        });
+        tinymce.init({
+            selector: "div.footer",
+            fontsize_formats: "8pt 9pt 10pt 11pt 12pt 26pt 36pt",
+            theme: "modern",
+            inline: true,
+            plugins: [
+                "textcolor colorpicker link"
+            ],
+            menubar: false,
+            toolbar1: "undo redo | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | fontselect | fontsizeselect "
+        });
+    </script>
+</head>
+<body style="margin:0px">
+    <BACKGROUND_IMAGE>
+    <div class="letter">
+        <div>
+            <LETTER_CONTENT>
+            <p style="margin-bottom: 3px;">
+                <USER_FIRST_NAME>
+            </p>
+            <div 
+                style="
+                    border-bottom: 2px solid #555; 
+                    width: 220px; height: 1px;
+                "
+            ></div>
+            <p style="margin-top: 3px;">
+                <USER_FIRST_NAME>
+                <USER_LAST_NAME><br />
+                Help Me Grow Care Coordinator<br />
+                801.691.5322<br />
+                <USER_EMAIL>
+            </p>
+        </div>
+    </div>
+    <div id="buttons"><input type="button" value="Print Letter" onclick="javascript: window.print();" /><br /><br /><input type="button" value="Close Letter" onclick="window.close();" /></div>
+</body>
+</html>

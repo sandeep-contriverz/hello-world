@@ -1,0 +1,1024 @@
+<?php
+    
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Family;
+use Hmg\Models\Organization;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+$family                 = new Family();
+$organization           = new Organization();
+$partnership_level      = new Setting('partnership_level');
+$resource_database      = new Setting('resource_database');
+$mode_of_contact       = new Setting('mode_of_contact');
+$organization_status   = new Setting('organization_status');
+$organization_type     = new Setting('organization_type');
+$event_type             =  new Setting('event_type');
+$type_of_contact        = new Setting('type_of_contact');
+$relationships          = new Setting('relationships');
+$language               = new Setting('language');
+$familyHeard            = new Setting('how_heard_category');
+$callReason             = new Setting('call_reason');
+$race                   = new Setting('race');
+$ccLevel                = new Setting('cc_level');
+$ethnicity              = new Setting('ethnicity');
+$issues                 = new Setting('issues');
+$status                 = new Setting('status');
+$city                   = new Setting('city');
+$county                 = new Setting('county');
+$region                 = new Setting('region');
+$point_of_entry         = new Setting('point_of_entry');
+$zip                    = new zip();
+
+$schoolDistrict = new schoolDistrict();
+
+?>
+
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/subforsanta.css">
+<link rel="stylesheet" href="css/ext-all.css">
+
+
+<script src="js/protoaculous.js"></script>
+<script src="js/ext-prototype-adapter.js"></script>
+<script src="js/ext-all.js"></script>
+<script src="js/builder.js"></script>
+
+<style>
+.popupFooter{
+	float:right;
+}
+select, input, textarea {
+    font-size: 11px !important;
+    font-weight: normal !important;
+    color: #555 !important;
+    border: 1px inset silver !important;
+    padding: 4px;
+}
+
+    
+    .outerButton .buttonText a {
+        color: white !important;
+        line-height: 24px !important;
+        padding: 5px;
+    }
+    
+    .ac_results {
+		padding: 0px;
+		border: 1px solid black;
+		background-color: white;
+		overflow: hidden;
+		z-index: 99999;
+	}
+	
+	.ac_results ul {
+		width: 100%;
+		list-style-position: outside;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	
+	.ac_results li {
+		margin: 0px;
+		padding: 2px 5px;
+		cursor: default;
+		display: block;		
+		font: menu;
+		font-size: 12px;
+		line-height: 16px;
+		overflow: hidden;
+	}
+	
+	.ac_loading {
+		background: white url('indicator.gif') right center no-repeat;
+	}
+	
+	.ac_odd {
+		background-color: #eee;
+	}
+	
+	.ac_over {
+		background-color: #0A246A;
+		color: white;
+	}
+	
+	#report_parameters table {
+		width: 100%;
+	}
+	#report_parameters select {
+		width: 200px;
+	}
+	
+	#report_parameters td {
+		padding:3px;
+	}
+	.fieldSet {padding: 5px;}
+    
+    .hide-hmg-worker{display:none;}
+    select,input[type="text"]{height:25px;}
+    td{padding:2px 0px;}
+</style>
+
+<script type="text/javascript">
+
+    function createCSV(){
+        data = jQuery('form[name=generate]').serialize();
+        window.open('includes/csvreport-angel-tree-label.php?' + data);
+    }
+    function showCreateReport() {
+        document.location.href = "?action=report&showBuilder=true";
+    }
+    
+    function showUserReports() {
+        document.location.href = "?action=report";
+    }
+
+	var languageSelector;	
+    var reportBuilder;
+	
+    function showReportPopup(){
+        jQuery.fancybox.open('#report_new');	
+    }
+    function showBuildReport() {
+        var fieldOptions = <?=json_encode($fieldOptions)?>;
+        if (reportBuilder == null) {
+            reportBuilder = new ReportBuilder(document.getElementById('report'), document.getElementById('editBox'), 1000, fieldOptions);
+            <? if ($reportResult['Template'] != "" && $reportResult['Template'] != null) { ?>
+                var reportData = "<?=addslashes($reportResult['Template'])?>";
+                reportBuilder.loadFromJSON(reportData);
+            <? } ?>
+        }
+
+        jQuery("#reportBuilder_popupBoxBack").show();
+        jQuery("#reportBuilder_popupBox").show();
+        jQuery.fancybox.open('#Edit_reportBuilder_popupBox',{
+        autoSize: false,
+        width : '100%',
+        height:800
+        
+    });
+    }
+		
+    function hideBuildReport() {
+        jQuery("#reportBuilder_popupBoxBack").hide();
+        jQuery("#reportBuilder_popupBox").hide();
+    }
+
+    function saveData() {
+        var jsonData = reportBuilder.toJSON();
+
+        jQuery.ajax({
+            type: "POST",
+            url: "index.php?action=report&saveReport=true&type=<?=$report['ReportCategoryID']?>",
+            data: {
+                reportID: <?=$reportResult['ReportID']?>,
+                jsonData: jsonData
+            },
+            dataType: 'json',
+            beforeSend: function(){
+                //jQuery("#autocomplete").css("background","#FFF url(LoaderIcon.gif) no-repeat 165px");
+            },
+            success: function(data){
+                if(data.status && data.status == true) {
+                    document.location.href = "index.php?action=report&do=reGenerate&reportID=<?=$reportResult['ReportID']?>";
+                } else {
+                    alert('Unable to process your request. Please try again later.');
+                }
+            }
+        });
+    }	
+		
+   
+    var newChildCurrentIndex = 0;
+    
+    function getHowHeardDetails(heard_id){
+        var select = '';
+        jQuery.ajax({
+            url: 'index.php',
+            data: {
+                action:'setting',
+                'get-select': true,
+                //'selected': selected,
+                'heard_id' : heard_id
+            },
+            async: false
+        }).done(function(data){
+            //alert(data);
+            select = data;
+        });
+
+        return select;
+    }
+
+    jQuery(document).ready(function(){
+        
+        jQuery('.fancybox').fancybox({
+            padding : '0px', 
+            scrolling : 'no',
+            width: "98%",
+            afterClose: function(){
+            }
+        });
+        
+        jQuery(document).on('click','.fancybox-close',function(){
+            window.location.reload();
+        });
+        
+        setTimeout(function() {
+            jQuery('#hideCreateReport').addClass('btn-small');
+            jQuery('#hideCreateReport').next().addClass('btn-small');
+        }, 300);
+        
+        jQuery('#autocomplete').autocomplete({
+            source: "includes/ajax.php?type=<?=$report['ReportCategoryID']?>",
+            focus: function( event, ui ) {
+                jQuery( "#autocomplete" ).val( ui.item.label );
+                return false;
+            },
+            select: function( event, ui ) {
+                //alert('You selected: ' + ui.item.label + '==='+ ui.item.value);
+                jQuery("#autocomplete").val( ui.item.label );
+                jQuery("#individual").val( ui.item.value );
+               return false;
+            }
+        });
+
+        jQuery('.report_input').focus(function(){
+            jQuery("#report_radio").prop('checked', true);
+        });
+
+        jQuery('#autocomplete').focus(function(){
+            jQuery("#individual_radio").prop('checked', true);
+        });
+
+        jQuery('.fancybox').fancybox({
+            padding : '0px', scrolling : 'no',width: "98%",
+            afterClose: function(){
+            }
+        });	
+    
+        jQuery("#hideCreateReport").on('click',function(){
+            jQuery.fancybox.close();
+        });
+        
+        jQuery(document).on('change','select[name="GridFieldSelection"]',function(){
+            jQuery(this).parent().find('input[type="text"]').val(jQuery(this).find('option:selected').html());
+             jQuery(this).parent().find('input[type="text"]').trigger('keyup');
+             jQuery(this).parent().find('input[type="text"]').keyup();
+        });
+
+        jQuery("#datepicker_to")
+            .datepicker({
+                altField: '#input_to'
+            })
+            .change(function(){
+                var date_val = jQuery("#input_to").val().split('/');
+                jQuery("#month_to").val(date_val[0]);
+                jQuery("#day_to").val(date_val[1]);
+                jQuery("#year_to").val(date_val[2]);
+                jQuery('#datepicker_to').hide();
+            });
+
+            jQuery("#click_to").click(function(e){
+                jQuery("#report_radio").prop('checked', true);
+            var locLeft = jQuery('#click_to').offset().left + jQuery('#click_to').outerWidth();
+            var locTop = jQuery('#click_to').offset().top;
+
+            jQuery('#datepicker_to')
+                .toggle()
+                .css({left: locLeft+'px', top: locTop+'px'});
+
+            if (jQuery("#datepicker_to").is(':visible')) {
+                var date = new Date(jQuery("#month_to").val() + '/' + jQuery("#day_to").val() + '/' + jQuery("#year_to").val());
+                if (date != "Invalid Date") {
+                    jQuery("#datepicker_to").datepicker('option', 'defaultDate', date);
+                    jQuery("#datepicker_to").datepicker("setDate", date);
+                }
+            }
+        });
+	
+	
+        jQuery("#datepicker_from")
+            .datepicker({
+                altField: '#input_from'
+            })
+            .change(function(){
+                var date_val = jQuery("#input_from").val().split('/');
+                jQuery("#month_from").val(date_val[0]);
+                jQuery("#day_from").val(date_val[1]);
+                jQuery("#year_from").val(date_val[2]);
+                jQuery('#datepicker_from').hide();
+            });
+
+            jQuery("#click_from").click(function(e){
+                jQuery("#report_radio").prop('checked', true);
+            var locLeft = jQuery('#click_from').offset().left + jQuery('#click_from').outerWidth();
+            var locTop = jQuery('#click_from').offset().top;
+
+            jQuery('#datepicker_from')
+                .toggle()
+                .css({left: locLeft+'px', top: locTop+'px'});
+
+            if (jQuery("#datepicker_from").is(':visible')) {
+                var date = new Date(jQuery("#month_from").val() + '/' + jQuery("#day_from").val() + '/' + jQuery("#year_from").val());
+                if (date != "Invalid Date") {
+                    jQuery("#datepicker_from").datepicker('option', 'defaultDate', date);
+                    jQuery("#datepicker_from").datepicker("setDate", date);
+                }
+            }
+        });
+	
+
+
+        jQuery('#create-report').on('click', function(e){
+            e.preventDefault();
+            jQuery('#export').val('');
+            jQuery('.message').html('');
+            form = jQuery('#outreach-form');
+            form.attr('target', '_blank');
+            form.submit();
+
+        });
+
+        jQuery('#export-report').on('click', function(e){	
+            jQuery('#export').val(1);
+                jQuery('.message').html('');
+                form = jQuery('#outreach-form');
+                form.attr('target', '_blank');
+                form.submit();		
+        });
+
+        // initialize date picker
+        jQuery('.date').datepicker();
+
+
+
+        jQuery('.fancybox').fancybox({
+            padding : '0px', scrolling : 'no',width: "98%",
+            afterClose: function(){
+              // fancybox is closed, run custom code
+              jQuery('.providerAutoCompList').hide();
+            }
+        });
+
+        jQuery('#family_heard_id').bind("change", function(e) {
+            e.preventDefault();
+            //ajax call to fetch how heard details listing
+            var result = getHowHeardDetails(jQuery(this).val());
+
+            if(result != ''){
+
+                jQuery('#heard_details_td').html(result).append("<script>jQuery('.chosen-select').chosen();<\/script>");
+            }
+            else{
+                jQuery('#heard_details_td').html('<select class="setting"><option value=""></option></select>');
+            }
+        });
+
+        jQuery('.enable-multi-select').on('change', function(e){
+            var checkbox = jQuery(this);
+            var select = checkbox.prev();
+            if(checkbox.prop('checked')){
+                select.attr('multiple', true);
+                select.attr('size', 5);
+                var name = select.attr('name');
+                select.attr('name', name + '[]');
+                select.find(':first-child').remove();
+            } else {
+                select.attr('multiple', false);
+                select.attr('size', '');
+                var name = select.attr('name');
+                select.attr('name', name.replace('[]', ''));
+            }
+        });
+        jQuery('.js-toggle-worker-select').on('change', function(e){
+            var checkbox = jQuery(this);
+            var hiddenHmgWorkerSelect = jQuery('.hide-hmg-worker');
+            var hmgWorkerSelect = jQuery('.hmg_worker');
+            hmgWorkerSelect.removeClass('hmg_worker').addClass('hide-hmg-worker');
+            hmgWorkerSelect.prop('disabled', true);
+            hiddenHmgWorkerSelect.addClass('hmg_worker').removeClass('hide-hmg-worker');
+            hiddenHmgWorkerSelect.prop('disabled', false);
+        });
+	
+    });
+</script>
+
+
+<?php $showHeader = false; ?>
+<div class="secondColumnWide">
+<div id="mainContent" class="inner contentMain"> 
+
+	<div class="pageTitleBar">
+	<h1>Reports</h1>
+	
+		<div style="float: right; padding: 8px 5px 5px 0; margin-left: 30px;">
+            <div class=" outerButton">
+				<div class="buttonLeft">
+					<div class="buttonText">
+						<input type="button" name="showCreateReport" id="showCreateReport" value="Add Report" class="fancybox_report btn-small" onclick="javascript:showCreateReport();"/>
+					</div>
+				</div>
+				<div class="buttonRight">&nbsp;</div>
+			</div>	
+				<div class=" outerButton">
+				<div class="buttonLeft">
+					<div class="buttonText">
+						<input type="button" name="showUserReports" id="showUserReports" value="Back To User Defined Reports" class="fancybox_report btn-small" onclick="javascript:showUserReports();"/>
+					</div>
+				</div>
+				<div class="buttonRight">&nbsp;</div>
+			</div>		
+		</div>
+	
+	
+</div>
+
+    
+<div class="dataTable report_d" style="height: auto;">
+	<div class="titleBar">
+	
+	<div class="" style="float: right; padding: 5px 4px; color: white; font-size: 12pt;">
+        <div class="buttonPane">
+            <div class=" outerButton">
+                <div class="buttonLeft">
+                    <div class="buttonText">
+                        <input type="button" name="" id="" value="Edit Fields" class="fancybox_report btn-small" onclick="javascript:showBuildReport();"/>				
+                    </div>
+                </div>
+                
+            </div>
+            <div class=" outerButton">
+                <div class="buttonLeft">
+                    
+                    <div class="buttonText">
+                        <input type="button" name="" id="" value="Edit Report" class="fancybox_report_edit btn-small" onclick="javascript:showReportPopup();"/>				
+                    </div>
+                </div>
+            </div>
+            <div class=" outerButton">
+                <div class="buttonLeft">
+                    <div class="buttonText">
+                        <input type="button" name="" id="" value="Delete Report" class="fancybox_report btn-small" onclick="javascript:if(confirm('Are you sure you want to delete this report? This action is irreversible')) window.location.href='index.php?action=report&do=deleteReport&reportID=<?=$reportResult['ReportID'];?>';"/>
+
+                    </div>
+                </div>
+                <div class="buttonRight">&nbsp;</div>
+            </div>				
+        </div>
+	</div>
+	
+	<div class="caption"><?=@$reportResult['Name']?></div>
+	</div> <!-- close titlebar -->
+    
+    
+    <div id="report_new" style="display: none;width:500px;">
+	<div class="titleBar" style="padding-left: 10px;"><span class="caption" style="">Edit Report - <?=$reportResult['Name'];?></span></div>
+	<script type="text/javascript">
+				
+				var reportMargins = new Array();
+				<? foreach ($reportsAll as $report) { ?>
+					<?
+						$rm = explode('|', $report['Margins']);
+					?>
+					reportMargins[<?=$report['ReportID']?>] = {mtop: '<?=$rm[0]?>', mright: '<?=$rm[1]?>', mbottom: '<?=$rm[2]?>', mleft:'<?=$rm[3]?>', showHeader: '<?=$report['ShowHeader']?>'};
+				<? } ?>
+				
+				function loadPresets(whichID) {
+					jQuery('input[name="topMargin"]').val(reportMargins[whichID].mtop);
+					jQuery('input[name="rightMargin"]').val(reportMargins[whichID].mright);
+					jQuery('input[name="bottomMargin"]').val(reportMargins[whichID].mbottom);
+					jQuery('input[name="leftMargin"]').val(reportMargins[whichID].mleft);
+					jQuery('input[name="showHeader"]').attr('checked', (reportMargins[whichID].showHeader == '1' ? 'checked' : ''));
+				}
+			</script>
+	<form method="POST">
+	<input type="hidden" name="do" value="editReport">
+	<input type="hidden" name="id" value="<?=$reportResult['ReportID'];?>">
+	<input type="hidden" name="action" value="report">
+		<div class="fieldGroup" style="width: 100%;">
+			<div class="fieldSet">
+				<div class="label">Report Name:</div>
+				<input type="text" name="name" id="reportName" class="field" value="<?=$reportResult['Name'];?>">
+			</div>
+					
+			<div class="fieldSet">
+				<div class="label">Category:</div>
+				
+				<select name="reportCategoryID" id="category" class="field">
+					<? foreach($reportCategories as $reportCategory) { ?>
+						<option value="<?=$reportCategory['ReportCategoryID'];?>" <?php echo ($reportResult['ReportCategoryID'] == $reportCategory['ReportCategoryID'])?"selected":"";?> ><?=$reportCategory['Name']?></option>
+					<? } ?>
+				</select>
+			</div>
+					
+			<div class="fieldSet">
+				<div class="label">Layout:</div>
+				<select id="layout" name="layoutType" class="field">
+					<option value="0" <?php echo ($reportResult['LayoutType'] == 0)?"selected":"";?>>Portrait 8.5" X 11"</option>
+					<option value="1" <?php echo ($reportResult['LayoutType'] == 1)?"selected":"";?>>Landscape 11" X 8.5"</option>
+				</select>
+			</div>
+			<?php 
+                $margins = explode("|",$reportResult['Margins']);
+            ?>		
+			<div class="fieldSet">
+				<div class="label">Margins (in inches):</div>
+				<div class="field">
+					<div class="">Top: </div><input type="text" name="topMargin" class="" value="<?=@$margins[0];?>">
+					<div class="">Bottom: </div><input type="text" name="bottomMargin" class="" value="<?=@$margins[2];?>">
+					
+				</div>
+			</div>
+					
+			<div class="fieldSet">
+				<div class="label">&nbsp;</div>
+				<div class="field">
+					<div class="">Left: </div><input type="text" name="leftMargin" class="" value="<?=@$margins[3];?>">
+					<div class="">Right: </div><input type="text" name="rightMargin" class="" value="<?=@$margins[1];?>">
+				</div>
+			</div>
+					
+			<div class="fieldSet">
+				<div class="label" style="float:left">Show Header:</div>
+				<input type="checkbox" name="showHeader" value="1" style="margin-left: 20px;   margin-top: 3px;" <?php echo ($reportResult['ShowHeader'] == 1)?"checked":"";?>>
+			</div>
+		</div>
+		
+		<div class="popupFooter" style="display:block;">
+			<input type="button" value="Cancel" id="hideCreateReport">
+			<input type="submit" value="Continue" onClick="return createReport();">
+		</div>
+		
+</form>
+</div>
+
+
+    
+    
+    
+    
+	<div style=" border:1px solid #ccc; border-top:0; padding:20px; padding-bottom:150px;">
+	<form method="POST" name="generate" action="includes/pdfreport.php" target="_blank">
+		<input type="hidden" name="reportID" value="<?=@$reportResult['ReportID']?>">
+		
+    <div id="report_parameters">
+        <?php 
+
+        //echo $report['ReportCategoryID'];
+    switch($reportResult['ReportCategoryID']) {
+    case 1:
+    
+    ?>
+        
+
+
+        <table style="width: 650px;    margin: 0 auto;">
+            <tbody>
+                
+                <tr>
+                    <td class="label" style="vertical-align: top">Region </td>
+                    <td style="vertical-align: top">
+                        <?
+                        
+                                echo $region->displaySelect('filters[region_id]', '', ' ');
+                            
+                        ?>
+                    </td>
+                    
+                    <td class="label">Language: </td>
+                    <td>
+                        <?= $language->displaySelect('filters[language_id]', '', ' ') ?>
+                    </td>
+                    
+                    
+                </tr>
+                <tr>
+                    <td class="label">City: </td>
+                    <td>
+                        
+                        <?= $city->displaySelect('filters[city]', '', ' ', '', false, '', true) ?>
+                        <input type="checkbox" class="enable-multi-select" /> Multi
+                    </td>
+                    
+                    <td class="label">Race: </td>
+                    <td>
+                        <?= $race->displaySelect('filters[race_id]', '', ' ') ?>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    
+                    <td class="label">Zip: </td>
+                    <td>
+                        <?= $zip->displaySelect('filters[zip]', '', ' ', '', false, '', true) ?>
+                        <input type="checkbox" class="enable-multi-select"  /> Multi
+                    </td>
+                    
+                    <td class="label">Ethnicity: </td>
+                    <td>
+                        <?= $ethnicity->displaySelect('filters[ethnicity_id]', '', ' ') ?>
+                    </td>
+                    
+                    
+                </tr>
+                <tr>
+                    
+                    <td class="label">School District </td>
+                    <td>
+                        <?= $schoolDistrict->displaySelect("filters[school_district]", '', 'School District') ?>
+                    </td>
+                    <td class="label">How Heard Category: </td>
+                    <td>
+                        <?= $familyHeard->displaySelect('filters[family_heard_id]', '', ' ', 31, false, null, true, false, false, 'family_heard_id') ?>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    
+                    <td class="label">Status: </td>
+                    <td>
+                        <?= $status->displaySelect('filters[status]', '', ' ', '', false, NULL, false, true) ?>
+                    </td>
+                    <td class="label" style="">How Heard Details</td>
+                    <td class="infoText" id="heard_details_td">
+                        
+                        <select class="setting"><option value=""></option></select>
+                        
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td class="label">Start Date: </td>
+                    <td>
+                        <input type="text" class="date" id="adv-start-date" name="filters[start_date]" value="" placeholder="Start Date" />
+                        <input type="text" class="date" id="adv-end-date" name="filters[end_date]" value="" placeholder = "End Date" />
+                    </td>
+                    <td class="label">Point of Entry: </td>
+                    <td>
+                        <?= $point_of_entry->displaySelect('filters[point_of_entry]', '', ' ', 50) ?>
+                    </td>
+                    
+                    
+                </tr>
+                <tr>
+                    <td class="label">CC Level: </td>
+                    <td>
+                        <?= $ccLevel->displaySelect('filters[cc_level]', '', ' ', '', false, null, false) ?>
+                    </td>
+                    <td class="label">Reason for Call: </td>
+                    <td>
+                        <?= $callReason->displaySelect('filters[call_reason_id]', '', ' ') ?>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    
+                    <td class="label">Worker: </td>
+                    <td>
+                        <?= $family->displayHmgWorkerSelect('filters[hmg_worker]', '', 'all') ?>
+                        <?= $family->displayHmgWorkerSelect('filters[hmg_worker]', '', 'all', '', 'hide-hmg-worker', true) ?>
+                        <input type="checkbox" class="js-toggle-worker-select"> All
+                    </td>
+                    
+                    <td class="label" style="vertical-align: top">Referral Issue: </td>
+                    <td style="vertical-align: top">
+                        <?= $issues->displaySelect('filters[issue]', '', ' ') ?>
+                    </td>
+
+                </tr>           
+                
+            </tbody>
+        </table>
+       
+
+
+<?php  
+    break;
+    case 2:
+            
+    ?>
+        
+<table id="search-form-table">
+            <tbody>
+                
+                <tr>
+                    
+                    <td class="label" style="vertical-align: top">Region </td>
+                    <td style="vertical-align: top">
+                        <?
+                            if (isset($_SESSION['user']['region_id'])) {
+                                $regionName = $setting->getSettingById($_SESSION['user']['region_id']);
+                                echo $regionName;
+                                echo '<input type="hidden" name="filters[region_id]" value="' . $_SESSION['user']['region_id'] . '" />';
+                            } else {
+                                echo $region->displaySelect('filters[region_id]', '', ' ');
+                            }
+                        ?>
+                    </td>
+                    
+                </tr>
+                <tr>                                    
+                    <td class="label">Organization Type: </td>
+                    <td>
+                        <?= $organization_type->displaySelect('filters[organization_type_id]','',' ') ?>
+                    </td>
+                    
+                </tr>
+                <tr>                                    
+                    <td class="label">Organization Status: </td>
+                    <td>
+                        <?= $organization_status->displaySelect('filters[status]','',' ') ?>
+                    </td>
+                    
+                </tr>               
+                <tr>        
+                    
+                    <td class="label">Start Date: </td>
+                    <td>
+                        <input type="text" class="date" id="adv-start-date" name="filters[start_date]" value="" placeholder="Start Date" />
+                        <input type="text" class="date" id="adv-end-date" name="filters[end_date]" value="" placeholder = "End Date" />
+                    </td>                   
+                </tr>               
+                
+               
+                <tr>                    
+                    <td class="label">Mode of Initial Contact: </td>
+                    <td>
+                        <?= $mode_of_contact->displaySelect('filters[mode_of_contact_id]', '', ' ') ?>
+                        
+                    </td>
+                </tr>                       
+                <tr>                                        
+                    <td class="label">Partnership Level: </td>
+                    <td>
+                        <?= $partnership_level->displaySelect('filters[partnership_level_id]', '', ' ') ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    
+                    <td class="label">MOU Signed: </td>
+                    <td>
+                        <select name="mou" >
+                            <option value=""></option>
+                            <option value="YES">YES</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </td>
+
+                </tr><tr>
+                    
+                    <td class="label">Resource Database: </td>
+                    <td>
+                        <?= $resource_database->displaySelect('filters[resource_database_id]', '', ' ') ?>
+                        
+                    </td>
+
+                </tr>
+                
+                <tr>
+                    
+                    <td class="label">City: </td>
+                    <td>
+                        <?
+                            $cityMulti = false;
+                            
+                        ?>
+                        <?= $city->displaySelect('filters[city]', '', ' ', '', false, '', true) ?>
+                        <input type="checkbox" class="enable-multi-select" <?= $cityMulti ? ' checked="checked"' : '' ?> /> Multi
+                    </td>
+                
+                </tr>
+                
+                <tr>
+                    <td class="label">County: </td>
+                    <td>
+                        <?
+                            $countyMulti = false;
+                            
+                        ?>
+                        <?= $county->displaySelect('filters[county]', '', ' ') ?>
+                        <input type="checkbox" class="enable-multi-select" <?= $countyMulti ? ' checked="checked"' : '' ?> /> Multi
+                        
+                    </td>
+                    
+                </tr>
+                <tr>                                    
+                    <td class="label">Zip: </td>
+                    <td>
+                        <input type="text" name="filters[zip]" value="" />
+                    </td>
+                    
+                </tr>
+                <tr>                                    
+                    <td class="label">Service Area: </td>
+                    <td>
+                        <input type="text" name="filters[service_area]" value="" />
+                    </td>
+                    
+                </tr>
+                <tr>                                    
+                    <td class="label">Service Terms: </td>
+                    <td>
+                        <input type="text" name="filters[service_terms]" value="" />
+                    </td>
+                    
+                </tr>
+            
+            </tbody>
+        </table>
+    
+<?php  
+	break;
+            case 3:
+	
+	?>
+                
+<table id="search-form-table">
+			<tbody>
+				
+				<tr>
+					
+					<td class="label" style="vertical-align: top">Region </td>
+					<td style="vertical-align: top">
+						<?
+							if (isset($_SESSION['user']['region_id'])) {
+								$regionName = $setting->getSettingById($_SESSION['user']['region_id']);
+								echo $regionName;
+								echo '<input type="hidden" name="filters[region_id]" value="' . $_SESSION['user']['region_id'] . '" />';
+							} else {
+								echo $region->displaySelect('filters[region_id]', '', ' ');
+							}
+						?>
+					</td>
+					
+				</tr>
+				<tr>									
+					<td class="label">Organization Name: </td>
+					<td>
+						<input type="text" name="filters[organization_name]" value="" />
+					</td>
+					
+				</tr>
+                <tr>
+                    <td class="label">Event Type: </td>
+                    <td>
+                        <?= $event_type->displaySelect('filters[event_type_id]', '', ' ') ?>
+                        
+                        <input type="checkbox" class="enable-multi-select"> Multi
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Outreach Type: </td>
+                    <td>
+                        <?php 
+                        $outreach_type         = new Setting('outreach_type');
+                        echo $outreach_type->displaySelect('filters[outreach_type_id]', '', ' ');
+                         ?>                        
+                    </td>
+                </tr>
+                <tr>                                    
+                    <td class="label">Event Zipcode: </td>
+                    <td>
+                        <input type="text" name="filters[event_zipcode_id]" value="" />
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td class="label">Event County: </td>
+                    <td>
+                        <?
+                            $countyMulti = false;
+                            
+                        ?>
+                        <?= $county->displaySelect('filters[county]', '', ' ') ?>
+                        <input type="checkbox" class="enable-multi-select" <?= $countyMulti ? ' checked="checked"' : '' ?> /> Multi
+                        
+                    </td>
+                    
+                </tr>	
+                <tr>                    
+                    <td class="label">HMG Worker: </td>
+                    <td>
+                        <?= $organization->displayHmgWorkerSelect('filters[hmg_worker]', '', ' ', '', '', '', false) ?>
+                        <?= $organization->displayHmgWorkerSelect('filters[hmg_worker]', '', ' ', '', 'hide-hmg-worker', false) ?>
+                        <input type="checkbox" class="js-toggle-worker-select"> All
+                    </td>
+                </tr>
+                <tr>	
+                <td class="label">Language: </td>
+                    <td>
+                        <?= $language->displaySelect('filters[event_language_id]', '', ' ') ?>
+                    </td>
+                    </tr>	
+                <tr>
+                    <td class="label">Time Of Day: </td>
+                    <td>
+                        <?php 
+                        $outreach_type         = new Setting('time_of_day');
+                        echo $outreach_type->displaySelect('filters[time_of_day]', '', ' ');
+                         ?>                        
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Event Date: </td>
+                    <td>
+                        <input type="text" class="date" id="adv-start-date" name="filters[event_start_date]" value="" placeholder="Start Date" />
+                        <input type="text" class="date" id="adv-end-date" name="filters[event_end_date]" value="" placeholder = "End Date" />
+                    </td>
+                </tr>
+			</tbody>
+		</table>
+<?php  
+	break;
+}?>			
+</div>
+		
+		<div style="float: right;">
+			<div class=" outerButton">
+				<div class="buttonLeft">
+					<div class="buttonText">
+                        <input type="button" name="" id="" value="Generate Report" class="fancybox_report btn-small" onclick="javascript:document.generate.submit();"/>
+						
+					</div>
+				</div>
+				<div class="buttonRight">&nbsp;</div>
+			</div>		
+							
+		</div>
+		<br>
+		</form>
+	</div>
+</div>
+
+        </div>
+      <!-- InstanceEndEditable -->
+      </div>
+
+
+
+
+
+<div id="Edit_reportBuilder_popupBox" style="display: none;width: 995px;">	
+
+	<div class="contentBox" style="width: 991px;">
+		<div class="content">
+			<div class="pageTitleBar">
+				<h1>Report Builder</h1>
+				<a class="closeLink" href="javascript:voidit(0)" onclick="hideBuildReport();">
+					<div class="close">&nbsp;</div>
+				</a>
+			</div>
+			<hr>
+			<div class="bodyBox">
+				<div class="body">
+				<div class="mainReportBuilderBox">
+				<div class="reportBuilderComponents">
+					<h2 class="componentTitle">Add Elements:</h2>
+					<div style="float: left;" class="addFormButtons">
+						<a href="javascript:reportBuilder.addFieldSet('form');" class="addFormButton"><div>&nbsp;</div></a>
+						<a href="javascript:reportBuilder.addFieldSet('grid');" class="addGridButton"><div>&nbsp;</div></a>
+						<a href="javascript:reportBuilder.addFieldSet('space');" class="addSpaceButton"><div>&nbsp;</div></a>
+						<a href="javascript:reportBuilder.addFieldSet('pageBreak');" class="addPageBreakButton"><div>&nbsp;</div></a>
+					</div>
+				</div>
+				<div class="reportBuilderEditorBox">
+					<div id="editBox" class="reportBuilderEditor"></div>
+				</div>
+				<div class="reportBox">
+					<div class="narrowReportBox">
+					<? if ($showHeader) { ?>
+							<div class="reportHeaderBox">
+								<div class="reportHeader">
+									<h2 class="reportTitle"><?=$reportResult['Name']?></h2>
+									<div class="generatedOn">Generated <?=date("M d Y")?></div>
+								</div>
+							</div>
+						<? } ?>
+					<div id="report" class="narrowReport"></div>
+					</div>
+				</div>
+				<div class="hr">&nbsp;</div>
+				<div style="padding: 5px 0 0 5px;">
+				<div class="blueOnBlueButton outerButton">
+				<div class="buttonLeft">
+					<div class="buttonText">
+						<a href="javascript:saveData();">Save Report</a>
+					</div>
+				</div>
+				<div class="buttonRight">&nbsp;</div>
+				</div>				
+				</div>
+				<div class="hr">&nbsp;</div>
+			</div>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	

@@ -1,0 +1,100 @@
+		<div class="titleBar" style="padding: 0 10px;"><span class="caption" style="">Family Screening</span></div>
+	<form id="developmental-screening-form" class="development-screening-form" action="index.php" method="get" onsubmit="return false;" enctype="multipart/form-data">
+		<input type="hidden" name="action" value="family-screening" />
+		<input type="hidden" id="child-id" name="developmentScreening[family_id]" value="<?= $family_id ?>" />
+		<input type="hidden" id="id" name="developmentScreening[id]" value="<?= (isset($developmentalScreening) ? $developmentalScreening['id'] : '') ?>" />
+		<div style="padding: 10px">
+		<table id="screening-form-table">
+			<tbody>
+				<tr>
+					<td class="label">Completed By</td> 
+					<td>
+						<select id="developmentScreening[completed_by]" class="setting  screening-type-family" name="developmentScreening[completed_by]" tabindex="100">
+							<option value=""></option>
+							<?php 
+							$var_completed_by = (isset($developmentalScreening['completed_by']) && $developmentalScreening['type'] ? $developmentalScreening['completed_by'] : '');
+							if(!empty($family->family['first_name_1'])){ 
+
+								?>
+							<option value="<?php echo $family->family['first_name_1'].' '.$family->family['last_name_1'];?>" <?php if($var_completed_by == $family->family['first_name_1'].' '.$family->family['last_name_1']){ echo "selected";} ?>><?php echo $family->family['first_name_1'].' '.$family->family['last_name_1'];?></option>
+							<?php } if(!empty($family->family['first_name_2'])){ ?>
+							<option value="<?php echo $family->family['first_name_2'].' '.$family->family['last_name_2'];?>" <?php if($var_completed_by == $family->family['first_name_2'].' '.$family->family['last_name_2']){ echo "selected";} ?>><?php echo $family->family['first_name_2'].' '.$family->family['last_name_2'];?></option>
+							<?php } ?>
+						</select>
+					</td>
+					<td class="label"></td>
+					<td>
+						
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Family Screening Type</td> 
+					<td>
+						<?= $screening_type->displaySelect('developmentScreening[type]', (isset($developmentalScreening['type']) && $developmentalScreening['type'] ? $developmentalScreening['type'] : ''), ' ', '100', false, ' screening-type-family', true, false) //261016 revert back ?>
+					</td>
+					<td class="label">Date Completed</td>
+					<td>
+						<input name="developmentScreening[date_sent]" value="<?= (isset($developmentalScreening['date_sent']) && $developmentalScreening['date_sent'] != '0000-00-00' ? $developmentalScreening['date_sent'] : '') ?>" class="date" tabindex="140" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Family Screening Interval</td>
+					<td>
+						<?= $screening_interval->displaySelect('developmentScreening[type_interval]', (isset($developmentalScreening['type_interval']) && $developmentalScreening['type_interval'] ? $developmentalScreening['type_interval'] : ''), ' ', '120', false, ' screening-interval-family', true, true) ?>
+					</td>
+
+					<td class="label">Date Faxed</td>
+					<td>
+						<input name="developmentScreening[date_sent_provider]" value="<?= (isset($developmentalScreening['date_sent_provider']) && $developmentalScreening['date_sent_provider'] != '0000-00-00' ? $developmentalScreening['date_sent_provider'] : '') ?>" class="date" tabindex="170" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Overall Score</td>
+					<td>
+						<?= $score->displaySelect('developmentScreening[score]', (isset($developmentalScreening['score']) && $developmentalScreening['score'] ? $developmentalScreening['score'] : ''), ' ', '130', false, ' screening-score', false, false) ?>
+					</td>
+                    <td colspan="2" style="padding-left: 15px;">
+						<span class="infoLabel">Attachments:</span>
+						<div id="attachment-container">
+							<?=$attachment_content?>
+						</div>
+						<iframe id="screening-attachment-frame" scrolling="no" src="views/family-file-screening.phtml?id=<?=(isset($developmentalScreening['id'])?$developmentalScreening['id']:'')?>&type=screening<?= (isset($developmentalScreening) ? '&show-button=1' : '') ?>" style="width: 200px; height: 20px; margin: 0px; overflow: hidden;"></iframe>
+					</td>					
+				</tr>
+				<tr>
+					<td class="label"  valign="top">Numerical Score</td>
+					<td valign="top">
+						<input name="developmentScreening[ed_score]" value="<?= (isset($developmentalScreening['ed_score']) ? $developmentalScreening['ed_score'] : '0') ?>"  tabindex="120" />
+					</td>
+					<td colspan="2">
+					&nbsp;					
+					</td>
+				</tr>
+				<tr>
+					<td class="label" rowspan="2" valign="top">Self Harm Rating</td>
+					<td rowspan="2" valign="top">
+						<?= $harm_rating->displaySelect('developmentScreening[harm_rating]', (isset($developmentalScreening['harm_rating']) && $developmentalScreening['harm_rating'] ? $developmentalScreening['harm_rating'] : ''), ' ', '130', false, 'harm_rating', true, false) ?>
+					</td>					
+				
+					
+					<td valign="top" colspan="2" style="padding-left: 15px;">
+						<textarea name="developmentScreening[notes]" cols="40" rows="6" tabindex="250" style="width: 190px; padding: 4px;" placeholder="Screening Notes"><?= (isset($developmentalScreening['notes']) ? $developmentalScreening['notes'] : '') ?></textarea>
+					</td>
+					
+				</tr>
+				
+				<tr>
+					
+				
+					<td colspan="4" style="text-align: right;">
+						<input type="submit" class="btn-small save-developmental-screening" name="save" value="<?= (isset($developmentalScreening['id']) && is_numeric($developmentalScreening['id']) ? 'Save': 'Add') ?>" tabindex="260" />
+						<? if(isset($developmentalScreening['id']) && is_numeric($developmentalScreening['id'])){ ?>
+						<input type="submit" class="btn-small delete-developmental-screening" name="delete" value="Delete" tabindex="280" />
+						<? } ?>
+					</td>
+				</tr>
+				
+			</tbody>
+		</table>
+		</div>
+	</form>

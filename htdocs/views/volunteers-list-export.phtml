@@ -1,0 +1,39 @@
+<? 
+if(is_array($volunteers)){	
+	$export = 'First Name,Last Name,Status,Organization,Address,City,State,Zip,Phone,Email,Language,How Heard,Areas,Notes' . "\n";
+	foreach($volunteers as $volunter){
+		//241016
+		$export .= ucfirst(strtolower($volunter['first_name'])) . ', ' 
+			. ucfirst(strtolower($volunter['last_name'])) . ','
+			. $volunter['status'] . ','
+			. $volunter['organization'] . ', ' 
+			. $volunter['address'] . ', '
+			. $volunter['city'] . ','
+			. $volunter['state'] . ','
+			. $volunter['zip'] . ','
+			. $volunter['phone'] . ','
+			. $volunter['email']  . ','
+			. str_replace(',', ';', $volunter['language']) . ','
+			. $settingOb->getSettingById($volunter['how_heard']) . ','
+			. '"' . trim($volunter['areas'], ',') . '",'
+			. '"' . $volunter['notes']  . '"' . "\n";
+		
+	}
+}
+
+$export .= ',,,,,,,,,,,,,,' . "\n";
+
+$filteredBy = '';
+foreach($filters as $filter => $value){
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=($filteredBy ? '' : 'Active Filters:,,,,,,,,,,,,,' . "\n") . ',' . ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . ',,,,,,,,,,,,,' . "\n"; // . '=' . $value;
+	}
+}
+
+$export .= $filteredBy;
+
+echo $export 
+?>

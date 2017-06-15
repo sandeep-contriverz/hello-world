@@ -1,0 +1,14 @@
+<div id="resource<?= $resource['id'] ?>" data-resource-id="<?= $resource['id'] ?>" class="resource clickable" style="position: relative;">
+	<div class="resourceName">
+		<?php //181016
+			echo $setting->getSettingById($resource['service_type']); 
+		?>
+		<div class="resource-date" style="float:right;"><?php if($resource['date_enrolled_formatted'] != '12/31/69'){ echo $resource['date_enrolled_formatted']; } ?></div>
+	</div>
+	
+	<div class="infoText resource-note" style="padding: 3px 45px 10px 10px;"><?= $resource['notes'] ?></div>
+
+	<div style="position: absolute; bottom: 5px; right: 5px; width: 38px; height: 22px;">
+		<input type="button" class="btn-small editPriorResource" name="editPriorResource" data-resource-id="<?= $resource['id'] ?>" value="Edit" />
+	</div>
+</div>

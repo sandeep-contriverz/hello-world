@@ -1,0 +1,82 @@
+<?
+if(is_array($families)){
+
+	$export = 'Families Export,,,,,,,,,,,,,,' . "\n\n";
+
+	// Adds filtered by
+	$filteredBy = '';
+	if(count($filters)){
+		$export .= 'Active Filters:,,,,,,,,,,,,,,' . "\n";
+	}
+	foreach($filters as $filter => $value){
+		// if value is numeric then we need to look up it's name in the settings table
+		if(is_numeric($value)
+			&& $filter != 'zip'
+			&& $filter != 'school_district'
+			&& $filter != 'child_id'
+		&& $filter != 'age_max'
+		&& $filter != 'age_min'
+		){
+			$value = $setting->getValue($value);
+		}
+		if(is_array($value) && $filter == 'providers'){
+			$tmpValues = [];
+			foreach ($value as $providerId) {
+				$tmpValues[] = $providers->getProviderNameById($providerId);
+			}
+			$value = $tmpValues;
+		} 
+		if(is_array($value)) {
+			$value = implode(', ', $value);
+		}
+		if($value){
+			$filteredBy .=
+				($filteredBy ? ' - ' : '') .
+				ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+				': ' .
+				$value;
+		}
+	}
+	$export .= (strpos($filteredBy, ',') ? '"' . $filteredBy . '"': $filteredBy) . "\n";
+	$export .= ',,,,,,,,,,,,,,' . "\n";
+
+	// Adds header
+	$export .= 'Family ID,Primary First Name, Primary Last Name,Relationship,Secondary First Name,Secondary Last Name,Relationship,Language,Reason for call,Address,City,State,Zip,Phone,Other Phone,Email,HMG Worker,Best Time,Best way of contact' . "\n";
+
+	// Adds rows
+	foreach($families as $family){
+
+		$contact = '';
+		$contact .= ($family['contact_phone'] ? 'Phone' : '');
+		$contact .= ($family['contact_text'] ? ($contact ? ', ' : '') . 'Text' : '');
+		$contact .= ($family['contact_email'] ? ($contact ? ', ' : '') . 'Email' : '');
+		if(strpos($contact, ',')){
+			$contact = '"' . $contact . '"';
+		}
+
+
+		$export .= $family['family_code'] . ','
+			. ucfirst(strtolower($family['first_name_1'])) . ','
+			. ucfirst(strtolower($family['last_name_1'])) . ','
+			. $family['relationship_1'] . ','
+			. ucfirst(strtolower($family['first_name_2'])) . ','
+			. ucfirst(strtolower($family['last_name_2'])) . ','
+			. $family['relationship_2'] . ','
+			. ucfirst(strtolower($family['language'])) . ','
+			. $family['call_reason'] . ','
+			. (strpos($family['address'], ',') ? '"' . $family['address'] . '"' : $family['address']) . ', '
+			. $family['city'] . ','
+			. $family['state'] . ','
+			. $family['zip'] . ','
+			. $family['primary_phone'] . ','
+			. $family['secondary_phone'] . ','
+			. $family['email'] . ','
+			. $family['hmg_worker'] . ','
+			. $family['best_times'] . ','
+			. $contact . "\n";
+
+	}
+}
+
+echo $export
+?>

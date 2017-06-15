@@ -1,0 +1,55 @@
+<?php 
+use Hmg\Models\Setting;
+use Hmg\Models\User; 
+
+$setting = new Setting(); 
+
+//191016 ?>
+<tr id="referralRow_<?= $referral['id'] ?>" class="clickable <?=$rowClass?>">
+							<td style="white-space: nowrap;">
+								<div class="toggleArrow" style="height: 24px;"></div>
+								<? $user = new User();
+								if(!empty($referral['hmg_worker'])) {
+								$user->setById($referral['hmg_worker']);
+								}
+								echo ((!empty($user) && isset($user->user['hmg_worker'])) ? $user->user['hmg_worker'] : 'Unknown');
+								?><br />
+								<?= $referral['referral_date_formatted'] ?>									
+							</td>
+							<td><?= $referral['issue'] ?></td>
+							<!--td><?= $referral['referred_to'] ?></td-->
+							<td>
+							<?php
+							$siteSeprate = '';
+							if($referral['site_name']){
+								$siteSeprate = ': '.$referral['site_name'];
+							}
+							echo $referral['organization_name'].$siteSeprate;
+							?>
+							
+								</td>
+							<td><?= $referral['service'] ?></td>
+							<td><?= $setting->getSettingById($referral['outcomes']) ?></td>
+						</tr>
+
+						<tr id="referralRow_details_<?= $referral['id'] ?>" class="hidden <?=$rowClass?>">
+							<td>&nbsp;</td>
+							<td colspan="4">
+								<table style="width: 100%; border: none;">
+									<tr>
+										<td style="border: none;"><b>Gaps:</b> <?= $gaps->getValue($referral['gap']) ?></td>
+										<td style="border: none;"><b>Barriers:</b> <?= $barriers->getValue($referral['barrier']) ?></td>
+										<td style="border: none;"><b>Based on Screening:</b> <input type="checkbox" disabled <?= ($referral['based_screening'] ? ' checked' : '') ?> /></td>
+										<td style="border: none; width: 60px;">&nbsp;</td>
+									</tr>
+									<tr>
+										<td colspan="3" style="border: none;">
+											<b>Notes:</b> <?= $referral['notes'] ?>
+										</td>
+										<td style="width: 60px; text-align: center; border: none;">
+											<input type="button" class="btn-small edit-referral" id="edit_<?= $referral['id'] ?>" value="Edit" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>

@@ -1,0 +1,380 @@
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$(document).on('click', '.parent-setcontainer', function(e){
+		
+		
+		e.preventDefault();
+		var txt = $.trim($(this).find('.parent.toggleArrow').next('.clickable').text());
+		location.href = "index.php?action=settings&manage="+txt;
+		return false;
+	});
+
+	$('.fancybox').fancybox({
+		padding : '10px'
+	});
+	$(".date").datepicker({ dateFormat: 'yy-mm-dd' });
+
+	var self = this;
+	var currentItem;
+	/** Open sync popup on click **/
+	$(document).on('click', '#sync_popup_open', function(){
+		var is_open = true;
+		
+		$('#sync_date').val('');
+		if(is_open)	
+			$.fancybox.open('#sync_popup');
+		else 
+			$('#sync-asq').trigger('click');
+
+		return false;
+	});
+	/** On start sync button click **/
+	$(document).on('click', '#start_sync', function(){
+        //alert('fsdfsdf');
+		var token = $.trim($('#sync_region').val());
+		var sync_date = $.trim($('#sync_date').val()); //yyyy-mm-dd
+		var region = $.trim($('#sync_region').find('option:selected').text());
+        
+		sync_url = "<?php echo $GLOBALS['sync_url']; ?>?token="+token+"&date="+sync_date+"&region="+region;
+        
+        window.open(
+            sync_url,
+            '_blank' 
+        );
+		//close sync popup
+		setTimeout(function() {
+			$.fancybox.close();
+		}, 300);
+        return false;
+	});
+	/** On cancel sync button click **/
+	$(document).on('click', '#cancel_sync', function(){
+		$.fancybox.close();
+	});
+
+	function replaceWithEditForm(parentElementId, toggleDisplay){
+		var parent = $('#' + parentElementId);
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Save'); // Change button value
+		ulElement = parent.find('ul');
+		liElements = ulElement.find('li');
+
+		liElements.each(function(index){
+			ex = $(this).text().split('-');
+			tmp = ex[0];
+			tokenVal = '';
+			if(ex.length>1){
+		    	tokenVal = ex[1];
+		    }
+			tmpId = $(this).attr('id').replace('rs','').replace('setting','');
+			tmpClass = $(this).attr('class');
+			$(this).attr('class', 'setting-item');
+			disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			curIndex = index;
+			if(parentElementId == 'region_api') {
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' /> '+'<input type="text" value="'+tokenVal+'" name= "token" placeholder="Token"/>'+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			} else {
+				$(this).html('<input name="settings[' + tmpId + ']" value="' + tmp + '" data-id="' + tmpId + '" class="setting-input' + (disabled ? ' setting-input-disabled' : '') + '" ' + (disabled ? ' disabled' : '') + ' /> '+'<input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>');
+			}
+		});
+		/*liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/>'+(ex.length>1?'<input type="text" value="" name= "token" placeholder="Token"/>':'')+'</li>');*/
+		//console.log('parentElementId= '+parentElementId);
+		if(parentElementId == 'region_api') {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/><input type="text" value="" name= "token" placeholder="Token"/></li>');
+		} else {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" /></li>');
+		}
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+	}
+
+	function removeEditForm(parentElementId, toggleDisplay){
+		// Make an ajax request
+		var parent = $('#' + parentElementId);
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Edit'); // Change button value
+		ulElement = parent.find('ul.settings-list');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			input = li.find('.setting-input');
+
+			if(input.length){
+				inputValue = input.val();
+				if(parentElementId == 'region_api') {
+					tokenValue = input.next().val();
+					if(tokenValue != '') {
+						inputValue = inputValue+' - '+tokenValue;
+					}
+				}
+				if(inputValue){
+					li.html(inputValue);
+				} else {
+					li.remove();
+				}
+			}
+		});
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	function cancelEditForm(parentElementId, toggleDisplay){
+		// Retrieve from cache
+		var parent = $('#' + parentElementId);
+		parent = parent.replaceWith(currentItem);
+		ulElement = parent.find('ul.settings-list');
+		arrow = parent.find('.toggleArrow');
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	$(document).on('change', '.js-enable-setting', function(){
+		var input = $(this).parent('li').find('input').eq(0);
+		var id = input.data('id');
+		var value = this.checked ? 0 : 1;
+		json = '{"id":"' + id + '", "value": "' + value + '"}';
+
+		$.post('index.php', { 'action' : 'setting', 'update' : 'true', 'json' : json }, function(data){
+			if(data.success){
+				if(value){
+					input.attr('class', 'setting-input setting-input-disabled');
+					input.prop('disabled', true);
+				} else {
+					input.attr('class', 'setting-input');
+					input.prop('disabled', false);
+				}
+			}
+		});
+	});
+
+	$(document).on('click', '.settings-list .btn-small', function(){
+		if($(this).val() == 'Edit'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			//console.log(parentElementId);
+			replaceWithEditForm(parentElementId);
+		} else if($(this).val() == 'Cancel'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			var toggleDisplay = true;
+			cancelEditForm(parentElementId, toggleDisplay);
+		} else {
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			var syncSelectList = $('#sync_region');
+			if(parentElementId == 'region_api') {
+				syncSelectList.find('option').remove(); // Remove sync select list items
+			}
+			btn = $(this);
+			ulElement = btn.parents('ul');
+			parentDiv = ulElement.parent('div');
+  			arrow = parentDiv.find('.toggleArrow');
+			// Create a JSON string and post to model
+			// Create a new list of settings
+			parentId = parentDiv.attr('id');
+			json = '{"id":"' + parentId + '","settings":[';
+			liElements = ulElement.find('li');
+			addSeparator = false;
+			liElements.each(function(index){
+				tokenVal = '';
+				tmpInput = $(this).find('input').eq(0);
+				tmpId = $(this).attr('id').replace('setting', '');
+				tmpVal = $.trim(tmpInput.val());
+				if($.trim($(this).find('input[name="token"]').val()) != '') {
+					tokenVal = $.trim($(this).find('input[name="token"]').val());
+				}
+				if(tmpId || tmpVal){
+					json += (addSeparator ? ',' : '') + '{"id" : "' + tmpId + '", "value" : "' + tmpVal + '","token" :"'+tokenVal+'"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			//console.log(json);
+			$.post('index.php', { 'action' : 'setting', 'save' : 'true', 'json' : json }, function(data){
+				//console.log(data);
+				if(! $.isEmptyObject(data)){
+					btn.val('Edit'); // Change button value
+					liElements.remove(); // Remove input list items
+					var items = [];
+					$.each(data, function(key, val) {
+						if(parentElementId == 'region_api') {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + val.name + (val.token ? ' - '+val.token : '') + '</li>').appendTo(ulElement);
+	    					if(val.disabled != "1" && $.trim(val.token) != '') {
+	    						$('<option value="'+val.token+'">' + val.name + '</option>').appendTo(syncSelectList);
+	    					}
+	    				} else {
+	    					$('<li class="setting-item' + (val.disabled === "1" ? ' setting-disabled' : '') + '" id="setting' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+	    				}
+    					
+  					});
+					ulElement.toggleClass('hide2', 1000, "easeOutSine");
+					arrow.toggleClass('on');
+  				}
+			});
+		}
+	});
+	clicktimer = 0;
+	/*$('.setting-container .clickable, .setting-container .child.toggleArrow').on('click', function(e){
+		var parent = $(this).parent();
+		currentItem = parent.clone(true, true); // Cache in case they cancel
+		parentElementId = parent.attr('id');
+		arrow = parent.find('.child.toggleArrow');
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		clicktimer = setTimeout(function(){
+			ul = parent.find('ul');
+			var toggleDisplay = true;
+			removeEditForm(parentElementId, toggleDisplay);
+		}, 300);
+	});*/
+
+	var allowDoubleClick = true;
+	/*9$('.setting-container .clickable, .setting-container .child.toggleArrow').on('dblclick', function(e){
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		if(allowDoubleClick){
+			parentElementId = $(this).parent().attr('id');
+			var toggleDisplay = true;
+			replaceWithEditForm(parentElementId, toggleDisplay);
+			allowDoubleClick = false;
+		}
+	});*/
+
+	/*$('.parent-setcontainer .clickable, .parent-setcontainer .parent.toggleArrow').on('click', function(e){
+		var parent = $(this).parent();
+		currentItem = parent.clone(true, true); // Cache in case they cancel
+		parentElementId = parent.attr('id');
+		arrow = parent.find('.parent.toggleArrow').eq(0);
+		arrow.toggleClass('on');
+		parent.find('.setting-container').toggleClass('hide2');
+	});
+
+	$('.parent-setcontainer .clickable, .parent-setcontainer .parent.toggleArrow').on('dblclick', function(e){
+		//
+	});*/
+
+	$('.settings-list').on('click', '.new-input', function(e){
+		// another li and input
+		ulElement = $(this).parents('ul.settings-list');
+		var parentEleId = $(this).parent('li').parent('ul').parent('div').attr('id');
+		if(parentEleId == 'region_api') {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" placeholder="Region Name"/><input type="text" value="" name="token" placeholder="Token"/></li>');
+		} else {
+			liElements.last().after('<li id="setting0"><input name="setting[0]" value="" class="setting-input new-input" /></li>');
+		}
+	});
+});
+
+	function showSyncResponse() {
+	    $.fancybox({
+	        'type': 'inline',
+	        'href': '#sync-result'
+	    });
+	};
+</script>
+
+<div id="sync_popup" style="display: none; padding: 10px; white-space: nowrap; width:350px;">
+	<table class="" cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+		<tbody>
+			<tr>
+				<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Select Location:</td>
+				<td class="infoText borderRight" style="">
+				<?php //echo "<pre>";print_r($settingLists);die; ?>
+					<select id="sync_region" style="max-width: 240px;min-width: 210px;">
+					<?php 
+						foreach($settingLists['General Items']['Regions for the API'] as $settingLabel => $settingObj) {
+							 
+								if(is_array($settingObj)){
+									foreach($settingObj as $setting){
+										if($setting['disabled'] == "1" || empty($setting['token']) )
+											continue;
+										
+                                        echo '<option value="'.$setting['token'].'">'.$setting['name'].'</option>';
+										
+									}
+								}
+							
+						} 
+					?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Start From Date:</td>
+				<td class="infoText borderRight" style="">
+					<input type="text" id="sync_date" class="date" placeholder="Leave blank to sync from last update" style="width: 205px;">
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+			<tr>
+				<td colspan="2" class="txtCntr"><input type="submit" id="start_sync" value="Start Sync" class="btn-small">&nbsp;&nbsp;<input type="submit" id="cancel_sync" value="Cancel" class="btn-small"></td>
+			</tr>
+			<tr>
+				<td colspan="2"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div style="margin-top: 10px;font-weight: bold;white-space: normal;text-align: center;">This process can take several minutes.</div>
+</div>
+<!--a href="#sync_popup" class="fancybox" style="font-weight: normal">Open</a-->
+<div class="pageTitleBar">
+	<h1>Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="region-counties" /><input type="submit" value="Region/Counties" class="btn-small" /></form>
+		<!--form action="index.php"><input type="hidden" name="action" value="referral-services" /><input type="submit" value="Referrals/Services" class="btn-small" /></form-->
+		<form action="index.php"><input type="submit" class="btn-small" id="sync_popup_open" value="Sync to ASQ Database"></form>
+		<div style="display:none; float: right;" id="ASQSyncApp"></div>
+		<form action="index.php"><input type="hidden" name="action" value="users" /><input type="submit" value="User Accounts" class="btn-small" /></form>
+	</div>
+</div>
+
+<? foreach ($settingLists as $parentLabel => $parentObj) : $c = 1;?>
+
+<div id="<?= str_replace(' ', '_', strtolower($parentLabel)) ?>" class="parent-setcontainer">
+	<div style="margin: 7px 10px 5px 0;" class="parent toggleArrow"></div>
+	<div class="clickable"><?= $parentLabel ?></div>
+<? foreach ($parentObj as $settingLabel => $settingObj) : 
+   //	print_r($settingObj);  
+?>
+	<? if(in_array($settingLabel, 
+			array('School Districts', 'School Districts Zipcodes', 'County Zipcodes', 'Regions/Counties', 'Informational Referral'))) {
+			continue; 
+		}
+	?>
+<div id="<?= $settingObj->getType() ?>" class="setting-container hide2">
+<?//= ($c===1) ? "margin: 7px 10px 10px 0;" : "margin: 7px 10px 5px 0;"; ?>
+	<div class="child toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+	<div class="clickable"><?= $settingLabel ?></div>
+	<ul class="settings-list hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+		<div class="setting-buttons">
+			<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+		</div>
+
+		<?php //echo "<pre>";print_r($settingObj->settings);die; ?>
+		<? if(is_array($settingObj->settings)) : ?>
+		<? foreach($settingObj->settings as $setting) : ?>
+			<? if($setting) : ?>
+				<li class="setting-item<?= ($setting['disabled'] ? ' setting-disabled' : '') ?>" id="setting<?= $setting['id'] ?>"><?= $setting['name'] ?> <?php if(isset($setting['token'])){ echo ' - '.$setting['token']; } ?>
+					
+				</li>
+			<? endif; ?>
+		<? endforeach ?>
+		<? endif; ?>
+	</ul>
+</div>
+<? $c++; endforeach ?>
+</div>
+<? endforeach ?>
+
+
+<div style="clear:left">&nbsp;</div>

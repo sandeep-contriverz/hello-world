@@ -1,0 +1,192 @@
+<script type="text/javascript">
+
+var newChildCurrentIndex = 0;
+$("document").ready(function(){
+
+	$("#outreach-reports").on('click', "#providerListSearch", function(e){
+		$(document).unbind('keydown');
+		$(this).select();
+	});
+	$("#outreach-reports").on('keyup', "#providerListSearch", function(e){
+		var keycode = e.which;
+		if(keycode == 40){
+			// Move focus to first element in Div
+			var providerList = $("#outreach-reports #providerList");
+			var firstItem = providerList.find('a:first-child');
+			firstItem.addClass('hover').focus();
+			// Disable scrolling while in the auto-suggest
+            $(document).keydown(function(e) {
+                e.preventDefault();
+            });
+		} else {
+			if(keycode == 13 || keycode == 9){
+				// check to see if we have an id
+				// if we do, then submit the form
+				var id = $('#providerListSearchId').val();
+				// submit the form
+				$('#create-report').click();
+				return;
+			}
+			var searchValue = $(this).val();
+			reportType = $(this).parents('form').find('#reportType').val();
+			postString = 'action=providers&search=' + searchValue;
+			if(reportType == 'agency-referrals'){
+				postString = 'action=referral-services&search=' + searchValue;
+			}
+			if(reportType == 'provider-family-clinic' || reportType == 'provider-family-child-id'){
+				postString = 'action=providers&searchType=clinic&search=' + searchValue;
+			}
+			$.post(
+				'index.php', postString, function(data){
+				if(! $.isEmptyObject(data)){
+					providerList = $('#providerList');
+					providerList.find('a').remove(); // resets the list
+					curClass = '';
+					$.each(data, function(key, val) {
+						if(curClass == 'odd'){
+							curClass = 'even';
+						} else {
+							curClass = 'odd';
+						}
+						$('<a href="#" class="pitem ' + curClass + '" data-id="' + val.id + '">' + val.name + '</a>').appendTo(providerList);
+					});
+					if(searchValue){
+						$('#providerListSearchId').val(' ');
+						$('#providerList').show();
+					} else {
+						$('#providerList').hide();
+					}
+				} else {
+					$('#providerList').hide();
+				}
+			});
+		}
+	});
+    $('#outreach-reports').on('keydown', '.pitem', function(event){
+	    var keyCode = event.which;
+	    var currentNode = $(this);
+	    switch(keyCode){
+	        case 40:
+	             // stop when we get to the end.
+	        	if(currentNode.attr('data-id') == $('#providerList a:last-child').attr('data-id')){
+	        		break;
+	        	}
+	            nextNode = currentNode.next();
+	            if(nextNode){
+	                currentNode.removeClass('hover');
+	                nextNode.focus().addClass('hover');
+	            }
+	            break;
+	        case 38:
+	            prevNode = currentNode.prev();
+	            if(prevNode){
+	                currentNode.removeClass('hover');
+	                prevNode.focus().addClass('hover');
+	                if(currentNode.attr('data-id') == $('#providerList a:first-child').attr('data-id')){
+	                    $('#providerList').hide();
+	                    $('#providerListSearch').focus();
+	                }
+	            }
+	            break;
+	        case 13:
+	        case 9:
+	        	$(this).click();
+	        	break;
+	        default:
+        }
+    });
+	$("#outreach-reports").on('click', "#providerList a", function(e){
+		e.preventDefault();
+		var id = $(this).attr('data-id');
+		var name = $(this).text();
+		$('#providerListSearch').val(name);
+		$('#providerListSearchId').val(id);
+		$('#providerList').hide();
+		$('#providerListSearch').focus();
+		$(document).unbind('keydown');
+	});
+
+	$('#reportType').on('change', function(e){
+		// reset form fields
+		$('#providerListSearchId').val('');
+		$('#providerListSearch').val('');
+	});
+
+	$('#clear-filters').on('click', function(e){
+		e.preventDefault();
+		// reset form fields
+		$('.filter').val('');
+	});
+
+	$('#create-report').on('click', function(e){
+		e.preventDefault();
+		var id = $('#providerListSearchId').val();
+		id = parseInt(id);
+		$('#export').val('');
+		if(id){
+			$('.message').html('');
+			form = $('#outreach-form');
+			form.attr('target', '_blank');
+			form.submit();
+		} else {
+			$('.message').html('Error: Missing provider or agency information');
+		}
+	});
+
+	$('#export-report').on('click', function(e){
+		e.preventDefault();
+		var id = $('#providerListSearchId').val();
+		id = parseInt(id);
+		$('#export').val('1');
+		if(id){
+			$('.message').html('');
+			form = $('#outreach-form');
+			form.attr('target', '_blank');
+			form.submit();
+		} else {
+			$('.message').html('Error: Missing provider or agency information');
+		}
+	});
+
+	// initialize date picker
+	$('.date').datepicker();
+
+});
+
+</script>
+<form id="outreach-form">
+<input type="hidden" name="action" value="reports" />
+<input type="hidden" name="type" value="outreach" />
+<input type="hidden" id="export" name="export" value="" />
+<div class="pageTitleBar" style="position: relative;">
+	<a href="index.php?action=reports"><h1>Outreach Reports</h1></a>
+	<div id="filter-form" action="index.php" style="position: absolute; left: 200px; top: 6px;">
+		<?= $region->displaySelect('filters[region_id]', $filters['region_id'], 'Region', false, null, 'filter') ?>
+		<?= $statusSetting->displaySelect('filters[status]', $status, 'Status', false, null, 'filter') ?>
+		<input type="text" class="date filter" id="start-date" name="filters[start_date]" value="<?= $start_date ?>" placeholder="Start Date" />
+		<input type="text" class="date filter" id="end-date" name="filters[end_date]" value="<?= $end_date ?>" placeholder = "End Date" />
+		<input type="button" id="clear-filters" name="clearFilters" value="Clear" class="btn-small" />
+		<input type="submit" id="create-report" value="Create Report" class="btn-small" />
+		<input type="submit" id="export-report" value="Export Report" class="btn-small" />
+	</div>
+</div>
+
+<div id="outreach-reports">
+	<div class="message"><?= $message ?></div>
+	<div class="reportTitle">Select a report</div>
+	<select id="reportType" name="report">
+		<option value="provider-family" <?=(isset($_GET['report']) && $_GET['report'] == 'provider-family' ? ' selected' : '')?>>Provider List of Families</option>
+		<option value="provider-family-child-id" <?=(isset($_GET['report']) && $_GET['report'] == 'provider-family-child-id' ? ' selected' : '')?>>Provider List of Families (Clinic Only, Child ID)</option>
+		<option value="provider-family-clinic" <?=(isset($_GET['report']) && $_GET['report'] == 'provider-family-clinic' ? ' selected' : '')?>>Provider List of Families (Clinic Only)</option>
+		<option value="provider-referrals" <?=(isset($_GET['report']) && $_GET['report'] == 'provider-referrals' ? ' selected' : '')?>>Provider List of Referrals</option>
+		<option value="agency-referrals" <?=(isset($_GET['report']) && $_GET['report'] == 'agency-referrals' ? ' selected' : '')?>>Agency Referrals</option>
+	</select>
+	<br />
+	<br />
+	<div class="reportTitle">Enter provider or agency name</div>
+	<input type="hidden" id="providerListSearchId" name="id" />
+	<input id="providerListSearch" name="search" placeholder="Type provider or agency name" autocomplete="off" />
+	<div id="providerList"></div>
+
+</div>
+</form>

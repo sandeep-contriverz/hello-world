@@ -1,0 +1,121 @@
+<script type="text/javascript">
+$("document").ready(function(){
+	$(".provider").on("click", function(){
+		var id = $(this).attr('id').slice(9);
+		location.href="index.php?action=provider&id=" + id;
+	});
+	$(".sort").on("click", function(){
+		field = ($(this).text().replace(/ /g, '_').toLowerCase());
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+			fieldsort = 'desc';
+		}
+		else if($(this).hasClass('sorting_desc')){
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		else {
+			$(this).removeClass('sorting').addClass('sorting_asc');
+			fieldsort = 'asc';
+		}
+		if(field == 'name'){
+			field = 'last_name';
+		}
+		if(field == 'provider_role'){
+			field = 'role';
+		}
+		if(field == 'clinic/organization_name'){
+			field = 'employer';
+		}
+		location.href="index.php?action=providers&field="+field+"&sort="+fieldsort;
+	});
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?print=true&' + postString, '');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?export=true&' + postString, '');
+	});
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Providers</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="provider" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Provider" class="btn-small" /></form>
+	</div>
+
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="providers" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['providers']['filters']['quick']) ? $_SESSION['providers']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+
+</div>
+
+<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+<div class="dataTable" style="height: auto;">
+	<div class="titleBar">
+		<form id="filter-form" action="index.php" style="padding: 4px 3px 0 4px;"><input type="hidden" name="action" value="providers">
+			<div style="float: right;">
+			<input type="submit" class="btn-small" id="export-list" name="export_list" value="Export" />
+			<input type="submit" class="btn-small" id="print-list" name="export_list" value="Print" />
+			</div>
+			<?= $provider->displaySelect('title', 'filters[title]', $filters['title'], 'Title') ?>
+			<?= $provider->displaySelect('city', 'filters[city]', $filters['city'], 'City') ?>
+			<?= $providerRole->displaySelect('filters[role_id]', (!empty($filters['role_id']) ? $filters['role_id'] : ''), 'Role', '', false, null, true) ?>
+			<input type="submit" value="Filter" class="btn-small" />  <input type="submit" name="clearFilters" value="Clear" class="btn-small" />
+		</form>
+	</div>
+
+<? if(is_array($providers)) : ?>
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="grid">
+	<thead>
+		<tr>
+			<th class="sort sorting<?=($sorts['employer'] ? '_' . strtolower($sorts['employer']) : '')?>">Clinic/Organization Name</th>
+			<th class="sort sorting<?=($sorts['last_name'] ? '_' . strtolower($sorts['last_name']) : '')?>">Name</th>
+			<th class="sort sorting<?=($sorts['title'] ? '_' . strtolower($sorts['title']) : '')?>">Title</th>
+			<th class="sort sorting<?=($sorts['role'] ? '_' . strtolower($sorts['role']) : '')?>">Provider Role</th>
+			<th class="sort sorting<?=($sorts['city'] ? '_' . strtolower($sorts['city']) : '')?>">City</th>
+			<th class="sort sorting<?=($sorts['phone'] ? '_' . strtolower($sorts['phone']) : '')?>">Phone</th>
+			<th class="sort sorting<?=($sorts['email'] ? '_' . strtolower($sorts['email']) : '')?>">Email</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? $row = 'odd'; ?>
+	<? foreach($providers as $provider) : ?>
+
+		<tr id="provider_<?=$provider['id']?>" class="provider <?=$row?>">
+			<td><?=$provider['employer']?></td>
+			<td><?=ucfirst(strtolower($provider['last_name'])) . ', ' . $provider['first_name']?></td>
+			<td><?=$provider['title']?></td>
+			<td><?=$provider['role']?></td>
+			<td><?=$provider['city']?></td>
+			<td><?=$provider['phone']?></td>
+			<td><?=($provider['email'] ? '<a href="mailto:' . $provider['email'] . '" title="' . $provider['email'] . '">Email</a>' : '')?></td>
+		</tr>
+
+		<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+	<? endforeach; ?>
+	</tbody>
+</table>
+<div class="gridFooter">
+	<div style="float: left;" id="gridPaginationText">
+		Showing <?= $firstRecord ?>-<?= $lastRecord ?> of  <?= $totalProviders ?> providers
+	</div>
+	<div style="float: right;" id="gridPages">
+		<a href="index.php?action=providers">First</a>
+		<?= ($pageNumber > 1 ? '<a href="index.php?action=providers' . (isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] . (isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') : '') . '&page= ' . ($pageNumber - 1) . '">&lt; Prev</a>' : '')?>
+		Page <?= $pageNumber ?> of <?= $numPages ?>
+		<?= ($pageNumber < $numPages ? '<a href="index.php?action=providers' . (isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] . (isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') : '') . '&page= ' . ($pageNumber + 1) . '">Next &gt;</a>' : '')?>
+		<a href="index.php?action=providers<?= (isset($_REQUEST['field']) ? '&field=' . $_REQUEST['field'] . (isset($_REQUEST['sort']) ? '&sort=' . $_REQUEST['sort'] : '') : '') ?>&page=<?= $numPages ?>">Last</a>
+	</div>
+</div>
+<? else : ?>
+<p><br /><em>No result found.</em></p>
+<? endif; ?>

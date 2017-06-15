@@ -1,0 +1,94 @@
+<div class="title"><h2><?=$followUpType?> Follow-up</h2></div>
+					<form action="index.php" method="get" id="form-follow-up" style="margin-top: 12px;">
+					<div id="add-follow-up-fields">
+						<div style="display:inline-block;">
+							<input type="hidden" class="autosuggest-value follow-up-referred-to" name="followUp[referred_to_id]" />
+							<input type="hidden" class="autosuggest-type follow-up-referred-type" name="followUp[referred_to_type]" />
+							<input
+								class="autosuggest-input rounded"
+								placeholder="Type referral name"
+								data-query-string="action=referral-services&search="
+								autocomplete="off" />
+							<div class="autosuggest-selection-container"></div>
+						</div>
+						<?= $service->displaySelect('followUp[service_id]', '', 'Service', '', '', 'follow-up-service') ?>
+						<?= $followUpTask->displaySelect('followUp[follow_up_task_id]', '', 'Follow up Task', '') ?>
+						<input type="text" id="followUp[follow_up_date]" name="followUp[follow_up_date]" class="date" placeholder="mm/dd/yyyy" style="width: 70px;" />
+
+						<input type="text" id="followUp[notes]" name="followUp[notes]" placeholder="Follow Up Notes" style="width: 125px;" />
+						<input type="submit" id="add-follow-up" name="save" value="Add" class="btn-small add-follow-up" />
+					</div>
+
+					<table class="display infoTable" style="margin-top: 12px;" border="0" cellspacing="0" cellpadding="0" id="table-follow-up">
+						<thead>
+						<tr>
+							<th style="padding-right: 0px; width:80px">&nbsp;</th>
+							<th style="padding-right: 0px; width:220px;">Referral Name</th>
+							<th style="padding-right: 0px; width:220px;">Service</th>
+							<th style="padding-right: 0px; width:auto;">Follow-up Task</th>
+							<th style="padding-right: 0px; width:80px;">Follow-up Date</th>
+							<th style="padding: 0px 3px; width: 15px;">Done</th>
+						</tr>
+						</thead>
+
+						<tbody>
+
+						<? 
+						
+						$row = 'odd'; ?>
+						<? $followUpCount = 0; ?>
+						<? if(is_array($followUps)) : ?>
+						<? foreach ($followUps as $key => $followUp) : ?>
+
+						<tr id="followUpRow_<?= $followUp['id'] ?>" class="clickable <?=$row?> <?=($followUpCount >= 5 ? 'hidden extra' : '')?>">
+							<td style="vertical-align: middle; width: 80px;">
+								<div class="toggleArrow"<?= ($followUp['referral_date_formatted'] != '00/00/00' ? ' style="height: 24px;"' : '') ?>></div>
+								<?= ($followUp['hmg_worker'] ? $followUp['hmg_worker'] : 'Unknown') ?>
+								<?= ($followUp['referral_date_formatted'] != '00/00/00' ? '<br />' . $followUp['referral_date_formatted'] : '') ?>
+							</td>
+							<td>
+							<?php
+							//print_r($followUp);
+						    if( $followUp['referred_to_type']  == 'info'){
+							    echo $setting->getValue($followUp['referred_to_id']);
+							}
+							else{
+							    $siteSeprate = '';
+							    if(!empty($followUp['site_name'])){
+								    $siteSeprate = ': '.$followUp['site_name'];
+							    }
+							    echo $followUp['organization_name'].$siteSeprate;
+							}
+							?>
+							</td>
+							<td><?= $setting->getValue($followUp['service_id']) ?></td>
+							<td><?= $setting->getValue($followUp['follow_up_task_id']) ?></td>
+							<td><?= ($followUp['follow_up_date_formatted'] != '00/00/00' ? $followUp['follow_up_date_formatted'] : '') ?></td>
+							<td style="text-align: center;">
+								<input type="hidden" name="followUp[<?= $followUp['id'] ?>][done]" value="0" class="done" />
+								<input type="checkbox" id="followUp[<?= $followUp['id'] ?>][done]" class="done done-check-box" name="followUp[<?= $followUp['id'] ?>][done]" value="1"<?= ($followUp['done'] ? ' checked' : '') ?> />
+							</td>
+						</tr>
+
+						<tr id="followUpRow_details_<?= $followUp['id'] ?>" class="hidden <?=$row?>">
+							<td style="white-space: nowrap;">
+								&nbsp;
+							</td>
+							<td colspan="5" style="border-top: 1px solid #ccc">
+								<b>Task Result:</b> <?= $followUp['result'] ?><br />
+								<b>Notes:</b> <?= $followUp['notes'] ?>
+								<input type="button" class="btn-small edit-follow-up" style="float: right; margin: 3px" id="edit_<?= $followUp['id'] ?>" value="Edit" />
+							</td>
+						</tr>
+
+						<? if($row=='odd'){ $row = 'even'; } else { $row='odd'; }?>
+
+						<? $followUpCount++; ?>
+						<? endforeach; ?>
+						<? endif; ?>
+						</tbody>
+					</table>
+					</form>
+					<? if($followUpCount > 5) : ?>
+					<a href="#" class="show-all-follow-ups">Show All <?=$followUpCount?> Follow Ups</a>
+					<? endif; ?>

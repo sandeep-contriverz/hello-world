@@ -1,0 +1,20 @@
+<? 
+
+$fileHeader = array('Organization Name', 'Referred To Id', 'Referred to Name', 'Service Id', 'Service Name');
+
+echo implode(',', $fileHeader) . "\n";
+
+if(is_array($referralServices)){
+  foreach($referralServices as $key => $referralSer) {
+  	foreach($referralSer as $referralService){
+		echo $key . ',';
+		echo $referralService['referred_to_id'] . 
+			',' . (strpos($referralService['referred_to'], ',') ? str_pad($referralService['referred_to'], strlen($referralService['referred_to']) + 2, '"', STR_PAD_BOTH) : $referralService['referred_to'])  . 
+			',' . $referralService['service_id'] . 
+			',' . (strpos($referralService['service'], ',') ? str_pad($referralService['service'], strlen($referralService['service']) + 2, '"', STR_PAD_BOTH) : $referralService['service'])  . 
+			"\n";
+
+	}
+  }
+
+}

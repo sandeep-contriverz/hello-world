@@ -1,0 +1,20 @@
+<script>
+	$(document).ready(function(){
+		$(".save-form").on('click',function(){
+			$("#cityForm").submit();
+		});
+	});
+	
+</script>
+<div>
+	<form id="cityForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="city" />
+		<input type="hidden" name="data[id]" value="" />
+		<input type="hidden" name="pos" value="" />
+		<input type="hidden" id="save-trigger" name="save" value="" />
+		<lable>City</lable>
+		<input type="text" name="city">
+		
+	</form>
+	<input type="button" name="save" value="save" class="save-form">
+</div>

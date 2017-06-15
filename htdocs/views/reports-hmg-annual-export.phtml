@@ -1,0 +1,597 @@
+<?
+
+use Hmg\Models\Setting;
+use Hmg\Models\Family;
+use Hmg\Models\User;
+use Hmg\Models\Families;
+use Hmg\Models\Child;
+use Hmg\Models\ProviderFamily;
+use Hmg\Models\FamilyProvider;
+use Hmg\Models\Provider;
+use Hmg\Models\StartEnds;
+use Hmg\Models\AgencyFamilyReferrals;
+use Hmg\Models\AgencyChildReferrals;
+use Hmg\Models\FamilyReferrals;
+use Hmg\Models\ChildDevelopmentalScreenings;
+use Hmg\Models\ChildDevelopmentalScreening;
+use Hmg\Models\ChildPriorResources;
+use Hmg\Models\ReferralServices;
+use Hmg\Models\ChildReferrals;
+use Hmg\Models\CountyZipcodes;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\SchoolDistrictZipcodes;
+use Hmg\Models\Organizations;
+use Hmg\Models\Organization;
+
+function escapeCsvValue($value){
+	if(strpos($value, ',') !== false || strpos($value, "\n") !== false || strpos($value, "\r") !== false){
+		if(strpos($value, '"') !== false){
+			$value = str_replace('"', '""', $value);
+		}
+		$value = '"' . trim($value) . '"';
+	}
+	return $value;
+}
+
+function getASQValue($score){
+
+	if($score == 'White'){
+		$value = 'A';
+	} else if($score == 'Black'){
+		$value = 'B';
+	} else {
+		$value = 'M';
+	}
+
+	return $value;
+}
+
+$csv = '';
+$csvHeader = '';
+$csvRows = '';
+
+switch($reportKey){
+	case 'family-file':
+
+		$csv .= "Annual Report: Family File Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList();
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $family){
+				$startEnds->set('_fkeyValue', $family['id']);
+				//$dates = $startEnds->getMaxMinDates();
+				if(isset($family['formatted_start_date'])) {
+					$dates = array(
+						'formatted_start_date' => !empty($family['formatted_start_date'])
+							? $family['formatted_start_date'] : '',
+						'formatted_end_date' => !empty($family['formatted_end_date'])
+							? $family['formatted_end_date'] : '',
+					);
+				} else {
+					$dates = $startEnds->getMaxMinDates();
+				}
+				$lastCloseReason = $startEnds->getLastCloseReason();
+				$familyProvider = new FamilyProvider($family['id']);
+				$provider = $familyProvider->getList();
+				$providerName = '';
+				$providerEmployer = '';
+				if (isset($provider[0]) && count($provider[0])) {
+					$provider = $provider[0];
+					$providerName = $provider['last_name'] .
+						($provider['first_name'] ? ', ' . $provider['first_name'] : '');
+					$providerName .= (!empty($providerName) ? ', ' . $provider['title'] : '');
+					$providerEmployer = $provider['employer'];
+				}
+				$allStartDates = $startEnds->getAllStartDates();
+				//echo "<pre>";print_r($allStartDates);
+				$countStartDates = !empty($allStartDates) ? $allStartDates['count'] : 0;
+				$exportData = array(
+					'Family ID'               => $family['id'],
+					'City'                    => $family['city'],
+					'Zip Code'                => $family['zip'],
+					'Start date'              => $dates['formatted_start_date'],
+					'End date'                => ($dates['formatted_end_date'] == '00/00/0000' ? '' : $dates['formatted_end_date']),
+					'Number of start dates'	  => $countStartDates,
+					'Reason for closing'      => $lastCloseReason,
+					'Primary Contact'         => $family['first_name_1'] . ' ' . $family['last_name_1'],
+					'Language'                => $setting->getSettingById($family['language_id']),
+					'Secondary Contact'       => $family['first_name_2'] . ' ' . $family['last_name_2'],
+					'Care Coordination Level' => $family['cc_level'],
+					'Who is calling'          => $setting->getSettingById($family['who_called_id']),
+					'How did the family hear' => $setting->getSettingById($family['family_heard_id']),
+					'Reason for call'         => $setting->getSettingById($family['call_reason_id']),
+					'Family Race'             => $setting->getSettingById($family['race_id']),
+					'Family Ethnicity'        => $setting->getSettingById($family['ethnicity_id']),
+					'Family Insurance'        => $setting->getSettingById($family['health_insurance']), //201016
+					'Family Status'           => $family['status'],
+					'Screening Preference'    => $setting->getSettingById($family['asq_preference']), //191016
+					'HMG Worker'              => $family['hmg_worker'],
+					'Provider Name'           => $providerName,
+					'Provider Clinic/Organizaiton' => $providerEmployer
+				);
+				if (!$csvHeader) {
+					$csvHeader = implode(',', array_keys($exportData)) . "\n";
+					$csvRows .= $csvHeader;
+				}
+				foreach ($exportData as $key => &$value) {
+					$value = escapeCsvValue($value);
+				}
+				$csvRows .= implode(',', array_values($exportData)) . "\n";
+			}
+		}
+		break;
+
+	case 'family-referral':
+
+		$csv .= "Annual Report: Family Referrals Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList();
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $family){
+				$familyReferral = new FamilyReferrals($family['id']);
+				$referrals = $familyReferral->getList();
+				if(is_array($referrals)){
+					foreach($referrals as $referral){
+						if( $referral['referred_to_type']  == 'info'){
+						    $referral['referred_to'] = $setting->getValue($referral['referred_to_id']);
+						}
+						else{
+							$siteSeprate = '';
+							if($referral['site_name']){
+							$siteSeprate = ': '.$referral['site_name'];
+							}
+							$referral['referred_to'] = $referral['organization_name'].$siteSeprate;
+						}
+						//echo '<pre>'; var_dump($family['id'], $referrals);
+						$exportData = array(
+							'Family ID'               => $referral['family_id'],
+							'City'                    => $family['city'],
+							'Zip Code'                => $family['zip'],
+							'Reason for call'         => $setting->getSettingById($family['call_reason_id']),
+							'Referral Issue'          => $referral['issue'],
+							'Referral Date'           => $referral['referral_date_formatted'],
+							'Referral Name'           => $referral['referred_to'],
+							'Referral Service Term'   => $referral['service'],
+							'Referral Outcome'        => $setting->getSettingById($referral['outcomes']), //251016
+							'Care Coordination Level' => $family['cc_level'],
+							'HMG Worker'              => $family['hmg_worker'],
+							'Referral Notes'          => $referral['notes']
+						);
+						if(!$csvHeader){
+							$csvHeader = implode(',', array_keys($exportData)) . "\n";
+							$csvRows .= $csvHeader;
+						}
+						foreach($exportData as $key => &$value){
+							$value = escapeCsvValue($value);
+						}
+						$csvRows .= implode(',', array_values($exportData)) . "\n";
+					}
+				}
+			}
+		}
+		break;
+
+	case 'child-referral':
+
+		$csv .= "Annual Report: Child Referrals Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$family = new Family();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList();
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $familyData){
+				$family->setById($familyData['id']);
+
+				if(is_array($family->family['children'])){
+					foreach($family->family['children'] as $child){
+						$childReferrals = new ChildReferrals($child['id']);
+						$referrals = $childReferrals->getList();
+						if(is_array($referrals)){
+							foreach($referrals as $referral){
+								//echo '<pre>'; var_dump($referral);
+								if( $referral['referred_to_type']  == 'info'){
+								    $referral['referred_to'] = $setting->getValue($referral['referred_to_id']);
+								}
+								else{
+									$siteSeprate = '';
+									if($referral['site_name']){
+									$siteSeprate = ': '.$referral['site_name'];
+									}
+									$referral['referred_to'] = $referral['organization_name'].$siteSeprate;
+								}
+								$exportData = array(
+									'Family ID'               => $child['parent_id'],
+									'Child ID'                => $referral['child_id'],
+									'Gender'                  => $child['gender'],
+									'Child Presenting Issue'  => $setting->getSettingById($child['issue_id']),
+									'Referral Issue'          => $referral['issue'],
+									'Referral Date'           => $referral['referral_date_formatted'],
+									'Referral Name'           => $referral['referred_to'],
+									'Referral Service Term'   => $referral['service'],
+									'Referral Outcome'        => $setting->getSettingById($referral['outcomes']), //251016,
+									'Based on Screening'      => $referral['based_screening'],
+									'Care Coordination Level' => $family->family['cc_level'],
+									'HMG Worker'              => $family->family['hmg_worker'],
+									'Referral Notes'          => $referral['notes']
+								);
+                                $user = new User ; 
+                                $exportData['HMG Worker'] = $user->getById($exportData['HMG Worker']); 
+								if(!$csvHeader){
+									$csvHeader = implode(',', array_keys($exportData)) . "\n";
+									$csvRows .= $csvHeader;
+								}
+								foreach($exportData as $key => &$value){
+									$value = escapeCsvValue($value);
+								}
+								$csvRows .= implode(',', array_values($exportData)) . "\n";
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
+
+	case 'child-information':
+
+		$csv .= "Annual Report: Child Information Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$family = new Family();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList(true);
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $familyData){
+				$family->setById($familyData['id']);
+				$startEnds->set('_fkeyValue', $family->family['id']);
+				//$dates = $startEnds->getMaxMinDates();
+				$dates = array(
+					'formatted_start_date' => !empty($familyData['formatted_start_date'])
+						? $familyData['formatted_start_date'] : '',
+					'formatted_end_date' => !empty($familyData['formatted_end_date'])
+						? $familyData['formatted_end_date'] : '',
+				);
+				$familyProvider = new FamilyProvider($familyData['id']);
+				$provider = $familyProvider->getList();
+				$providerName = '';
+				$providerEmployer = '';
+				if (isset($provider[0]) && count($provider[0])) {
+					$provider = $provider[0];
+					$providerName = $provider['last_name'] .
+						($provider['first_name'] ? ', ' . $provider['first_name'] : '');
+					$providerName .= (!empty($providerName) ? ', ' . $provider['title'] : '');
+					$providerEmployer = $provider['employer'];
+				}
+				$allStartDates   = $startEnds->getAllStartDates();
+				$countStartDates = !empty($allStartDates) ? $allStartDates['count'] : 0;
+
+				if(is_array($family->family['children'])){
+					foreach($family->family['children'] as $child){
+						$childPriorResources = new childPriorResources($child['id']);
+						$priorResources = $childPriorResources->getList();
+
+						$exportData = array(
+							'Family ID'                    => $child['parent_id'],
+							'Child ID'                     => $child['id'],
+							'Gender'                       => $child['gender'],
+							'Child Birth Date'             => $child['birth_date_formatted'],
+							'Start date'                   => $dates['formatted_start_date'],
+							'End date'                     => ($dates['formatted_end_date'] == '00/00/0000' ? '' : $dates['formatted_end_date']),
+							'Number of start dates'	  => $countStartDates,
+							'Child Presenting Issue'       => $setting->getSettingById($child['issue_id']),
+							'Existing/Prior Resource'      => (isset($priorResources[0]['service_type']) ? $setting->getSettingById($priorResources[0]['service_type']) : ''),
+							'Existing/Prior Resource Date' => (isset($priorResources[0]['date_enrolled_formatted']) ? $priorResources[0]['date_enrolled_formatted'] : ''),
+							'HMG Worker'                   => $family->family['hmg_worker'],
+							'Provider Name'           => $providerName,
+							'Provider Clinic/Organizaiton' => $providerEmployer,
+						);
+                        $user = new User ; 
+                        $exportData['HMG Worker'] = $user->getById($exportData['HMG Worker']); 
+
+						if(!$csvHeader){
+							$csvHeader = implode(',', array_keys($exportData)) . "\n";
+							$csvRows .= $csvHeader;
+						}
+						foreach($exportData as $key => &$value){
+							$value = escapeCsvValue($value);
+						}
+						$csvRows .= implode(',', array_values($exportData)) . "\n";
+					}
+				}
+			}
+		}
+		break;
+
+	case 'developmental-screening':
+
+		$csv .= "Annual Report: Developmental Screening Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$family = new Family();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList();
+		$setting = new Setting();		
+		$settingOb = new Setting(); //201016
+		if(is_array($data)){
+			foreach($data as $familyData){
+				$family->setById($familyData['id']);
+
+				if(is_array($family->family['children'])){
+					foreach($family->family['children'] as $child){
+						$childDevelopmentalScreenings = new ChildDevelopmentalScreenings($child['id']);
+						$screenings = $childDevelopmentalScreenings->getList();
+						if(is_array($screenings)){
+							foreach($screenings as $screening){
+								if( !empty($screening['date_sent_formatted']) && $screening['date_sent_formatted'] != '00/00/00'){  
+								$d1 = new DateTime($screening['date_sent_formatted']);
+								$d2 = new DateTime($child['birth_date']);
+								$interval = $d1->diff($d2);
+								$years  = $interval->format("%y");
+								$months = $interval->format("%m");
+								$days   = $interval->format("%d");
+								$totalMonths   = $years * 12 + $months;
+								$monthFraction = round($days/30, 1);
+								$totalMonths   += $monthFraction;
+                                }
+                                else{
+                                    $totalMonths = '';
+                                }
+
+								$exportData = array(
+									'Family ID'                            => $child['parent_id'],
+									'Child ID'                             => $child['id'],
+									'Child age of each screening (months)' => $totalMonths,
+									'Screening Type'                       => $screening['type'], //261016 revert back
+									'Screening Interval'                   => $screening['asq_month'],
+									'Score'                                => $screening['score'],
+									'Date Scored'                          => $screening['date_sent_formatted'],
+									'Faxed to Provider'                    => ($screening['date_sent_provider_formatted'] == '00/00/00' ? '' : $screening['date_sent_provider_formatted']),
+									'Communication'                        => getASQValue($screening['communication']),
+									'Gross Motor'                          => getASQValue($screening['gross_motor']),
+									'Fine Motor'                           => getASQValue($screening['fine_motor']),
+									'Problem Solving'                      => getASQValue($screening['problem_solving']),
+									'Personal Social'                      => getASQValue($screening['personal_social']),
+									'HMG Worker'                           => $family->family['hmg_worker']
+								);
+                                $user = new User ; 
+                                $exportData['HMG Worker'] = $user->getById($exportData['HMG Worker']); 
+
+								if(!$csvHeader){
+									$csvHeader = implode(',', array_keys($exportData)) . "\n";
+									$csvRows .= $csvHeader;
+								}
+								foreach ($exportData as $key => &$value) {
+									$value = escapeCsvValue($value);
+								}
+								$csvRows .= implode(',', array_values($exportData)) . "\n";
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
+
+	case 'screening-per-child':
+
+		$csv .= "Annual Report: Counts of Screenings per Child Export\n\n";
+		$startEnds = new StartEnds();
+		$families = new Families();
+		$family = new Family();
+		$families->set('_search', false);
+		$families->set('_filters', $filters);
+		$families->set('_start', 1000);
+		$families->set('_limit', 0);
+		$data = $families->getList();
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $familyData){
+				$family->setById($familyData['id']);
+
+				if(is_array($family->family['children'])){
+					foreach($family->family['children'] as $child){
+						$childDevelopmentalScreenings = new ChildDevelopmentalScreenings($child['id']);
+						$screenings = $childDevelopmentalScreenings->getList();
+						//echo '<pre>'; print_r($screenings);die;
+						if(is_array($screenings) && count($screenings) >= 3){
+							$exportData = array(
+								'Family ID'                            => $child['parent_id'],
+								'Child ID'                             => $child['id'],
+								'Count of Screenings'                             => count($screenings),
+								'Date Scored of Most Recent Screening'            => isset($screenings[0]['date_scored_formatted']) ? $screenings[0]['date_scored_formatted'] : '',
+								'Date Faxed to Provider of Most Recent Screening' => ($screenings[0]['date_sent_provider_formatted'] == '00/00/00' ? '' : $screenings[0]['date_sent_provider_formatted']),
+								'Month of Most Recent Screening'                  => isset($screenings[0]['date_scored_formatted']) ? substr($screenings[0]['date_scored_formatted'], 0, 2) : '',
+								'Score of Most Recent Screening'                  => $screenings[0]['score'],
+							);
+							if(!$csvHeader){
+								$csvHeader = implode(',', array_keys($exportData)) . "\n";
+								$csvRows .= $csvHeader;
+							}
+							foreach($exportData as $key => &$value){
+								$value = escapeCsvValue($value);
+							}
+							$csvRows .= implode(',', array_values($exportData)) . "\n";
+						}
+					}
+				}
+			}
+		}
+		break;
+
+	case 'school-district-zip-codes':
+
+		$filters = array(); // Unset filters
+
+		$csv .= "Annual Report: School Districts and Zip Codes Export\n\n";
+		$schoolDistrictZipcodes = new SchoolDistrictZipcodes();
+		$data = $schoolDistrictZipcodes->getSchoolDistrictZipCodes();
+		if(is_array($data)){
+			foreach($data as $schoolDistrictZip){
+				$exportData = array(
+					'School District' => $schoolDistrictZip['name'],
+					'Zip Code'        => $schoolDistrictZip['zip_code']
+				);
+				if(!$csvHeader){
+					$csvHeader = implode(',', array_keys($exportData)) . "\n";
+					$csvRows .= $csvHeader;
+				}
+				foreach($exportData as $key => &$value){
+					$value = escapeCsvValue($value);
+				}
+				$csvRows .= implode(',', array_values($exportData)) . "\n";
+			}
+		}
+		break;
+
+	case 'county-zip-codes':
+
+		$filters = array(); // Unset filters
+
+		$csv .= "Annual Report: County and Zip Codes Export\n\n";
+		$countyZipcodes = new CountyZipcodes();
+		$data = $countyZipcodes->getCountyZipCodes();
+		if(is_array($data)){
+			foreach($data as $schoolDistrictZip){
+				$exportData = array(
+					'County'   => $schoolDistrictZip['county'],
+					'Zip Code' => $schoolDistrictZip['zip_code']
+				);
+				if(!$csvHeader){
+					$csvHeader = implode(',', array_keys($exportData)) . "\n";
+					$csvRows .= $csvHeader;
+				}
+				foreach($exportData as $key => &$value){
+					$value = escapeCsvValue($value);
+				}
+				$csvRows .= implode(',', array_values($exportData)) . "\n";
+			}
+		}
+		break;
+	case 'service-terms-organizations':
+
+		$csv .= "Annual Report: Service Terms within Organizations\n\n";
+		
+		unset($filters['school_district']);		
+		$organizations = new Organizations();
+		$organization = new Organization();
+		$organizations->set('_search', false);
+		$organizations->set('_filters', $filters);
+		$organizations->set('_start', 1000);
+		$organizations->set('_limit', 0);
+		$data = $organizations->getList();
+		$setting = new Setting();
+		if(is_array($data)){
+			foreach($data as $family){
+				
+				//echo $data['organization_name_id'];
+				$org_id=$organization->getOrganizationByOrgID($family['organization_name_id']);
+				
+				if(!empty($family['service_terms']))
+				{
+					$string = $family['service_terms'];	
+				}
+				else{
+					$string = $org_id['service_terms'];	
+				}
+				
+				
+				$id_array = (explode(",",$string));
+		
+				$service_terms_string = '';
+				
+				if(is_array($id_array) && !empty($id_array)){
+					
+					foreach($id_array as $a){					
+						$ae = $setting->getSettingById($a);						
+						$exportData = array(
+							'Organization ID'	=> $family['organization_name_id'],
+							'Organization Name' => $family['organization_name'],
+							'Site ID'           => $family['organization_site_id'],
+							'Site'              => $family['site'],
+							'Service Terms ID'  => $a,
+							'Service Terms'	  	=> $ae,
+							'Organization Type' => $family['organization_type']	
+						);
+						if (!$csvHeader) {
+							$csvHeader = implode(',', array_keys($exportData)) . "\n";
+							$csvRows .= $csvHeader;
+						}
+						foreach ($exportData as $key => &$value) {
+							$value = escapeCsvValue($value);
+						}
+						$csvRows .= implode(',', array_values($exportData)) . "\n";
+					}
+					
+				}
+						
+				
+			}
+		}
+		break;
+	default:
+}
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters:';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if (is_numeric($value) && $filter != 'zip' && $filter != 'school_district') {
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if (is_numeric($value) && $filter == 'school_district') {
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if ($value) {
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+echo $csv . $csvRows;

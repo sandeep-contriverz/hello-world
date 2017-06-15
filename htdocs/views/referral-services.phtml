@@ -1,0 +1,459 @@
+<style>
+.referral {
+    padding-left: 25px;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	var toggleAll = false;
+	
+
+	$('#toggle-btn').on('click', function(){
+		toggleAll = !toggleAll;
+		if(toggleAll){
+			$('.services, .referral').removeClass('hide2');
+			$('.toggleArrow').addClass('on');
+		} else {
+			$('.referral').each(function(i, ele){
+				var div = $(ele);
+				var hasSelect = div.find('select').length;
+				if(hasSelect) {
+					removeEditForm(div.attr('id'), true);
+				}
+			});
+			$('.services, .referral').addClass('hide2');
+			$('.toggleArrow').removeClass('on');
+		}
+	});
+
+	function replaceWithEditForm(parentElementId, toggleDisplay){
+		htmlSelect = $('<div><?= addslashes($referred_to_service->displaySelect('rs[0]', '', ' ', '', false, ' referral-service', true)) ?></div>');
+		var parent = $('#' + parentElementId);
+		var parentParent = parent.parent('.referral_parent');
+		referralElement  = parent.find('.child.referral-title');
+		referralParentElement = parentParent.find('.parent.referral-title');
+		var referralDisabled  = referralElement.hasClass('setting-disabled');
+		selects = parent.find('select');
+		if(selects.length){
+			//return false;
+		}
+		btn = parent.find('.btn-edit');
+  		arrowParent = parent.find('.parent.toggleArrow');
+  		arrow = parent.find('.child.toggleArrow');
+		btn.val('Save'); // Change button value
+		btn.prop('disabled', false);
+		
+		btn.removeClass('disabled');
+
+		referralName = referralElement.text().replace(/"/g, '&quot;');
+		referralId = parentElementId.replace(/r/, '');
+		referraCheckboxInput = ' <input type="checkbox" class="js-enable-referral" value="1"' + (!referralDisabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+		referralElement.html('<input type="text" class="referral-input' + (referralDisabled ? ' referral-input-disabled' : '') + '" name="referral[' + referralId + ']" data-id="' + referralId + '"' + (referralDisabled ? ' disabled="true"' : '') + '  value="' + referralName + '" />' + referraCheckboxInput);
+
+		referralParentName = $.trim(referralParentElement.text().replace(/"/g, '&quot;'));
+		referraParentCheckboxInput = '';// <input type="checkbox" class="js-enable-referral" value="1"' + (!referralDisabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+		referralParentElement.html('<input type="text" class="referral-input' + (referralDisabled ? ' referral-input-disabled' : '') + '" name="referral[' + referralId + ']" data-id="' + referralId + '"' + (referralDisabled ? ' disabled="true"' : '') + '  value="' + referralParentName + '" />' + referraParentCheckboxInput);
+		
+		if(referralDisabled){
+			referralElement.removeClass('setting-disabled');
+			btn.prop('disabled', true);
+			btn.addClass('disabled');
+			return;
+		}
+
+		ulElement = parent.find('ul');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			serviceId = li.attr('data-service-id');
+			curIndex = index;
+			newHtmlSelect = htmlSelect.clone();
+			select = newHtmlSelect.find('select');
+			select.attr('id', 'rs[' + referralId + ']');
+			select.attr('name', 'rs[' + referralId + ']');
+			tmpClass = li.attr('class');
+			li.removeClass('referral-item-disabled');
+			disabled = (tmpClass.indexOf('disabled') !== -1 ? true : false);
+			newClass = 'setting referral-service' + (disabled ? ' referral-input-disabled' : '');
+			select.attr('class', newClass);
+			if(disabled){
+				select.prop('disabled', true);
+			}
+			options = newHtmlSelect.find('option');
+			options.each(function(index){
+				option = $(this);
+				if(option.val() == serviceId){
+					option.attr('selected', 'selected');
+				}
+			});
+			//$(this).html('<input name="rs[' + tmpId + ']" value="' + tmp + '" class="setting" style="width: 300px !important;" />');
+
+			checkboxInput = ' <input type="checkbox" class="js-enable-setting" value="1"' + (! disabled ? ' checked' : '') + '> <span class="enable">Enabled</span>';
+			serviceId = $(this).attr('data-service-id');
+			if(serviceId > 0){
+				$(this).html(newHtmlSelect.html() + checkboxInput);
+			} else {
+				$(this).remove();
+			}
+		});
+		if(liElements.length){
+			// <li class="referral-item" data-referral-id="' + parentId + '" data-service-id="' + val.id + '">' + val.name + '</li>
+			liElements.last().after('<li class="referral-item new-item" data-referral-id="' + referralId + '" data-service-id="0">' + htmlSelect.html() + '</li>');
+		} else {
+			ulElement.append('<li class="referral-item new-item" data-referral-id="' + referralId + '" data-service-id="0">' + htmlSelect.html() + '</li>');
+		}
+		if(toggleDisplay){
+			if(!arrow.hasClass['on']){
+				ulElement.toggleClass('hide2');
+				arrow.toggleClass('on');
+			}
+		}
+	}
+
+	function removeEditForm(parentElementId, toggleDisplay){
+		var parent = $('#' + parentElementId);
+		var parentParent = parent.parent('.referral_parent');
+		btn = parent.find('.btn-edit');
+  		arrow = parent.find('.toggleArrow');
+		btn.val('Edit'); // Change button value
+		btn.removeClass('disabled');
+		btn.prop('disabled', false)
+
+		referralElement = parent.find('.referral-title');
+		referralName = referralElement.find('input').val();
+		referralParentElement = parentParent.find('.parent.referral-title');
+		referralParentName = parentParent.find('.parent.referral-title').find('input').val();
+		referralDisabled = referralElement.hasClass('setting-disabled');
+		disableClass = referralElement.find('input').prop('disabled') || referralDisabled ? 'setting-disabled' : '';
+		referralElement.html(referralName);
+		referralParentElement.html(referralParentName);
+		referralElement.removeClass('setting-disabled');
+		if(disableClass){
+			referralElement.addClass(disableClass);
+		}
+
+		ulElement = parent.find('ul.services');
+		liElements = ulElement.find('li');
+		liElements.each(function(index){
+			var li = $(this);
+			// loop through the select options and get the text for the where the input value matches.
+			var select = li.find('select');
+			var disabled = select.prop('disabled');
+			if(disabled){
+				li.addClass('referral-item-disabled');
+			}
+			if(select.length){
+				selectValue = select.val();
+				options = select.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == selectValue){
+						selectValue = option.text();
+					}
+				});
+				if(selectValue.trim()){
+					li.html(selectValue);
+				} else {
+					li.remove();
+				}
+			}
+		});
+		if(toggleDisplay){
+			ulElement.toggleClass('hide2');
+			arrow.toggleClass('on');
+		}
+		allowDoubleClick = true;
+	}
+
+	$(document).on('click', '.js-enable-setting', function()
+	{
+		var li = $(this).closest('li');
+		var input = $(this).prev();
+		var referralId = li.data('referral-id');
+		var serviceId = li.data('service-id');
+		checkbox = $(this);
+		var disabled = 1;
+		if(checkbox.prop('checked')){
+			disabled = 0;
+		}
+		json = '{"referralId":"' + referralId + '", "serviceId":"' + serviceId + '", "disabled": "' + disabled + '"}';
+
+		$.post('index.php', { 'action' : 'referral-services', 'update' : 'true', 'json' : json }, function(data){
+			if(data.success){
+				if(disabled){
+					input.attr('class', 'setting referral-service referral-input-disabled');
+					input.prop('disabled', true);
+				} else {
+					input.attr('class', 'setting referral-service');
+					input.prop('disabled', false);
+				}
+			}
+		});
+	});
+
+	$(document).on('click', '.js-enable-referral', function(){
+		var checkbox = $(this);
+		var input = checkbox.prev('input');
+		var div = input.closest('.referral');
+		var disabled = 1;
+		if(checkbox.prop('checked')){
+			disabled = 0;
+		}
+		var referralId = input.data('id');
+
+		json = '{"id":"' + referralId + '", "value": "' + disabled + '"}';
+
+		$.post('index.php', { 'action' : 'setting', 'update' : 'true', 'json' : json }, function(data){
+			if(data.success){
+				if(disabled){
+					input.prop('disabled', true);
+					input.addClass('referral-input-disabled');
+				} else {
+					input.prop('disabled', false);
+					input.removeClass('referral-input-disabled');
+				}
+			}
+			div.find('.btn-cancel').click();
+		});
+	});
+
+	$(document).on('click', '.services .btn-small', function(){
+		if($(this).val() == 'Edit'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			replaceWithEditForm(parentElementId);
+		} else if($(this).val() == 'Cancel'){
+			parentElementId = $(this).parent('div').parent('ul').parent('div').attr('id');
+			var toggleDisplay = true;
+			removeEditForm(parentElementId, toggleDisplay);
+		} else {
+			// Save Data
+			btn = $(this);
+			ulElement = btn.parents('ul');
+			parentDiv = ulElement.parent('div');
+  			arrow = parentDiv.find('.toggleArrow');
+			// Create a JSON string and post to model
+			// Create a new list of settings
+
+			//alert(referralParentId);
+			
+			referralElement = parentDiv.find('.child.referral-title');
+			referralName = $.trim(referralElement.find('input').val().replace(/"/g, '\\\"'));
+
+			referralParentElement = parentDiv.parent('.referral_parent').find('.parent.referral-title');
+			referralParentName = $.trim(referralParentElement.find('input').val().replace(/"/g, '\\\"'));
+            
+			referralId = parentDiv.attr('id').replace('r','');
+			referralParentId = parentDiv.parent('.referral_parent').attr('id').replace('p','');
+			//json = '{"id":"' + referralId + '","name":"' + referralName + '","services":[';
+			json = '{"id":"' + referralId + '","name":"' + referralName + '","org_id":"' + referralParentId + '","org_name":"' + referralParentName + '","services":[';
+			liElements = ulElement.find('li');
+			addSeparator = false;
+			liElements.each(function(index){
+				tmpInput = $(this).find('select');
+				checkbox = tmpInput.next();
+				var disabled = 1;
+				if(checkbox.prop('checked') || checkbox.length === 0){
+					disabled = 0;
+				}
+				tmpId = tmpInput.val();
+				options = tmpInput.find('option');
+				options.each(function(index){
+					option = $(this);
+					if(option.val() == tmpId){
+						tmpVal = option.text();
+					}
+				});
+				if(tmpId){
+					json += (addSeparator ? ',' : '');
+					json += '{"id" : "' + tmpId + '", "name" : "' + tmpVal + '", "disabled" : "' + disabled + '"}';
+					addSeparator = true;
+				}
+			});
+			json += ']}';
+			$.post('index.php', { 'action' : 'referral-services', 'save' : 'true', 'json' : json }, function(data){
+				if(! $.isEmptyObject(data)){
+					btn.val('Edit'); // Change button value
+					referralElement.html(referralName); // replace form element
+					referralParentElement.html(referralParentName); // replace form element
+					liElements.remove(); // Remove input list items
+					var items = [];
+  					$.each(data, function(key, val) {
+    					$('<li class="referral-item' + (val.disabled ==="1" ? ' referral-item-disabled' : '') + '" data-referral-id="' + referralId + '" data-service-id="' + val.id + '">' + val.name + '</li>').appendTo(ulElement);
+  					});
+					ulElement.toggleClass('hide2', 1000, "easeOutSine");
+					arrow.toggleClass('on');
+  				}
+			});
+		}
+	});
+	clicktimer = 0;
+	$(document).on('click', '.referral .clickable, .referral .toggleArrow', function(e){
+	//$('.referral .clickable, .referral .toggleArrow').on('click', function(e){
+		nodeType = e.target.nodeName;
+		if(nodeType == 'DIV'){
+			var parent = $(this).parent('div');
+			parentElementId = parent.attr('id');
+			arrow = parent.find('.toggleArrow');
+			if(clicktimer){
+				clearTimeout(clicktimer);
+			}
+			clicktimer = setTimeout(function(){
+				ul = parent.find('ul');
+				var toggleDisplay = true;
+				removeEditForm(parentElementId, toggleDisplay);
+			}, 300);
+		}
+	});
+
+	var allowDoubleClick = true;
+	$('.referral .clickable, .referral .toggleArrow').on('dblclick', function(e){
+		if(clicktimer){
+			clearTimeout(clicktimer);
+		}
+		if(allowDoubleClick){
+			parentElementId = $(this).parent().attr('id');
+			// We don't want to toggle things if there already open
+			// We need to check to see if it's already open and if it is set toggleDisplay = false;
+			arrow = parent.find('.child.toggleArrow');
+			toggleDisplay = !arrow.hasClass('on');
+			replaceWithEditForm(parentElementId, toggleDisplay);
+			//allowDoubleClick = false;
+		}
+	});
+
+	$('.referral_parent .clickable, .referral_parent .parent.toggleArrow').on('click', function(e){
+		nodeType = e.target.nodeName;
+		if(nodeType == 'DIV'){
+			var parent = $(this).parent('div');
+			parentElementId = parent.attr('id');
+			arrow = parent.find('.parent.toggleArrow');
+			if(!arrow.hasClass['on']){
+				arrow.toggleClass('on');
+				parent.find('.referral').toggleClass('hide2');
+			}
+			
+		}
+	});
+
+	$(document).on('click', '#print-list', function(e){
+		e.preventDefault();
+		postString = $('#filter-form').serialize();
+		window.open('index.php?print=true&' + postString, '');
+	});
+	$(document).on('click', '#export-list', function(e){
+		e.preventDefault();
+		curLocation = window.location.href;
+		postString = curLocation + '&export=true';
+		window.open(postString, '');
+	});
+	$('ul.services').on('change', '.new-item select', function(){
+		htmlSelect = $('<div><?= addslashes($referred_to_service->displaySelect('rs[0]', '', ' ', '', false, ' referral-service', true)) ?></div>');
+		ulElement = $(this).parents('ul.services');
+		referralId = parentElementId.replace(/r/, '');
+		ulElement.append('<li class="referral-item new-item" data-referral-id="' + referralId + '" data-service-id="0">' + htmlSelect.html() + '</li>');
+	});
+
+	// Prevent default export button to submit the form when pressing
+	// enter in the filter form.
+    $('#filter-form').on('keypress', 'input:text', function(event){
+	    var keyCode = event.which;
+	    switch(keyCode){
+	        case 13:
+	        	$('#filter-btn').click();
+	        	return false;
+	        	break;
+	        default:
+        }
+    });
+});
+</script>
+
+<div class="pageTitleBar">
+	<h1>Organization Settings</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="settings" /><input type="submit" value="System Settings" class="btn-small" /></form>
+	</div>
+	<!-- <form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="referral-services" />
+	<input type="text" id="search" name="filters[referral]" value="<?=isset($_SESSION['referral-services']['filters']['referral']) ? $_SESSION['referral-services']['filters']['referral'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form> -->
+</div>
+
+<div>
+
+	<div class="titleBar">
+		<form id="filter-form" action="index.php" style="padding: 4px 3px 0 4px;"><input type="hidden" name="action" value="referral-services">
+			<div style="float: right;">
+			<input type="submit" class="btn-small" id="export-list" name="export_list" value="Export" />
+			<input type="submit" class="btn-small" id="print-list" name="print_list" value="Print" />
+			</div>
+			<input type="text" id="filters[referral]" name="filters[referral]" value="<?=isset($_SESSION['referral-services']['filters']['referral']) ? $_SESSION['referral-services']['filters']['referral'] : ''?>" style="padding: 2px;" Placeholder="Referral Agency" />
+			<input type="text" id="filters[service]" name="filters[service]" value="<?=isset($_SESSION['referral-services']['filters']['service']) ? $_SESSION['referral-services']['filters']['service'] : ''?>" style="padding: 2px;" Placeholder="Service Term" />
+			<input id="filter-btn" type="submit" value="Filter" class="btn-small" />  <input type="submit" name="clearFilters" value="Clear" class="btn-small" /> <input type="submit" name="manage_referral" value="Manage Referrals" class="btn-small" />
+			<input id="toggle-btn" type="button" value="Show/Hide All" class="btn-small" style="margin-left: 20px;" />
+		</form>
+	</div>
+
+	<?=(isset($message) ? '<div style="color: #c00; padding: 10px 5px;">' . $message . '</div>' : '')?>
+
+<? $referredToId = null; $closeList = false; ?>
+<? //echo "<pre>";print_r($referralServices);die; ?>
+<? if(is_array($referralServices)) : $org_name = ''; ?>
+  <? foreach($referralServices as $key => $referralSer) : ?>
+  <? if(empty($org_name))
+        $org_name = $key; 
+        $count = 1;
+    ?>
+  	<div class="referral_parent" id="p<?=$referralSer[0]['organization_name_id']?>">
+  		<div class="parent toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+  		<div style="font-size: 10pt; line-height: 18pt; color: #000;" class="parent referral-title clickable <?//=($referralService['referral_disabled'] ? ' setting-disabled' : '')?>">
+		<?= $key; ?></div>
+	<? foreach($referralSer as $referralService) : ?>
+		<? if(empty($referralService['referred_to_site_id']) 
+			|| empty($referralService['service']) 
+			|| empty($referralService['referred_to_site'])) continue; ?>
+		<? if($referralService['referred_to_site_id'] != $referredToId) : ?>
+			<? if(!is_null($referredToId) && $count != 1) : ?>
+					</ul>
+				</div>
+				</div>
+					
+			<? endif ?>
+			<?
+			$referredToId = $referralService['referred_to_site_id'];
+			$org_name = $key;
+			?>
+			<div id="r<?=$referralService['referred_to_site_id']?>" class="referral hide2" style="position: relative;">
+				<div class="child toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+				<div style="font-size: 10pt; line-height: 18pt; color: #000;" class="child referral-title clickable <?=($referralService['referral_disabled'] ? ' setting-disabled' : '')?>">
+				<?= !empty($referralService['referred_to_site']) ? $referralService['referred_to_site'] : ''; ?></div>
+				<ul class="referrals hide2">
+				<? if($referralService['service_id'] && !$referralService['service_disabled']) : ?>
+					<li class="referral-item <?=($referralService['disabled'] ? ' referral-item-disabled' : '')?>" data-referral-id="<?=$referralService['referred_to_site_id']?>" data-service-id="<?=$referralService['service_id']?>"><?= $referralService['service'] ?></li>
+				<? endif ?>
+				</ul>
+				<ul class="services hide2" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+					<div class="setting-buttons">
+						<input type="submit" value="Edit" class="btn-small btn-edit" /> <input type="submit" value="Cancel" class="btn-small btn-cancel"  />
+					</div>
+
+		<? endif ?>
+					<? if($referralService['service_id'] && !$referralService['service_disabled']) : ?>
+						<li class="referral-item <?=($referralService['disabled'] ? ' referral-item-disabled' : '')?>" data-referral-id="<?=$referralService['referred_to_site_id']?>" data-service-id="<?=$referralService['service_id']?>"><?= $referralService['service'] ?></li>
+					<? endif ?>
+			<? $count++; ?>
+
+	<? endforeach ?>
+
+				</ul>
+			</div></div>
+		
+	<? endforeach ?>
+		</div>
+	
+
+<? endif ?>
+
+</div>

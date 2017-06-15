@@ -1,0 +1,125 @@
+<style type="text/css">
+.titleBar select, #filter-form select, #search-form-table select{max-width: 100px;}
+</style>
+<script type="text/javascript">
+
+$("document").ready(function(){
+
+	$('#clear-filters').on('click', function(e){
+		e.preventDefault();
+		// reset form fields
+		$('#annual-form .filter-container').find('select, input').not('.btn-small').val('');
+	});
+
+	$('#create-report').on('click', function(e){
+		e.preventDefault();
+		$('.message').html('');
+		if($('#reportKey').val()){
+			form = $('#annual-form');
+			form.attr('target', '_blank');
+			form.submit();
+		} else {
+			$('.message').html('Error: Please select a report from the drop down.');
+		}
+	});
+
+	$('#multi-zip').on('change', function(e){
+		var checkbox = this;
+		$('.select').attr('multiple',checkbox.checked);
+	 	if(checkbox.checked){
+	 		$('.select').attr('name','filters[zip][]');
+	 		$('.select').attr('size','11');
+	 	} else {
+	 		$('.select').attr('name','filters[zip]');
+	 		$('.select').attr('size','1');
+	 	}
+	});
+
+	// initialize date picker
+	$('.date').datepicker();
+
+});
+
+</script>
+
+<form id="annual-form" action="index.php">
+<div class="pageTitleBar" style="position: relative;">
+	<a href="index.php?action=reports"><h1>Annual Report Export for HMG</h1></a>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 5px;">
+		<div id="filter-form" style="padding: 8px 3px 0 4px;">
+			<input type="hidden" name="action" value="reports">
+			<input type="hidden" name="type" value="annual">
+			<input type="hidden" name="subtype" value="hmg-export">
+			<div style="float: right; margin-left: 5px">
+			<input type="submit" class="btn-small" id="create-report" name="createReport" value="Create Report" />
+			</div>
+			<style>
+			select.status{
+				width: auto;
+			}
+			.pageTitleBar input[type="text"] {
+				width: 80px;
+			}
+			.school_district, .select, .filter {
+				display: inline-block;
+				float: left;
+				margin-right: 2px;
+				margin-top: 2px;
+			}
+			.counts-county{
+				float: left;
+				margin-right: 2px;
+				margin-top: 2px;
+				width: auto !important;
+			}
+			.select-wrapper {
+				float: left;
+				margin-right: 20px;
+			}
+			.filter-container {
+				float: left;
+				margin: auto 0;
+			}
+			#multi-zip{
+				vertical-align: middle;
+			}
+			#clear-filters {
+				margin-left: 10px;
+			}
+			</style>
+			<div class="filter-container">
+				<?= $region->displaySelect('filters[region_id]', $filters['region_id'], 'Region', false, null, 'filter') ?>
+				<?= $county->displaySelect('filters[county]', $filters['county'], 'County', '', false, ' counts-county', false) ?>
+				<? if(is_array($filters['zip'])){ $multiSelect = true; } else { $multiSelect = false; } $tabIndex = ''; ?>
+				<?= $schoolDistrict->displaySelect('filters[school_district]', $filters['school_district'], 'School District') ?>
+				<div class="select-wrapper">
+					<?= $family->displayFieldSelect('filters[zip]', 'zip', $filters['zip'], 'Zip Code', $tabIndex, $multiSelect) ?>
+				</div>
+				Multi <input id="multi-zip" type="checkbox" <?= ($multiSelect ? ' checked' : ''); ?> />
+				<?= $status->displaySelect('filters[status]', $filters['status'], 'Status', '', false, ' counts-status', false) ?>
+				<input type="text" class="date" id="start-date" name="filters[start_date]" value="<?= $filters['start_date'] ?>" placeholder="Start Date" />
+				<input type="text" class="date" id="end-date" name="filters[end_date]" value="<?= $filters['end_date'] ?>" placeholder = "End Date" />
+				<!-- <input type="submit" value="Filter" class="btn-small" /> -->  <input type="submit" id="clear-filters" name="clearFilters" value="Clear" class="btn-small" />
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="annual-reports">
+	<div class="message"><?= $message ?></div>
+	<div class="reportTitle">Select a report</div>
+	<select id="reportKey" name="reportKey">
+		<option></option>
+		<option value="family-file"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'family-file' ? ' selected' : '')?>>Family File Export</option>
+		<option value="family-referral"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'family-referral' ? ' selected' : '')?>>Family Referrals Export</option>
+		<option value="child-referral"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'child-referral' ? ' selected' : '')?>>Child Referrals Export</option>
+		<option value="child-information"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'child-information' ? ' selected' : '')?>>Child Information Export</option>
+		<option value="developmental-screening"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'developmental-screening' ? ' selected' : '')?>>Developmental Screening Export</option>
+		<option value="screening-per-child"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'screening-per-child' ? ' selected' : '')?>>Count of Screenings per Child Export</option>
+		<option value="school-district-zip-codes"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'school-district-zip-codes' ? ' selected' : '')?>>School Districts and Zip Codes Export</option>
+		<option value="county-zip-codes"<?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'county-zip-codes' ? ' selected' : '')?>>Counties and Zip Codes Export</option>
+		<option value="service-terms-organizations" <?=(isset($_GET['reportKey']) && $_GET['reportKey'] == 'service-terms-organizations' ? ' selected' : '')?> >Service Terms within Organizations</option>
+	</select>
+
+</div>
+</form>

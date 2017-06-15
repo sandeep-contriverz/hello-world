@@ -1,0 +1,1248 @@
+<?php //echo "<pre>";print_r($_SESSION['user']);die;?>
+<link href="css/chosen.css" rel="stylesheet">
+<script type="text/javascript" src="js/chosen.jquery.js"></script>
+<style>
+div#providerList, div.providerAutoCompList, div#searchList, div.autosuggest-selection-container {
+    border: 1px solid silver;
+    display: none;
+    font-weight: normal;
+    height: auto;
+    overflow: hidden;
+    position: absolute;
+    width: auto !important;
+    z-index: 10;
+}
+.label {font-weight: bold;padding: 5px;}
+</style>
+
+<script type="text/javascript">
+
+var newChildCurrentIndex = 0;
+
+function getHowHeardDetails(heard_id){
+	var select = '';
+	$.ajax({
+		url: 'index.php',
+		data: {
+			action:'setting',
+			'get-select': true,
+			//'selected': selected,
+			'heard_id' : heard_id
+		},
+		async: false
+	}).done(function(data){
+		//alert(data);
+		select = data;
+	});
+
+	return select;
+}
+
+$("document").ready(function(){
+	$(".chosen-select").chosen();
+
+	$('.fancybox').fancybox({
+		autoSize: false,
+		padding : '0px', scrolling : 'no',
+		height: 200,
+		width: '40%',
+	});
+
+	$('.date').keyup(function(){
+		var value =	$(this).val();
+		//console.log(value);
+	});
+
+	//$(document).on('change', 'input[name="data[family_heard_id]"]', function(e){
+	$('#family_heard_id').bind("change", function(e) {
+		e.preventDefault();
+		//ajax call to fetch how heard details listing
+		var result = getHowHeardDetails($(this).val());
+		
+		if(result != ''){
+			
+			$('#heard_details_td').html(result).append("<script>$('.chosen-select').chosen();<\/script>");
+		}
+		else{
+			$('#heard_details_td').html('<select class="setting"><option value=""></option></select>');
+		}
+	});
+	countsaveProvider = 0;
+	$(document).on('click', '.saveProvider', function(e){
+		var provider_id     = $.trim($('#provider_id').val());
+		var provider_name     = $.trim($('#provider_name').val());
+		
+		var send_follow_up  = $.trim($('input[name="send_follow_ups"]:checked').val());
+		var date_permission_granted  = $.trim($('input[name="date_permission_granted"]').val());
+		var date_permission_revoked  = $.trim($('input[name="date_permission_revoked"]').val());
+		var enrollment_type = $.trim($('#enrollment_type').val());
+		//alert(provider_id+'='+send_follow_up+'='+enrollment_type);
+		var html = '<input type="hidden" name="provider['+countsaveProvider+'][provider_id]" value="'+provider_id+'"/>';
+		html += '<input type="hidden" name="provider['+countsaveProvider+'][send_follow_up]" value="'+send_follow_up+'"/>';
+		html += '<input type="hidden" name="provider['+countsaveProvider+'][permission_type]" value="'+enrollment_type+'"/>';
+		html += '<input type="hidden" name="provider['+countsaveProvider+'][date_permission_granted]" value="'+date_permission_granted+'"/>';
+		html += '<input type="hidden" name="provider['+countsaveProvider+'][date_permission_revoked]" value="'+date_permission_revoked+'"/>';
+		countsaveProvider++;
+		
+		//var providerArray = ["6", "242", "641"];
+		var myarray =new Array();
+		$('.dpro').each(function(){
+			myarray.push($(this).attr('id')); 
+		});
+		if(jQuery.inArray(provider_id, myarray) !== -1)
+		{
+			alert("You have already added provider");
+			
+		}else{
+		$('#familyForm').append(html);
+		$('#current_provider').append('<div class="dpro" id="'+provider_id+'">'+provider_name+'</div>');
+		}
+		
+		$('#provider_name').val('');
+		$.fancybox.close();
+	});
+	//check whether the user has permission for county/region
+	$("input[name=county_id]").bind("change", function() {
+		//ajax call check permissions
+		var $this = $(this);
+		var cid   = $.trim($(this).val());
+		var uid   = "<?php echo $_SESSION['user']['id']; ?>";
+		var json  = '{ "cid" : "' + cid + '", "uid" : "' + uid + '" }';
+		$.ajax({
+			type		: "POST",
+			data		: { 'action' : 'family', 'check_permissions' : 'true', 'json' : json },
+			url			: 'index.php',
+			dataType	: 'json',
+			beforeSend	: function() {},
+			error		: function() {},
+			success		: function( result ) {
+				if(result && result.status == false) {
+					$this.val('');
+					$this.next('.autosuggest-input').val('');
+					alert('You do not have permission to save a family in a County outside of your Region. If you have received this message in error, please contact your Help Me Grow Administrator.');
+				}
+			}
+		});
+	});
+
+    $('.infoPane').on('keyup', '.county-lookup', function(event){
+    	input = $(this);
+		if(input.val().length >= 5){
+			searchString = input.val().substring(0, 5);
+			$.post('/index.php', 'action=zip&zip=' + searchString, function(data){
+				county = data.county;
+				updateCountySelect(county);
+			})
+		}
+    });
+    $('.infoPane').on('change', '[name="city_id"]', function(event){
+		input = $('input[name="data[city]"]');
+		searchString = input.val();
+		$.post('index.php', 'action=zip&city=' + searchString, function(data){
+			county = data.county;
+			updateCountySelect(county);
+			//ajax call check permissions
+			var uid   = "<?php echo $_SESSION['user']['id']; ?>";
+			var json  = '{ "cid" : "' + data.county + '", "uid" : "' + uid + '" }';
+			$.ajax({
+				type		: "POST",
+				data		: { 'action' : 'family', 'check_permissions' : 'true', 'json' : json },
+				url			: 'index.php',
+				dataType	: 'json',
+				beforeSend	: function() {},
+				error		: function() {},
+				success		: function( result ) {
+					if(result && result.status == false) {
+						$('input[name=county_id]').val('');
+						$('input[name=county_id]').next('.autosuggest-input').val('');
+						alert('You do not have permission to save a family in a County outside of your Region. If you have received this message in error, please contact your Help Me Grow Administrator.');
+					}
+				}
+			});
+		});
+    });
+	$(".addAnotherChild").on("click", function(){
+		lastChild = $('#childrenDiv .infoTable:last').not('.newChild');
+		if(!lastChild.length){
+			lastChild = $('#childrenDiv .editChild:last').not('.newChild');
+		}
+		lastTabIndex = parseInt(lastChild.find('textarea').attr('tabindex'));
+		if(isNaN(lastTabIndex)){
+			lastTabIndex = 50;
+		}
+		newChild = $(".newChild");
+		cloneChild = newChild.clone();
+		cloneChild.removeClass('newChild');
+		inputs = cloneChild.find('input, textarea, select').not('.prenatal');
+		inputs.each(function(index){
+			lastTabIndex++;
+			if($(this).hasClass('deleteAnotherChild')) {
+				$(this).attr('data-id', newChildCurrentIndex);
+				return;
+			}
+			myname = $(this).attr('name');
+			tmpname = myname.replace(/[^0-9]/g, "");
+			i = parseInt(tmpname);
+			newname = myname.replace("template[0]", "children[NEW" + newChildCurrentIndex + "]");
+			$(this).attr('name', newname);
+			$(this).attr('tabindex', lastTabIndex);
+			if(newname.indexOf('birth_date') != -1){
+				$(this).addClass('date');
+				$(this).addClass('date birth');
+			}
+			if(newname.indexOf('birth_due_date') != -1){
+				$(this).addClass('date birth-due-date');
+				//$(this).addClass('date birth-due-date birth');
+			}
+		});
+		newChildCurrentIndex++;
+		cloneChild.appendTo("#childrenDiv");
+		setTimeout(function(){
+			$('.date').datepicker();
+			if($('#childrenDiv .infoTable').not('.newChild').length > 1){
+				$('#childrenDiv .infoTable:last').not('.newChild').find('input').eq(1).focus();
+			}
+		}, 1000);
+	});
+	<? if($addChild) : ?>
+	$(".addAnotherChild").trigger('click');
+	<? endif; ?>
+
+	$('.delete-name').on('click', function(e){
+		$('.delete-child').attr('name', e.target.name);
+		$('.cancel-delete').focus();
+		setTimeout(function() {
+			$('.cancel-delete').focus();
+		}, 500);
+	});
+	$('.delete-child').on('click', function(e){
+		$('#save-trigger').attr('name', e.target.name);
+		$('#save-trigger').val('1');
+		$('#familyForm').submit();
+	});
+	$(document).on('click', '.deleteAnotherChild', function(e){
+		$('#new_child_ref').val($(this).attr('data-id'));
+		$.fancybox.open('#new-child-delete-div');
+		$('.cancel-delete').focus();
+		setTimeout(function() {
+			$('.cancel-delete').focus();
+		}, 500);
+	});
+	$(document).on('click', '.cancel-delete', function(e){
+		$.fancybox.close();
+	});
+	$(document).on('click', '.new-delete-child', function(e){
+		var data_id = $('#new_child_ref').val();
+		$('input[data-id="'+data_id+'"]').parentsUntil('.infoTable').remove();
+		$.fancybox.close();
+	});
+	
+	$('.delete-family').on('click', function(e){
+		confirmed = confirm('Are you sure you want to delete this family?');
+		if (confirmed) {
+			$('#save-trigger').attr('name', 'delete');
+			$('#save-trigger').val('1');
+			$('#familyForm').submit();
+		}
+	});
+
+	$('.save-shortcut').on('click', function(e){
+		$('#familyForm').find('.save-form').click();
+		e.preventDefault();
+	});
+
+	$('#familyForm .save-form').on('click', function(e) {
+
+		var return_value = dateValidation(); 
+		if(!return_value){
+			return false;
+		}
+		$('.btn-small.save-shortcut, .btn-small.save-form').prop('disabled', true).addClass('disabled');
+		$('#save-trigger').val('1');
+		$('#familyForm').submit();
+	});
+
+	function placeFocusOnMissing(){
+		$('#familyForm').find('.required').each(function(index){
+			if($(this).val() == ''){
+				$(this).focus();
+				return false;
+			}
+		});
+
+	}
+
+	function updateCountySelect(county){
+		select = $("[name*='county']");
+		select.val(county);
+	}
+
+	<? if($message) : ?>
+	placeFocusOnMissing();
+	<? endif; ?>
+	// initialize date picker
+	$('.date').datepicker();
+
+	function dateValidation(){
+		//return true;
+		var is_birth_valid= true;
+		$('.birth').each(function(){
+			if($(this).hasClass('not_count'))
+			{
+				return ;
+			}
+			if($(this).val() == "")
+			{
+				return;
+			}
+			
+		    var Val_date = $(this).val();    
+	      	var match1 = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/.test(Val_date);
+	      	var match2 = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.test(Val_date);
+	      	
+	      	if(match1 || match2)
+	      	{
+	      		try{
+		      		var match = Val_date.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+			      	var mm = match[1];
+				    var dd = match[2];
+				    var yy = match[3];
+					console.log($.datepicker.parseDate("dd/mm/yy", dd + "/" + mm + "/" + yy));
+					$.datepicker.parseDate("dd/mm/yy", dd + "/" + mm + "/" + yy, null);
+				}
+				catch(error)
+				{
+					alert("Please enter VALID BIRTH DATE");
+					is_birth_valid= false;
+					return ;
+					return false;
+				}
+			}
+			else{
+				alert("Please enter VALID BIRTH DATE");
+				is_birth_valid= false;
+				return ;
+				return false;
+			}
+
+		});
+		if(is_birth_valid) return true;
+	}
+});
+</script>
+<script type="text/javascript" src="js/autosuggest.js"></script>
+
+<div class="infoMain">
+
+	<div class="titleBar">
+	<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+		<?= (isset($data['id']) && is_numeric($data['id']) ? '<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="family"  /><input type="hidden" name="id" value="' .  $data['id'] . '" /><input type="hidden" name="pos" value="' . $pos . '" /><input type="submit" value="View Family" class="btn-small" /></form>' : '')?> <form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="families" /><input type="hidden" name="field" value="<?=$field?>" /><input type="hidden" name="sort" value="<?=$sort?>" /><input type="submit" value="Families List" class="btn-small" /> <input type="submit" value="Save" class="btn-small save-shortcut" /></form>
+		<?=(isset($_SESSION['totalFamilies']) && ($pos - 1) > 0 ? '<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="family" /><input type="hidden" name="id" value="' . $data['id'] . '" /><input type="hidden" name="pos" value="' . ($pos + 1) . '" /><input type="submit" name="edit" value=" " class="prev" /></form>' : '')?>
+		<?=($data['id'] != null && isset($_SESSION['totalFamilies']) && ($pos - 1) < $_SESSION['totalFamilies'] ? '<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="family" /><input type="hidden" name="id" value="' . $data['id'] . '" /><input type="hidden" name="pos" value="' . ($pos + 1) . '" /><input type="submit" name="edit" value=" " class="next" /></form>' : '')?>
+	</div>
+		<div class="caption"><?=($data['first_name_1'] ? $data['first_name_1'] . ' ' . $data['last_name_1'] . ' (' . $data['id'] . ')' : 'Add New Family')?></div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+	<form id="familyForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="family" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+		<input type="hidden" name="pos" value="<?=$pos?>" />
+		<input type="hidden" id="save-trigger" name="save" value="" />
+
+			<div class="infoBody" style="">
+
+				<div class="infoColumn" style="padding: 0px 12px;">
+
+					<div class="infoPane" style="margin-top: 12px;">
+
+						<table class="" style="width: 100%;" cellpadding="0" cellspacing="0" border="0">
+
+							<tbody>
+
+							<tr>
+
+								<td colspan="2" class="infoTitle" style="width: 342px;"><h2>Primary Contact</h2></td>
+
+								<td colspan="2" class="infoTitle" style="width: 344px; padding-left: 12px;"><h2>Secondary Contact</h2></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">First Name:*</td>
+
+								<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[first_name_1]" value="<?= $data['first_name_1'] ?>" class="required" ></td>
+
+
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">First Name:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[first_name_2]" value="<?= $data['first_name_2'] ?>" ></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Last Name:*</td>
+
+								<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[last_name_1]" value="<?= $data['last_name_1'] ?>" class="required" ></td>
+
+
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Last Name:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[last_name_2]" value="<?= $data['last_name_2'] ?>" ></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Relationship:</td>
+
+								<td class="infoText borderRight" style=""><?= $relationship->displaySelect('data[relationship_1_id]', (isset($data['relationship_1_id']) ? $data['relationship_1_id'] : ''), ' ', 3, true) ?></td>
+
+
+
+								<td class="infoLabel" style="width: 116px; padding: 4px 0px 4px 28px;">Relationship:</td>
+
+								<td class="infoText" style=""><?= $relationship->displaySelect('data[relationship_2_id]', (isset($data['relationship_2_id']) ? $data['relationship_2_id'] : ''), ' ', 6) ?></td>
+
+							</tr>
+
+
+
+
+							<tr>
+
+								<td colspan="2" style="width: 50%; padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+								<td colspan="2" style="padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+							</tr>
+
+							<tr>
+
+								<td colspan="4" class="infoTitle"><h2>Contact Information</h2></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Address:</td>
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[address]" value="<?= $data['address'] ?>" ></td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Email:</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;"  name="data[email]" value="<?= $data['email'] ?>"></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">City:</td>
+
+								<td class="infoText" style="">
+									<div style="display:inline-block;" class="setting-autosuggest">
+										<input type="hidden" name="city_id" class="autosuggest-value" />
+										<input
+											
+											name="data[city]"
+											value="<?=$data['city']?>"
+											class="autosuggest-input rounded"
+											placeholder="Type city name"
+											data-query-string="action=settings&type=city&search="
+											autocomplete="off" />
+										<div class="autosuggest-selection-container"></div>
+									</div>
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Primary Phone:*</td>
+
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[primary_phone]" value="<?= $data['primary_phone'] ?>" class="required" ></td>
+
+							</tr>
+
+							<tr>
+								<td class="infoLabel" style="padding: 4px 0px 4px 12px;">State:</td>
+
+								<td class="infoText" style="">
+									<input type="text" style="width: 70px; float: left;" name="data[state]" value="<?php if(isset($data['state']) && !empty($data['state'])){ echo $data['state'];}else{ echo 'UT'; } ?>" >
+
+
+
+									<div class="infoLabel" style="float: left; padding-left: 19px; padding-right: 7px;">Zip:</div>
+
+									<input type="text" style="width: 32px; float: left;" class="county-lookup" name="data[zip]" value="<?= $data['zip'] ?>" >
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Secondary Phone:</td>
+								<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[secondary_phone]" value="<?= $data['secondary_phone'] ?>" ></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 8px 12px;">
+									<div>County:*</div>
+								</td>
+
+								<td class="infoText">
+									<div style="display:inline-block;" class="setting-autosuggest">
+										<input type="hidden" name="county_id" class="autosuggest-value" />
+										<input
+											
+											name="data[county]"
+											value="<?=$data['county']?>"
+											class="autosuggest-input rounded"
+											placeholder="Type a county name"
+											data-query-string="action=settings&type=county&search="
+											autocomplete="off" />
+										<div class="autosuggest-selection-container"></div>
+									</div>
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">
+									Best Time:
+								</td>
+								<td>
+									<?= $best_hours->displayBestHoursSelect('data[best_times_start]', $data['best_times_start'], 'Start Time', 16, false, NULL, false, true) ?><br />
+									<?= $best_hours->displayBestHoursSelect('data[best_times_end]', $data['best_times_end'], 'End Time', 16, false, NULL, false, true) ?>
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="padding: 4px 0px 8px 12px;">
+									<div>Language:</div>
+								</td>
+
+								<td class="infoText">
+									<?= $language->displaySelect('data[language_id]', (isset($data['language_id']) ? $data['language_id'] : ''), ' ', 12) ?>
+								</td>
+
+								<td class="infoLabel" style="padding: 4px 0px 4px 28px;">
+									Best Days to Contact:
+								</td>
+								<td>
+									<?
+										$data['best_times_days'] = explode(', ', $data['best_times_days']);
+									?>
+									M: <input type="checkbox" name="data[best_times_days][]" value='M'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('M', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+									Tu: <input type="checkbox" name="data[best_times_days][]" value='Tu'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('Tu', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+									W: <input type="checkbox" name="data[best_times_days][]" value='W'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('W', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+									Th: <input type="checkbox" name="data[best_times_days][]" value='Th'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('Th', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+									F: <input type="checkbox" name="data[best_times_days][]" value='F'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('F', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+									Any: <input type="checkbox" name="data[best_times_days][]" value='any day'  style="vertical-align: middle"<?=($data['best_times_days'] && in_array('any day', $data['best_times_days']) ? ' checked="checked"' : '')?> />
+								</td>
+
+							</tr>
+
+							<tr>
+								<td class="infoLabel" style="padding: 4px 0px 8px 12px;">
+									&nbsp;
+								</td>
+
+								<td class="infoText">
+									&nbsp;
+								</td>
+
+								<td style="padding: 8px 0px 4px 28px;" colspan="2">
+ 								<table cellspacing="0" border="0">
+									<tbody style="border: none;"><tr>
+	  								<td style="width: 130px;">
+		 								<b>Best Way To Contact:</b>
+	  								</td>
+	  								<td class="infolabel" style="width: 57px; padding-left: 5px;">
+		 								Email:
+		 								<input type="hidden" name="data[contact_email]" value="0">
+		 								<input type="checkbox" name="data[contact_email]" value="1"  style="vertical-align: middle"<?=($data['contact_email'] ? ' checked="checked"' : '')?>>
+
+	  								</td>
+	  								<td style="width: 50px; padding-left: 5px;">
+		 								Text:
+		 								<input type="hidden" name="data[contact_text]" value="0">
+		 								<input type="checkbox" name="data[contact_text]" value="1"  style="vertical-align: middle"<?=($data['contact_text'] ? ' checked="checked"' : '')?>>
+	  								</td>
+	  								<td style="width: 70px; padding-left: 5px;">
+		 								Phone:
+		 								<input type="hidden" name="data[contact_phone]" value="0">
+		 								<input type="checkbox" name="data[contact_phone]" value="1"  style="vertical-align: middle"<?=($data['contact_phone'] ? ' checked="checked"' : '')?>>
+	  								</td>
+									</tr>
+ 								</tbody></table>
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td colspan="2" style="width: 50%; padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+								<td colspan="2" style="padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+							</tr>
+
+							<tr>
+
+								<td colspan="4" class="infoTitle borderRight" style="width: 342px;"><h2>Program Information</h2></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">HMG Worker:</td>
+
+								<td class="infoText borderRight">
+									<? $showAllWorkers = (is_numeric($data['id']) ? true : false) ?>
+									<?= $family->displayHmgWorkerSelect('data[hmg_worker]', ($data['hmg_worker'] ? $data['hmg_worker'] : $_SESSION['user']['hmg_worker']), ' ', '', '', $showAllWorkers) ?>
+								</td>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 0px;">Enrolled in Help Me Grow:</td>
+
+								<td class="infoText borderRight">
+									<?= $family->displayEnumOptions('data[enrollment_filed]', 'enrollment_filed', (isset($data['enrollment_filed']) ? $data['enrollment_filed'] : ''), '') ?>
+								</td>
+								
+								
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">Status:</td>
+
+								<td class="infoText">
+									<?= $status->displaySelect('data[status]', ($data['status'] ? $data['status'] : 'Open Inquiry'), ' ', 21, false, NULL, false) ?>
+								</td>
+								<td colspan="2" class="infoLabel">ECIDS Permission:
+									<?= $ecids_options ?>
+								                                        &nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="text" name="data[ecids_permission_granted]" value="<?= (isset($data['ecids_permission_granted_formatted']) && $data['ecids_permission_granted_formatted'] != '00/00/0000' ? $data['ecids_permission_granted_formatted'] : '') ?>" class="date permission" placeholder="Date Granted"  size="15"/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="text" name="data[ecids_permission_revoked]" value="<?= (isset($data['ecids_permission_revoked_formatted']) && $data['ecids_permission_revoked_formatted'] != '00/00/0000' ? $data['ecids_permission_revoked_formatted'] : '') ?>" class="date permission" placeholder="Date Revoked"  size="15"    />
+								</td>
+								
+								
+								
+								<?php /* 050117 
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 0px;">Permission to Fax Type:</td>
+
+								<td class="infoText borderRight">
+									<?= $permission_fax_type->displaySelect('data[enrollment_type]', $data['enrollment_type'], ' ', 27, false, NULL, false) ?>
+								</td>
+								*/ ?>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">CC Level:</td>
+
+								<td class="infoText">
+									<?= $cc_level->displaySelect('data[cc_level]', ($data['cc_level'] ? $data['cc_level'] : 'Level 1'), ' ', 22, false, NULL, false) ?>
+								</td>
+								<td colspan="2" class="infoLabel">Sharing Family Permissions:
+									<?= $sharing_options ?>
+								                                        &nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="text" name="data[sharing_permission_granted]" value="<?= (isset($data['sharing_permission_granted_formatted']) && $data['sharing_permission_granted_formatted'] != '00/00/0000' ? $data['sharing_permission_granted_formatted'] : '') ?>" class="date permission" placeholder="Date Granted" size="12"/>
+                                      &nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="text" name="data[sharing_permission_revoked]" value="<?= (isset($data['sharing_permission_revoked_formatted']) && $data['sharing_permission_revoked_formatted'] != '00/00/0000' ? $data['sharing_permission_revoked_formatted'] : '') ?>" class="date permission" placeholder="Date Revoked"  size="12"/>
+							</td>	
+								
+								<?php /* 050117 
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px;">Date Permission to Fax Granted: </td>
+
+								<td class="infoText borderRight">
+									<input type="text" name="data[date_permission_granted]" value="<?= (isset($data['date_permission_granted_formatted']) && $data['date_permission_granted_formatted'] != '00/00/0000' ? $data['date_permission_granted_formatted'] : '') ?>" class="date permission" placeholder="mm/dd/yyyy" tabindex="28" />
+								</td>
+								*/ ?>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">ASQ Preference:</td>
+
+								<td class="infoText">
+									<?= $asq_preference->displaySelect('data[asq_preference]', $data['asq_preference'], ' ', 23, false, NULL, true) //191016 ?>
+								</td>
+								
+								<td colspan="2"><a href="#addProviders" class="fancybox" style="font-weight: normal">Add a Provider</a>
+									<div id="addProviders" style="display: none; padding: 15px; white-space: nowrap">
+										<div class="titleBar" style="padding-left: 10px;text-align: center;"><span class="caption" style="">Add a Provider</span></div>
+										<table>
+										<tbody>
+											<tr>
+												<td class="label">Provider:</td>
+												<td id="provider-autosuggest" class="infoText">
+									<div style="display:inline-block;" class="setting-autosuggest">
+										<input type="hidden" id="provider_id" class="autosuggest-value" />
+										<input
+											
+											id="provider_name"
+											value=""
+											class="autosuggest-input rounded"
+											placeholder="Type a provider name"
+											data-query-string="action=providers&search="
+											autocomplete="off" />
+										<div class="autosuggest-selection-container"></div>
+									</div>
+								</td>
+											</tr>
+											<tr>
+												<td class="label">Send Follow-up to Organization:</td>
+												<td><?= $family->displayEnumOptions('send_follow_ups', 'send_follow_up', 'Yes', 33) ?></td>
+											</tr>
+											<tr>
+												<td class="label">Permission Type:</td>
+												<td><?= $permission_fax_type->displaySelect('enrollment_type', '', '', 27, false, NULL, false) ?></td>
+											</tr>
+											<tr>
+									<td class="label">Date Permission Granted:</td>
+									<td class="infoText borderRight">			
+									<input type="text" name="date_permission_granted" value="" class="date permission" placeholder="mm/dd/yyyy"  />
+								</td>
+                                        </tr>
+                                        <tr>
+								<td class="label">
+								Revoked
+								</td>
+								<td class="infoText borderRight">
+									<input type="text" name="date_permission_revoked" value="" class="date permission" placeholder="mm/dd/yyyy"  />
+								</td>
+		
+												<td ><input type="button" tabindex="990" class="saveProvider btn-small" value="Add" name="saveProvider"></td>
+												
+											</tr>
+										</tbody>
+										</table>
+										
+									</div>
+								</td>
+								
+								<?php /* 050117 
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 28px;">
+									Primary Provider:<br /><a href="#CurrentProviders" class="fancybox" style="font-weight: normal">Current Providers?</a>
+									<div id="CurrentProviders" style="display: none; padding: 15px; white-space: nowrap">
+									<? foreach ($providers as $provider) : ?>
+								            <b><?= $provider['employer'] . ': ' ?></b>
+								            <span><?=$provider['first_name'] . ' ' . $provider['last_name'] . ' ' . $provider['title']  ?></span><br />
+									<? endforeach ?>
+									</div>
+								</td>
+
+
+								<td id="provider-autosuggest" class="infoText">
+									<div style="display:inline-block;" class="setting-autosuggest">
+										<input type="hidden" name="provider[id]" class="autosuggest-value" />
+										<input
+											tabindex="29"
+											name="provider[name]"
+											value=""
+											class="autosuggest-input rounded"
+											placeholder="Type a provider name"
+											data-query-string="action=providers&search="
+											autocomplete="off" />
+										<div class="autosuggest-selection-container"></div>
+									</div>
+								</td>
+								*/ ?>
+
+							</tr>
+							<tr>
+							<td></td>
+							<td></td>
+							
+							<td colspan="2">
+							<b>Current Providers Listed:</b> 
+								<div id="current_provider">
+									<? 
+									
+									foreach ($providers as $provider) : ?>
+								            <div class="dpro" id="<?=$provider['id']?>">
+											<?= $provider['name'] ?>
+
+										   </div>
+									<? endforeach ?>
+								</div>	
+								</td>
+							</tr>
+							<tr>
+
+								<td colspan="2" style="width: 50%; padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+								<td colspan="2" style="padding-bottom: 8px; border-bottom: 1px solid silver;"></td>
+
+							</tr>
+
+							<tr>
+
+								<td colspan="4" class="infoTitle"><h2>Additional Information</h2></td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">Who Called:</td>
+
+								<td class="infoText borderRight">
+									<?= $who_called->displaySelect('data[who_called_id]', (isset($data['who_called_id']) ? $data['who_called_id'] : ''), ' ', 30) ?>
+								</td>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 28px;">Race:</td>
+
+								<td class="infoText borderRight">
+									<?= $race->displaySelect('data[race_id]', (isset($data['race_id']) ? $data['race_id'] : ''), ' ', 35) ?>
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">How Heard Category:</td>
+
+								<td class="infoText borderRight">
+									<?= $family_heard->displaySelect('data[family_heard_id]', (isset($data['family_heard_id']) ? $data['family_heard_id'] : ''), ' ', 31, false, null, true, false, false, 'family_heard_id') ?>
+								</td>
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 28px;">Ethnicity:</td>
+
+								<td class="infoText">
+									<?= $ethnicity->displaySelect('data[ethnicity_id]', (isset($data['ethnicity_id']) ? $data['ethnicity_id'] : ''), ' ', 36) ?>
+								</td>
+
+							</tr>
+							<tr>
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">How Heard Details</td>
+								<td class="infoText" id="heard_details_td">
+									<? if(!empty($how_heard_details))
+									       echo $how_heard_details;
+									   else {
+									?>
+									<select class="setting"><option value=""></option></select>
+									<? } ?>
+								</td>
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 28px;">Insurance:</td>
+
+								<td class="infoText borderRight">
+									<?= $health_insurance->displaySelect('data[health_insurance]', $data['health_insurance'], ' ', 37, false, NULL, true) //201016 ?>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">Point of Entry:</td>
+
+								<td class="infoText">
+									<?= $point_of_entry->displaySelect('data[point_of_entry]', (isset($data['point_of_entry']) ? $data['point_of_entry'] : ''), ' ', 50) ?>
+								</td>
+								
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 28px;">Health Insurance Notes:</td>
+
+								<td class="infoText" rowspan="2">
+									<textarea name="data[health_insurance_notes]" cols="40" rows="3" style="width: 188px;" ><?= $data['health_insurance_notes'] ?></textarea>
+								</td>
+							</tr>
+
+							<tr>
+								
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">Reason for Call?</td>
+
+								<td class="infoText">
+									<?= $call_reason->displaySelect('data[call_reason_id]', (isset($data['call_reason_id']) ? $data['call_reason_id'] : ''), ' ', 32) ?>
+								</td>
+
+								<td>&nbsp;</td>
+
+							</tr>
+							<tr>
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">Success Story:</td>
+
+								<td class="infoText borderRight">
+									<?= $family->displayEnumOptions('data[success_story]', 'success_story', (!empty($data['success_story']) && $data['success_story'] == 'Yes' ? $data['success_story'] : 'No'), '') ?>
+								</td>
+
+								<td class="infoLabel" style="text-align: top; padding: 4px 0px 4px 12px;">&nbsp;</td>
+
+								<td class="infoText">
+									&nbsp;
+								</td>
+								
+							</tr>
+							<tr>
+							
+							</tr>
+							<tr>
+
+								<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">Success Story Notes:</td>
+
+								<td class="infoText borderRight">
+									<textarea name="data[success_story_notes]" cols="40" rows="3" style="width: 188px;" ><?= $data['success_story_notes'] ?></textarea>
+								</td>
+							</tr>
+
+							<tr>
+
+								<td colspan="4">
+
+
+									<div id="childrenDiv" class="" style="margin: 14px 0 14px 0;">
+
+										<div class="title"><h2>Children</h2></div>
+
+										<? $tabIndex = 50; // tab index is incremented from here on out ?>
+										<? $childIncrement = null; ?>
+										<? if(is_array($data['children'])) : //echo "<pre>";print_r($data);die;?>
+										<? foreach($data['children'] as $child) : ?>
+											<? 
+												$prenatalChecked = false;
+												if (!empty($child['birth_due_date_formatted']) 
+													&& $child['birth_due_date_formatted'] !== '0000-00-00') 
+												{
+													$prenatalChecked = true;
+												}
+												if(isset($child["birth_due_date"]) && !empty($child["birth_due_date"]) && !$prenatalChecked) {
+													$prenatalChecked = true;
+												}
+											?>
+											<? if(!isset($child['id'])) : ?>
+												<? $childIncrement++; $child['id'] = 'NEW' . $childIncrement; ?>
+												<script>newChildCurrentIndex='<?=$childIncrement?>';</script>
+											<? endif; ?>
+
+										      <input type="hidden" name="children[<?= $child["id"] ?>][id]" value="<?= $child['id'] ?>" />
+												<table class="infoTable edit editChild" border="0" cellspacing="0" cellpadding="0" style="margin-top: 4px; width: 100%; border-color: silver; border-style: solid; border-width: 1px 1px 0px 1px;">
+
+													<tbody>
+													<tr>
+
+														<th class="borderRight smallHeader">First Name</th>
+														<th class="borderRight smallHeader">Last Name</th>
+														<th class="borderRight smallHeader">
+															Due Date
+														</th>
+														<th class="borderRight smallHeader">
+															Birth Date
+														</th>
+														<th class="borderRight smallHeader">Gender</th>
+														<th class="borderRight smallHeader">Early</th>
+														<th class="borderRight smallHeader">Presenting Issue</th>
+														<td class="btn-background" style="padding: 0 5px; width: 26px; height: 25px;">
+															<a href="#child-delete-div" class="fancybox delete-name"><input type="button" class="btn-small" name="deleteChild[<?= $child['id'] ?>]" value="Delete" tabindex="-1" /></a>
+
+														</td>
+
+													</tr>
+
+													<tr>
+
+														<td class="borderLeft borderTop" style="vertical-align: top;">
+
+															<input type="text" style="width: 120px;" name="children[<?= $child["id"] ?>][first]" value="<?= $child["first"] ?>" tabindex="<?= $tabIndex++ ?>" />
+
+														</td>
+
+														<td class="borderLeft borderTop" style="vertical-align: top;">
+
+															<input type="text" style="width: 120px;" name="children[<?= $child["id"] ?>][last]" value="<?= $child["last"] ?>" tabindex="<?= $tabIndex++ ?>" />
+
+														</td>
+
+														<td class="borderTop" style="text-align: center;">
+															Prenatal 
+															<input type="checkbox" 
+																onClick="
+																	var dueDate = $(this).next('.birth-due-date'); 
+																	if(this.checked){
+																		dueDate.show();
+																	} else {
+																		dueDate.val('');
+																		dueDate.hide();
+																	}
+																"
+																style="margin: 0 5px;"
+																<?= ($prenatalChecked ? 'checked="checked"' : '') ?>
+															/>
+															<input 
+																type="text" 
+																name="children[<?= $child["id"] ?>][birth_due_date]" 
+																value="<?=isset($child["birth_due_date"]) ? $child["birth_due_date"] : ''?>" 
+																class="date birth-due-date" 
+																placeholder="mm/dd/yyyy" 
+																<?=
+																	(!$prenatalChecked ?
+																		'style="display: none; width: 70px;"' :
+																		'style="display: block width: 70px;"'
+																	)
+																?>
+																tabindex="<?= $tabIndex++ ?>" 
+															/>
+
+														</td>
+
+														<td class="borderTop" style="text-align: center;">
+														<?php $c=isset($child["id"]) ? $child["id"] : 0; $value = isset($_POST["children"]) ? $_POST["children"][$c]['birth_date'] : '';?>
+														<input type="text" id="children[<?= $child["id"] ?>][birth_date]" name="children[<?= $child["id"] ?>][birth_date]" value="<? echo !empty($value)? $value : $child["birth_date_formatted"]?>" class="date birth" placeholder="mm/dd/yyyy" style="width: 70px;" tabindex="<?= $tabIndex++ ?>" />
+
+														</td>
+
+														<td class="borderTop" style="border-style: solid; text-align: center;">
+
+															<select name="children[<?= $child["id"] ?>][gender]" tabindex="<?= $tabIndex++ ?>">
+
+																<option></option>
+
+																<option<?= $child['gender'] == 'F' ? ' selected="selected"' : '' ?>>F</option>
+
+																<option<?= $child['gender'] == 'M' ? ' selected="selected"' : '' ?>>M</option>
+
+															</select>
+
+														</td>
+
+														<td class="borderTop" style="border-style: solid; text-align: center;">
+
+															<input type="text" name="children[<?= $child["id"] ?>][early]" value="<?= ($child["early"] ? $child["early"] : ''); ?>" style="width: 20px;" tabindex="<?= $tabIndex++ ?>">
+
+														</td>
+
+														<td class="borderTop" colspan="2" style="padding-right: 10px;">
+															<?=
+																$child_issues->displaySelect(
+																	'children[' . $child["id"] . '][issue_id]',
+																	(isset($child['issue_id']) ?
+																		$child['issue_id'] :
+																		''
+																	),
+																	' ',
+																	$tabIndex++
+																)
+															?>
+														</td>
+
+													</tr>
+
+													<tr>
+
+														<td colspan="8" class="borderLeft borderRight borderBottom borderTop" style="height: 34px; background-color: white;">
+
+															<div class="infoText" style="clear: left;">
+
+																<span class="infoLabel" style="font-weight: bold;">Notes:&nbsp;&nbsp;</span><br />
+
+																<textarea name="children[<?= $child["id"] ?>][notes]" cols="125" rows="2" tabindex="<?= $tabIndex++ ?>"><?= (isset($child['notes']) ? $child['notes'] : '') ?></textarea>
+
+															</div>
+
+														</td>
+
+													</tr>
+
+												</tbody></table>
+
+										<? endforeach; ?>
+										<? endif; ?>
+
+										<!-- New Child -->
+										<table class="infoTable edit newChild" border="0" cellspacing="0" cellpadding="0" style="margin-top: 4px; width: 100%; border-color: silver; border-style: solid; border-width: 1px 1px 0px 1px;">
+
+										<tbody><tr style="background: #ece6e6;">
+
+											<th class="borderRight smallHeader">First Name</th>
+											<th class="borderRight smallHeader">Last Name</th>
+											<th class="borderRight smallHeader">
+												Due Date
+											</th>
+											<th class="borderRight smallHeader">Birthdate</th>
+											<th class="borderRight smallHeader">Gender</th>
+											<th class="borderRight smallHeader">Early</th>
+											<th class="borderRight smallHeader">Presenting Issue</th>
+											<td style="padding: 0 5px; width: 26px; height: 25px;">
+
+												<input type="button" class="deleteAnotherChild btn-small" name="deletechild" value="Delete" tabindex="-1">
+
+											</td>
+
+										</tr>
+
+										<tr>
+
+											<td class="borderLeft borderTop" style="vertical-align: top;">
+
+												<input type="text" style="width: 160px;" name="template[0][first]" value="" tabindex="<?= $tabIndex++ ?>">
+
+											</td>
+
+											<td class="borderLeft borderTop" style="vertical-align: top;">
+
+												<input type="text" style="width: 160px;" name="template[0][last]" value="" tabindex="<?= $tabIndex++ ?>">
+
+											</td>
+
+											<td class="borderTop" style="text-align: center;">
+												Prenatal 
+												<input type="checkbox" 
+													class="prenatal"
+													onClick="
+														var dueDate = $(this).next('.birth-due-date'); 
+														if(this.checked){
+															dueDate.show();
+														} else {
+															dueDate.val('');
+															dueDate.hide();
+														}
+													"
+													style="margin: 0 5px;"
+												/>
+												<input 
+													type="text" 
+													name="template[0][birth_due_date]" 
+													value="" 
+													placeholder="mm/dd/yyyy" 
+													style="display: none; width: 70px;"
+													tabindex="<?= $tabIndex++ ?>" 
+												/>
+											</td>
+
+											<td class="borderTop" style="text-align: center;">
+
+											<input type="text" name="template[0][birth_date]" value="" placeholder="mm/dd/yyyy" style="width: 70px;" tabindex="<?= $tabIndex++ ?>" />
+
+											</td>
+
+											<td class="borderTop" style="border-style: solid; text-align: center;">
+
+												<select name="template[0][gender]" tabindex="<?= $tabIndex++ ?>">
+
+													<option></option>
+
+													<option>F</option>
+
+													<option>M</option>
+
+												</select>
+
+											</td>
+
+											<td class="borderTop" style="border-style: solid; text-align: center;">
+
+												<input type="text" name="template[0][early]" style="width: 20px;" tabindex="<?= $tabIndex++ ?>">
+
+											</td>
+
+											<td class="borderTop" colspan="2" style="padding-right: 10px;">
+												<?= $child_issues->displaySelect('template[0][issue_id]', '', ' ',  $tabIndex++) ?>
+
+											</td>
+
+										</tr>
+
+										<tr>
+
+											<td colspan="7" class="borderLeft borderRight borderBottom borderTop" style="height: 34px; background-color: white;">
+
+												<div class="infoText" style="clear: left;">
+
+													<span class="infoLabel" style="font-weight: bold;">Notes:&nbsp;&nbsp;</span><br>
+
+													<textarea name="template[0][notes]" cols="125" rows="2" class="birth not_count" tabindex="<?= $tabIndex++ ?>"></textarea>
+
+												</div>
+
+											</td>
+
+										</tr>
+
+									</tbody></table>
+
+									</div>
+								</td>
+
+							</tr>
+
+							<tr>
+								<td colspan="4" style="padding-top: 8px">
+									<input type="button" name="addAnotherChild" value="Add Child" class="addAnotherChild btn-small" tabindex="990" />
+								</td>
+							</tr>
+
+							<tr>
+
+								<td colspan="4" style="padding-top: 8px;"></td>
+							</tr>
+
+
+							<tr>
+
+								<td colspan="4">
+								<span class="infoLabel" style="font-weight: bold;">Family Notes:&nbsp;&nbsp;</span><br>
+								<textarea name="note" cols="128" rows="1" style="width: 100%; height: 16px; line-height: 16px;" tabindex="1000"><?= (isset($_REQUEST['note']) ? $_REQUEST['note'] : '') ?></textarea>
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td colspan="4" style="padding-top: 8px;"></td>
+
+
+							<tr>
+								<td colspan="4" style="text-align: right;">
+									<input type="button" name="savebutton" value="Save" class="btn-small save-form" tabindex="1020" />
+									<? if($data['id']) : ?>
+									<input type="button" name="delete" value="Delete" class="btn-small delete-family" tabindex="1030" />
+									<? endif; ?>
+								</td>
+							</tr>
+
+							<tr>
+
+								<td colspan="4" style="padding-top: 8px;"></td>
+
+							</tr>
+
+						</tbody></table>
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</form>
+
+
+</div>
+
+<!-- popup to delete child records starts -->
+<div style="display:none;" id="child-delete-div">		
+	<div style="padding: 0 10px;" class="titleBar"><span style="" class="caption">Delete Child</span></div>
+	<div style="padding: 10px">
+		<div style="color:red;font-size:16px;padding:10px;">
+			Are you sure you want to delete this child?
+		</div>
+		<input type="button" class="btn-small delete-child" style="margin: 10px 10px 0;" value="Yes">
+		<input type="button" class="btn-small cancel-delete" value="Cancel">
+	</div>
+		
+</div>
+	<!-- popup to delete child records ends -->
+
+<!-- popup to delete child records for new addition starts -->
+<div style="display:none;" id="new-child-delete-div">		
+	<div style="padding: 0 10px;" class="titleBar"><span style="" class="caption">Delete Child</span></div>
+	<div style="padding: 10px">
+		<div style="color:red;font-size:16px;padding:10px;">
+			Are you sure you want to delete this child?
+		</div>
+		<input type="hidden" id="new_child_ref">
+		<input type="button" class="btn-small new-delete-child" style="margin: 10px 10px 0;" value="Yes">
+		<input type="button" class="btn-small cancel-delete" value="Cancel">
+	</div>
+		
+</div>
+	<!-- popup to delete child records for new addition  ends -->

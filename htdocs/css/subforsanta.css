@@ -1,0 +1,1114 @@
+/* CSS RESET
+*************************************************************/
+/*
+html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, font, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td {margin: 0;padding: 0;border: 0;outline: 0;font-size: 100%;vertical-align: baseline;background: transparent;}body {line-height: 1;}ol, ul {list-style: none;}blockquote, q {quotes: none;}blockquote:before, blockquote:after,q:before, q:after {content: '';content: none;}:focus {outline: 0;}ins {text-decoration: none;}del {text-decoration: line-through;}table {border-collapse: collapse;border-spacing: 0;}
+.DEBUG{background: #900;line-height: 2em;font-weight: bold;text-align: center;border-bottom: 1px solid dodgerblue;color: white}
+.DEBUG:hover{background: #099;}
+*/
+/* SUB FOR SANTA STYLES
+************************************************************/
+
+
+
+select, input {
+	font-size: 9pt;
+	font-weight: normal;
+	color: #3D4EA0;
+}
+
+input {
+	color: #000000;
+}
+
+.hidden-input {
+	display: none;
+}
+
+#colourfulHeads .colourfulHeaderBlue h1 {
+	line-height: 29px;
+}
+
+.narrowFirstColumn {
+	width: 154px !important;
+}
+
+.narrowLeftNav {
+	width: 154px !important;
+}
+
+.narrowLeftNav .top {
+	width: 154px !important;
+	background:url(images/subforsanta/leftNavTop.png) no-repeat !important;
+}
+
+.narrowLeftNav .inside {
+	width: 152px !important;
+}
+
+.narrowLeftNav .bottom {
+	width: 154px !important;
+	background:url(images/subforsanta/leftNavBottom.png) no-repeat !important;
+}
+
+.secondColumnWide {
+	width: auto !important;
+	padding-right: 0px !important;
+}
+
+.pageTitleBar {
+	border: 1px solid #D9DAE1;
+	background: #F4F6F8;
+	height: 37px;
+	margin-bottom: 15px;
+}
+
+.pageTitleBar h1 {
+	margin: 0;
+	padding: 0 0 0 10px;
+	float: left;
+	font-size: 12pt;
+	line-height: 37px;
+}
+
+.pageTitleBar form {
+	float: right;
+	padding: 8px 5px 5px 0;
+}
+
+.pageTitleBar input[type="text"] {
+	width: 180px;
+}
+
+.pageTitleBar h1.small {
+	width: 60px;
+	overflow: hidden;
+	float: right;
+	font-size: 7pt;
+	font-weight: normal;
+	padding: 7px 0 0 0;
+	line-height: 12px;
+}
+
+.small {
+	font-size: .6em;
+	line-height: 1.3;
+}
+
+.italic {
+	font-style: italic;
+}
+/*
+.titleBar {
+	border: 1px solid #CACBCE;
+	border-bottom: 1px solid #141E6D;
+	background: #00009B url(images/subforsanta/blueBar.png) repeat-x top left;
+	height: 30px;
+}
+*/
+
+
+.infoBody {
+	border: 1px solid #CACBCE;
+	font-size: 8pt;
+}
+
+.gridFooter {
+	height: 15px;
+	font-size: 8pt;
+	color: #818284;
+	padding-top: 6px;
+}
+
+.gridLink:link, gridLink:hover, .gridFooter * {
+	font-size: 8pt;
+}
+
+.datePicker {
+	background: url(images/subforsanta/calIcon.png) no-repeat top left;
+}
+
+
+/* Popup Box Styles */
+
+.popupBoxBack {
+	 opacity:0.6;
+	 filter: alpha(opacity = 60);
+	 background:#000000;
+	 height:100%;
+	 left:0;
+	 position:absolute;
+	 top:0;
+	 width:100%;
+	 z-index:3;
+}
+
+.popupBox {
+	 position: absolute;
+	 left: 0px;
+	 top: 110px;
+	 height:100%;
+	 width:100%;
+	 z-index:4;
+}
+
+.popupBox .contentBox {
+	margin: auto;
+	width: 760px;
+	height: auto;
+	background: #FFFFFF;
+	border: 1px solid #CACBCE;
+}
+
+.popupBox .content {
+	padding: 10px;
+}
+
+h2 {
+	color: #231F20 !important;
+	font-size: 11pt;
+	padding: 0;
+}
+
+.popupBox * .pageTitleBar {
+	margin-bottom: 8px;
+}
+
+.popupBox * .pageTitleBar .closeLink {
+	padding: 7px;
+	display: block;
+}
+
+.popupBox * .pageTitleBar .close {
+	float: right;
+	background: url(images/subforsanta/blueCloseBox.png) no-repeat top left;
+	width: 25px;
+	height: 23px;
+	font-size: 1px;
+}
+
+.popupBox * .bodyBox {
+	background: #F7F8F9;
+	border: 1px solid #CACBCE;
+}
+
+.popupBox * .body {
+	padding: 20px 15px 20px 15px;
+	font-size: 9pt;
+}
+
+.popupBox * .fieldGroup {
+	padding: 0 0 10px 10px;
+}
+
+.popupBox * .fieldSet {
+	clear: both;
+	height: 24px;
+}
+
+.popupBox * .label {
+	float: left;
+	width: 122px;
+}
+
+.popupBox * .field {
+	float: left;
+	width: 195px;
+}
+
+.popupBox * hr {
+	clear: both;
+	border: none;
+	background: none;
+}
+
+.popupBox * .popupFooter {
+	float: right;
+}
+
+/** Button Styles **/
+
+.outerButton {
+	font-size: 1px;
+	height: 22px;
+	float: left;
+	margin-right: 6px;
+}
+
+.buttonLeft {
+	float: left;
+	padding-left: 9px;
+	height: 22px;
+}
+
+.buttonRight {
+	float: left;
+	width: 8px;
+	height: 22px;
+}
+
+.buttonText a, .ui-widget-content .buttonText a {
+	color: white !important;
+	line-height: 24px !important;
+}
+
+.buttonText a:hover {
+	text-decoration: none;
+}
+/*
+.blueOnBlueButton .buttonLeft {
+	background: url(images/subforsanta/blueButtonOnBlue.png) no-repeat top left;
+}
+
+.blueOnBlueButton .buttonRight {
+	background: url(images/subforsanta/blueButtonOnBlue.png) no-repeat top right;
+}
+
+.blueOnWhiteButton .buttonLeft {
+	background: url(images/subforsanta/blueButtonOnWhite.png) no-repeat top left;
+}
+
+.blueOnWhiteButton .buttonRight {
+	background: url(images/subforsanta/blueButtonOnWhite.png) no-repeat top right;
+}
+
+.redButton .buttonLeft {
+	background: url(images/subforsanta/redButton.png) no-repeat top left;
+}
+
+.redButton .buttonRight {
+	background: url(images/subforsanta/redButton.png) no-repeat top right;
+}
+*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * General page setup
+ */
+#dt_example {
+	font: 80%/1.45em "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	color: #333;
+	background-color: #fff;
+}
+
+
+#dt_example #container {
+	width: 800px;
+	margin: 30px auto;
+	padding: 0;
+}
+
+
+#dt_example #footer {
+	margin: 50px auto 0 auto;
+	padding: 0;
+}
+
+#dt_example #demo {
+	margin: 30px auto 0 auto;
+}
+
+#dt_example .demo_jui {
+	margin: 30px auto 0 auto;
+}
+
+#dt_example .big {
+	font-size: 1.3em;
+	font-weight: bold;
+	line-height: 1.6em;
+	color: #4E6CA3;
+}
+
+#dt_example .spacer {
+	height: 20px;
+	clear: both;
+}
+
+#dt_example .clear {
+	clear: both;
+}
+
+#dt_example pre {
+	padding: 15px;
+	background-color: #F5F5F5;
+	border: 1px solid #CCCCCC;
+}
+
+#dt_example h1 {
+	margin-top: 2em;
+	font-size: 1.3em;
+	font-weight: normal;
+	line-height: 1.6em;
+	color: #4E6CA3;
+	border-bottom: 1px solid #B0BED9;
+	clear: both;
+}
+
+#dt_example h2 {
+	font-size: 1.2em;
+	font-weight: normal;
+	line-height: 1.6em;
+	color: #4E6CA3;
+	clear: both;
+}
+
+#dt_example a {
+	color: #0063DC;
+	text-decoration: none;
+}
+
+#dt_example a:hover {
+	text-decoration: underline;
+}
+
+#dt_example ul {
+	color: #B0BED9;
+}
+
+.css_right {
+	float: right;
+}
+
+.css_left {
+	float: left;
+}
+
+/*
+ * jQuery UI specific styling
+ */
+
+.paging_two_button .fg-button {
+	float: left;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.paging_full_numbers .fg-button {
+	padding: 2px 6px;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.paging_full_numbers {
+	width: 350px !important;
+}
+
+.fg-toolbar {
+	padding: 5px;
+}
+
+.dataTables_paginate {
+	width: auto;
+}
+
+table.display thead th, table.display tfoot th {
+	/*padding: 3px 0px 3px 10px;*/
+	cursor: pointer;
+	* cursor: hand;
+	background-color: #DCDEED;
+	height: 30px;
+	line-height: 30px;
+	border-bottom: 1px solid #C1C1E0;
+	border-top: 1px solid #C1C1E0;
+	border-left: 1px solid #B8C5D8;
+	color: #0A1273;
+	font-size: 9pt;
+	text-align: center;
+}
+
+table.display tbody td {
+	border-left: 1px solid #D9DAE1;
+}
+
+table.display thead th:first-child, table.display tfoot th:first-child, table.display tbody tr td:first-child {
+	border-left: none;
+}
+
+table.display tbody tr td {
+	font-size: 8pt;
+	color: #3D4EA0;
+}
+
+table.display {
+	border: 1px solid #CACBCE;
+	border-top: none;
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Everything below this line is the same as demo_table.css. This file is
+ * required for 'cleanliness' of the markup
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables features
+ */
+
+.dataTables_wrapper {
+	position: relative;
+	min-height: 502px;
+	_height: 502px;
+	clear: both;
+}
+
+.dataTables_processing {
+	position: absolute;
+	top: 0px;
+	left: 50%;
+	width: 250px;
+	margin-left: -125px;
+	border: 1px solid #ddd;
+	text-align: center;
+	color: #999;
+	font-size: 11px;
+	padding: 2px 0;
+}
+
+.dataTables_length {
+	width: 40%;
+	float: left;
+}
+
+.dataTables_filter {
+	width: 50%;
+	float: right;
+	text-align: right;
+}
+
+.dataTables_info {
+	width: 50%;
+	float: left;
+}
+
+.dataTables_paginate {
+	float: right;
+	text-align: right;
+}
+
+/* Pagination nested */
+.paginate_disabled_previous, .paginate_enabled_previous, .paginate_disabled_next, .paginate_enabled_next {
+	height: 19px;
+	width: 19px;
+	margin-left: 3px;
+	float: left;
+}
+
+.paginate_disabled_previous {
+	background-image: url('../images/back_disabled.jpg');
+}
+
+.paginate_enabled_previous {
+	background-image: url('../images/back_enabled.jpg');
+}
+
+.paginate_disabled_next {
+	background-image: url('../images/forward_disabled.jpg');
+}
+
+.paginate_enabled_next {
+	background-image: url('../images/forward_enabled.jpg');
+}
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables display
+ */
+table.display {
+	margin: 0 auto;
+	width: 100%;
+	clear: both;
+}
+
+table.display tfoot th {
+	cursor: pointer;
+	* cursor: hand;
+	background-color: #DCDEED;
+	height: 30px;
+	line-height: 30px;
+	border-bottom: 1px solid #C1C1E0;
+	border-top: 1px solid #C1C1E0;
+	border-left: 1px solid #B8C5D8;
+	color: #0A1273;
+	font-size: 9pt;
+	text-indent: 11px;
+}
+
+table.display tr.heading2 td {
+	border-bottom: 1px solid #aaa;
+}
+
+table.display td {
+	padding: 3px 10px;
+}
+
+table.display td.center {
+	text-align: center;
+}
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables sorting
+ */
+
+.sorting_asc {
+	background: url('..images/subforsanta/columnArrows.png') no-repeat right -30px;
+}
+
+.sorting_desc {
+	background: url('..images/subforsanta/columnArrows.png') no-repeat right -60px;
+}
+
+.sorting {
+	background: url('..images/subforsanta/columnArrows.png') no-repeat top right;
+}
+
+
+
+
+
+tr.odd {
+	background-color: #F1F1F1;
+}
+
+tr.even {
+	background-color: white;
+}
+
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Misc
+ */
+ /*
+.top, .bottom {
+	padding: 15px;
+	background-color: #F5F5F5;
+	border: 1px solid #CCCCCC;
+}
+*/
+
+.top .dataTables_info {
+	float: none;
+}
+
+.clear {
+	clear: both;
+}
+
+.dataTables_empty {
+	text-align: center;
+}
+
+tfoot input {
+	margin: 0.5em 0;
+	width: 100%;
+	color: #444;
+}
+
+tfoot input.search_init {
+	color: #999;
+}
+
+td.group {
+	background-color: #d1cfd0;
+	border-bottom: 2px solid #A19B9E;
+	border-top: 2px solid #A19B9E;
+}
+
+td.details {
+	background-color: #d1cfd0;
+	border: 2px solid #A19B9E;
+}
+
+
+.example_alt_pagination div.dataTables_info {
+	width: 40%;
+}
+
+.paging_full_numbers span.paginate_button,
+ 	.paging_full_numbers span.paginate_active {
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
+	margin: 0 3px;
+	cursor: pointer;
+	*cursor: hand;
+}
+
+.paging_full_numbers span.paginate_button {
+	background-color: #ddd;
+}
+
+.paging_full_numbers span.paginate_button:hover {
+	background-color: #ccc;
+}
+
+.paging_full_numbers span.paginate_active {
+	background-color: #99B3FF;
+}
+
+table.display tr.even.row_selected td {
+	background-color: #B0BED9;
+}
+
+table.display tr.odd.row_selected td {
+	background-color: #9FAFD1;
+}
+
+
+
+/*
+ * Row highlighting example
+ */
+#grid tbody tr.even:hover, #grid tbody tr.odd:hover {
+	background-color: #E0E0EF;
+	cursor: pointer;
+}
+
+#grid th {
+	padding-right: 27px;
+}
+
+.contentMain .buttonPane {
+	float: right;
+}
+
+.contentMain .buttonPane .button {
+	background-color: #0000B8;
+	float: left;
+	margin-right: 8px;
+	border: 1px solid black;
+	height: 16px;
+	min-width: 32px;
+	font-size: 9pt;
+	padding: 2px 6px;
+	text-align: center;
+	cursor: pointer;
+	color: white;
+}
+
+.contentMain .buttonPane .button.warning {
+	background-color: #900000;
+}
+
+.infoBody {
+	background-color: #f7f8f9;
+	font-size: 8pt;
+}
+
+.infoPane table th {
+}
+
+.infoPane table td {
+}
+
+.tabsPanel .tabsInner {
+	min-height: 90px;
+}
+
+.tabsPanel .tabsInner select {
+	max-width: 132px;
+}
+
+.tabsPanel .tabsInner table {
+	width: 100%;
+	clear: both;
+}
+
+.tabsPanel .tabsInner .tabButtons {
+	position: absolute;
+	bottom: 8px;
+	right: 8px;
+}
+
+.tabSubPanel {
+	margin-top: 12px;
+	border-top: 1px solid silver;
+	padding-top: 12px;
+}
+
+.infoTitle {
+	font-weight: bold;
+	font-size: 11pt;
+}
+
+.infoTable td, .infoTable th {
+	border-style: solid;
+	border-color: silver;
+	border-width: 0px;
+}
+
+.infoTable th {
+	font-weight: bold;
+	background-color: #dcdeed;
+}
+
+.infoTable th.borderTop, .infoTable td.borderTop { border-top-width: 1px; }
+.infoTable th.borderLeft, .infoTable td.borderLeft { border-left-width: 1px; }
+.infoTable th.borderBottom, .infoTable td.borderBottom { border-bottom-width: 1px; }
+.infoTable th.borderRight, .infoTable td.borderRight { border-right-width: 1px; }
+.infoTable th.borderAll, .infoTable td.borderAll { border-width: 1px; }
+
+.infoTable th.bigHeader {
+	height: 32px;
+	font-weight: bold;
+	padding: 2px 4px;
+	text-align: center;
+}
+
+.infoTable th.smallHeader {
+	height: 24px;
+	font-weight: bold;
+	padding: 4px 0px 0px 8px;
+}
+
+.infoTable.view td {
+	padding: 2px;
+	padding-top: 4px;
+	text-align: center;
+}
+
+.infoTable.edit td {
+	padding: 6px 2px; padding-left: 6px;
+}
+
+.infoLabel {
+	font-weight: bold;
+}
+
+.infoBody select, .infoBody input[type=text], .infoBody input[type=password] {
+	border-width: 1px;
+	border-style: solid;
+	border-color: #909090 #d0d0d0 #e0e0e0 #a0a0a0;
+	padding: 3px; 
+}
+
+.infoBody select {
+	padding: 1.5px; 
+}
+
+.infoTable .toggleArrow {
+	float: left;
+	margin: 5px;
+	height: 8px;
+	width: 8px;
+	cursor: pointer;
+	background-image: url(images/subforsanta/arrow_right.png);
+}
+
+.infoTable .toggleArrow.on {
+	background-image: url(images/subforsanta/arrow_down.png);
+}
+
+.infoTable .hoverRow:hover {
+	/* cursor: pointer; */
+}
+
+.infoPane div.infoText {
+	color: #666666;
+	line-height: 18px;
+}
+
+.moreInfoButton {
+	cursor: pointer;
+	background-image: url(images/subforsanta/questionMark.png);
+	width: 13px;
+	height: 12px;
+}
+
+.moreInfoDiv {
+	background-color: white;
+}
+
+.moreInfoDiv .borderBack {
+	background-color: white;
+}
+
+.gridShortcutButton {
+	padding: 4px 4px 0 0;
+	float: left;
+}
+
+.matchingBox {
+	border: 1px solid #CACBCE;
+	border-top: none;
+}
+
+.matchingGrid {
+	float: left;
+	width: 520px;
+	border-right: 2px solid #ABADC9;
+	height: 540px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.matchingGrid table.display {
+	border-left: none !important;
+	border-right: none !important;
+}
+
+.matchingGrid .gridFooter {
+	padding: 6px 8px 6px 8px;
+}
+
+.matchingInfo {
+	float: right;
+	width: 273px;
+}
+
+.sponsorSummaryHeader {
+	background: #E9EAF4;
+	border-bottom: 1px solid #C1C1E0;
+	height: 31px;
+}
+
+.sponsorSummaryHeader h2 {
+	float: left;
+	padding-left: 12px;
+	line-height: 31px;
+}
+
+.sponsorSummaryHeader a {
+	float: right;
+	padding: 2px 12px 0 0;
+	line-height: 31px;
+}
+
+.sponsorSummaryContent {
+	clear: both;
+	padding: 12px;
+	height: 445px;
+}
+
+.sponsorSummaryFooter {
+	float: right;
+	height: 35px;
+	padding-right: 6px;
+}
+
+.addFormButtons {
+	float: left;
+	margin-top: 3px;
+}
+
+.addFormButton, .addGridButton, .addSpaceButton, .addPageBreakButton {
+	background: url(images/subforsanta/addElement.png) no-repeat;
+	display: block;
+	
+	float: left;
+	
+}
+
+.addFormButton div, .addGridButton div, .addSpaceButton div, .addPageBreakButton div {
+	font-size: 1px;
+	width: 113px;
+	height: 22px;
+}
+
+.addFormButton {
+	background-position: top left;
+}
+
+.addGridButton {
+	background-position: left -22px;
+}
+
+.addSpaceButton {
+	background-position: left -44px;
+}
+
+.addPageBreakButton {
+	background-position: left -66px;
+}
+
+.editingTitle {
+	font-size: 11pt;
+	font-weight: bold;
+	color: #355A68;
+}
+
+.moveUpButton, .moveDownButton  {
+	display: block;
+	float: left;
+	padding: 8px 6px 0 6px;
+}
+
+.moveUpButton div, .moveDownButton div {
+	width: 20px;
+	height: 19px;
+}
+
+.moveUpButton div {
+	background: url(images/subforsanta/moveArrows.png) no-repeat top left;
+}
+
+.moveDownButton div {
+	background: url(images/subforsanta/moveArrows.png) no-repeat -20px 0px;
+}
+
+.deleteElementButton {
+	float: right;
+}
+
+.redDeleteButton {
+	cursor: pointer;
+	width: 25px;
+	height: 23px;
+	background-image: url(images/subforsanta/redDeleteBox.png);
+}
+
+.subBoxContainer {
+	width: 245px;
+	float: left;
+}
+
+.subBoxSpacer {
+	float: left;
+	width: 11px;
+}
+
+.subBox {
+	border: 1px solid #CECECE;
+}
+
+.subBoxTitle {
+	background: url(images/subforsanta/subBoxBack.png) repeat-x;
+	border-bottom: 1px solid #CECECE;
+	padding: 0 10px;
+	line-height: 32px;
+	height: 30px;
+	color: #404041;
+	font-size: 9pt;
+	font-weight: bold;
+}
+
+.subBoxContent {
+	padding: 10px;
+}
+
+.staticGrid {
+	border: none !important;
+}
+
+.staticGrid thead th, .staticGrid tfoot th {
+	border-top: none !important;
+	color: #4B4B4C !important;
+}
+
+.keyValueGrid tbody td {
+	border: none !important;
+}
+
+.quickCount {
+	border: 1px solid #CACBCE;
+	padding: 8px;
+	height: 15px;
+	margin-bottom: 5px;
+}
+
+.quickCountStat {
+	float: left;
+}
+
+.quickCountValue {
+	float: right;
+}
+
+.smallRedDeleteButton {
+	cursor: pointer;
+	width: 18px;
+	height: 17px;
+	background-image: url(images/subforsanta/redDeleteSmall.png);
+}
+
+.infoPane .settingsPanel {
+	width: 236px;
+	border: 1px solid silver;
+	margin: 16px 0 0 16px;
+	
+}
+
+.infoPane .settingsPanel .titleBarWhite {
+	width: 236px;
+	height: 30px;
+	background-image: url(images/subforsanta/titleBar.png);
+	margin: 0px;
+}
+
+.infoPane .settingsPanel .titleBarWhite .titleBarText {
+	color: black;
+	font-weight: bold;
+	font-size: 10.5pt;
+	padding: 8px 12px;
+}
+
+.infoPane .settingsPanel .tableHeader {
+	background-color: #dcdeed;
+}
+
+.infoPane .settingsPanel .tableHeader td {
+	padding: 4px 0px 4px 12px;
+	border-top: 1px solid silver;
+	border-bottom: 1px solid silver;
+	height: 30px;
+}
+
+.infoPane .settingsPanel .settingsTable {
+	background-color: white;
+}
+
+.infoPane .settingsPanel .settingsTable td {
+	padding: 2px 0px 2px 6px;
+}
+
+.infoPane .settingsPanel .settingsTable td.odd {
+	background-color: #f7f8f9;
+}
+
+/*
+.infoPane .settingsPanel .settingsTable tr:nth-child(odd) {
+	background-color: green;
+}
+
+.infoPane .settingsPanel .settingsTable tr:nth-child(even) {
+	background-color: red;
+}
+*/
+/*
+h1
+	{
+	margin:10px 0 5px 0;
+	font-family: "Trebuchet MS", arial, sans-serif;
+	font-size: 19px;
+	font-weight:bold;
+	color:#2f3196;
+	}
+*/	
+#content h1 {
+background-image: url(images/garrow.png);
+background-repeat: no-repeat;
+background-position: 0px 5px;
+padding: 0px 0px 3px 12px;
+font-size: 16px;
+border-bottom: 1px solid #D9DAE1;
+font-weight: normal;
+font-family: "Times New Roman";
+}
+	
+	h1.aboveVideo
+		{margin:0 0 5px 0;}
+		
+.notice {
+	font-weight: bold;
+	color: #23298D;
+	padding-bottom: 10px;
+}

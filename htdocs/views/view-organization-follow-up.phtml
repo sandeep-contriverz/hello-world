@@ -1,0 +1,48 @@
+<? 
+namespace Hmg\Models;
+$userObj = new User();
+?>
+						<tr id="followUpRow_<?= $followUp['id'] ?>" class="clickable <?=$rowClass?>">
+							<td style="white-space: nowrap; vertical-align: middle;">
+								<div class="toggleArrow"<?= ($followUp['referral_date_formatted'] != '00/00/00' ? ' style="height: 24px;"' : '') ?>></div>
+								<?//= ($followUp['hmg_worker'] ? $followUp['hmg_worker'] : 'Unknown') ?>	
+								<? $userD = $userObj->setById((int)$followUp['hmg_worker']);?>
+								<?= !empty($userObj->user['hmg_worker']) ? $userObj->user['hmg_worker'] : 'unknown' ?>
+								<?= ($followUp['referral_date_formatted'] != '00/00/00' ? '<br />' . $followUp['referral_date_formatted'] : '') ?>									
+							</td>
+							<td>
+							<?php 
+							//print_r($followup);
+							if( $followUp['referred_to_type']  == 'info'){
+							    echo $setting->getValue($followUp['referred_to_id']);
+							}
+							else{
+							$siteSeprate = '';
+							if($followUp['site_name']){
+								$siteSeprate = ': '.$followUp['site_name'];
+							}
+							echo $followUp['organization_name'].$siteSeprate;
+							}
+							?>
+							<?//= $setting->getValue($referred_to_id) ?></td>
+							<td><?= $setting->getValue($followUp['service_id']) ?></td>
+							<td><?= $setting->getValue($followUp['follow_up_task_id']) ?></td>
+							<td style="white-space: nowrap; text-align: center;"><?= ($followUp['follow_up_date_formatted'] != '00/00/00' ? $followUp['follow_up_date_formatted'] : '') ?></td>
+							<td style="text-align: center;">
+								<input type="hidden" name="followUp[<?= $followUp['id'] ?>][done]" value="0" /> 
+								<input type="checkbox" id="followUp[<?= $followUp['id'] ?>][done]" class="done-check-box" name="followUp[<?= $followUp['id'] ?>][done]" value="1"<?= ($followUp['done'] ? ' checked' : '') ?> />
+							</td>
+						</tr>
+
+						<tr id="followUpRow_details_<?= $followUp['id'] ?>" class="hidden <?=isset($rowClass)?$rowClass:''?>">
+							<td style="white-space: nowrap;">
+								&nbsp;								
+							</td>
+							<td colspan="5" style="border-top: 1px solid #ccc">
+								<b>Task Result:</b> <?= $followUp['result'] ?><br />
+								<b>Notes:</b> <?= $followUp['notes'] ?>
+								<input type="button" class="btn-small edit-follow-up" style="float: right; margin: 3px;" id="edit_<?= $followUp['id'] ?>" value="Edit" />
+							</td>
+						</tr>
+						
+						

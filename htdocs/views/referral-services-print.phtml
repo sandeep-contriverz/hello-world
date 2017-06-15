@@ -1,0 +1,46 @@
+<div class="pageTitleBar">
+	<h1>Organization Settings</h1>
+</div>
+
+<div>
+
+	<?=(isset($message) ? '<div style="color: #c00; padding: 10px 5px;">' . $message . '</div>' : '')?>
+
+<? $referredToId = null; $closeList = false; ?>
+<? if(is_array($referralServices)) : ?>
+  <? foreach($referralServices as $key => $referralSer) : ?>
+  	<div class="referral_parent" id="p<?=$referralSer[0]['organization_name_id']?>">
+  		<div class="parent toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+  		<div style="font-size: 10pt; line-height: 18pt; color: #000;" class="parent referral-title clickable <?//=($referralService['referral_disabled'] ? ' setting-disabled' : '')?>">
+		<?= $key; ?></div>
+	<? foreach($referralSer as $referralService) : ?>
+
+		<? if($referralService['referred_to_id'] != $referredToId) : ?>
+			<? if(!is_null($referredToId)) : ?> 
+					</ul>
+				</div>
+			<? endif ?>
+			<? 
+			$referredToId = $referralService['referred_to_id'];
+			$count = 1;
+			?>
+			<div id="r<?=$referralService['referred_to_id']?>" class="referral" style="position: relative;padding-left: 70px;">
+				<div class="toggleArrow" style="margin: 7px 10px 5px 0;"></div>
+				<div style="font-size: 10pt; line-height: 18pt; color: #000;" class="clickable"><?= $referralService['referred_to'] ?></div>
+				<ul class="services" style="margin-left: 40px; list-style: none; font-size: 10pt; line-height: 18pt; color: #000;">
+		<? endif ?>
+		<? if($referralService['service_id']) : ?>
+			<li class="referral-item" data-referral-id="<?=$referralService['referred_to_id']?>" data-service-id="<?=$referralService['service_id']?>"><?= $referralService['service'] ?></li>
+		<? endif ?>
+			<? $count++; ?>
+
+	<? endforeach ?>
+
+		</ul>
+	</div>
+	</div>
+	<? endforeach ?>
+
+<? endif ?>
+
+</div>

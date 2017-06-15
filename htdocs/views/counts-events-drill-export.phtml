@@ -1,0 +1,85 @@
+<? 
+$csv = "Counts: Outreach Events Demographics\n\n";
+
+if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) $csv .= implode(', ' , $this->drillheading)." - ";
+if(!empty($this->subvalue)){
+    if( is_numeric($this->subvalue))
+    {   
+        $csv .= $setting->getValue($this->subvalue);
+    }
+    else{
+        if($this->subvalue =='Totals'){
+            $csv .= "Totals"; 
+
+        }
+        else{
+            $ert = explode(',',$this->subvalue);
+
+            $sdf = '';
+            foreach( $ert as $er){
+                $sdf .= $setting->getValue($er).' & '; 
+            }
+            $csv .= substr($sdf,0,-2);
+        }
+    }
+}
+else{ 
+    $csv .= 'Uncoded'; 
+} 
+$csv .= "\n\n";
+
+
+$encapsulateField = false;
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = 'Active Filters: ';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+			$encapsulateField = true;
+		}
+		$filteredBy .=
+			($filteredBy ? ' - ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) . 
+			': ' . 
+			$value;
+	}
+}
+if($encapsulateField){
+	$csv .= '"' . $filteredByLabel . $filteredBy . '",,';
+} else {
+	$csv .= $filteredByLabel . $filteredBy . ',,';
+}
+
+if($filteredByLabel){
+	$csv .= "\n\n";
+} else {
+	$csv .= "\n";
+}
+
+$csv .= 'Event Name,Organization,Site,Outreach Type,Event Type,HMG Worker' . "\n";
+foreach($organizations as $row){
+	
+	$csv .= $row['event_name']. ',';
+	$csv .= $row['organization_name'] . ',';
+	$csv .= $row['site']. ',';
+	$csv .= $row['outreach_type']. ',';
+	$csv .= $row['event_type']. ',';
+	$csv .= $row['hmgworker']. ','. "\n";
+}
+
+echo $csv;
+?>
+
+					                         

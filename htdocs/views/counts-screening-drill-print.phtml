@@ -1,0 +1,160 @@
+<script>
+$(function(){
+	setTimeout(function() {
+		$('table .count-hdr').find('th').eq(0).trigger('click');
+		$('table .count-hdr').find('th').eq(0).trigger('click');
+	}, 500);
+		
+	function comparer(index) {
+	    return function(a, b) {
+	        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+	        return ($.isNumeric(valA) && $.isNumeric(valB)) ? valA - valB : valA.localeCompare(valB)
+	    }
+	}
+	function getCellValue(row, index){
+		var text = $(row).children('td').eq(index).text();
+		if(text.indexOf('referrals') !== -1){
+			text = parseInt(text)
+		} else if(text.indexOf('Uncoded') !== -1){
+			text = 1000;
+		}
+		return text;
+	}
+
+	$('th.sort').click(function(){
+		if($(this).hasClass('sorting_asc')){
+			$(this).removeClass('sorting_asc').addClass('sorting_desc');
+		}
+		else {
+			$(this).removeClass('sorting_desc').addClass('sorting_asc');
+		}
+	    var table = $(this).parents('table').eq(0)
+	    var lastRow = table.find('tr:last');
+	    lastRowLabel = lastRow.find('td:first').text();
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	    	lastRow.remove();
+	    }
+	    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+	    this.asc = !this.asc
+	    if (this.asc){rows = rows.reverse()}
+	    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+	    if(lastRowLabel == 'Total' || lastRowLabel == 'Totals'){
+	   		table.append(lastRow);
+	   	}
+	   	// Fix odd/event class on sorted elements
+	   	rowClass = 'even';
+	   	table.find('tr:gt(0)').each(function(index){
+	   		curRow = $(this);
+	   		curRow.attr('class', rowClass);
+	   		if(rowClass == 'even'){
+	   			rowClass = 'odd';
+	   		} else {
+	   			rowClass = 'even';
+	   		}
+	   	});
+	});
+
+	$('#multi-zip').on('change', function(e){
+		var checkbox = this;
+		$('.select').attr('multiple',checkbox.checked);
+	 	if(checkbox.checked){
+	 		$('.select').attr('name','filters[zip][]');
+	 		$('.select').attr('size','11');
+	 	} else {
+	 		$('.select').attr('name','filters[zip]');
+	 		$('.select').attr('size','1');
+	 	}
+	});
+
+	$('.date').datepicker();
+	
+});
+</script>
+
+<?
+
+$filteredByLabel = '';
+$filteredBy = '';
+if(count($filters)){
+	$filteredByLabel = '<b style="color: #464646">Active Filters: </b>';
+}
+foreach($filters as $filter => $value){
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter != 'zip' && $filter != 'school_district'){
+		$value = $setting->getValue($value);
+	}
+	// if value is numeric then we need to look up it's name in the settings table
+	if(is_numeric($value) && $filter == 'school_district'){
+		$value = $schoolDistrict->getSchoolDistrictById($value);
+	}
+	if($value){
+		if(is_array($value)){
+			$value = implode($value, ', ');
+		}
+		$filteredBy .=
+			($filteredBy ? ' &mdash; ' : '') .
+			ucwords(str_replace('_', ' ', str_replace('_id', ' ', $filter))) .
+			': ' .
+			$value;
+	}
+}
+?>
+
+<?= $headerHtml ?>
+<?php if(isset($this->drillheading[0]) && !empty($this->drillheading[0])) echo "<b style='color: #464646'>".implode(', ' , $this->drillheading)."</b><br>"; ?>
+<div class="filters" style="padding-bottom: 3px;"><?= $filteredByLabel . $filteredBy ?></div>
+<div style="width: 60%">
+
+<table class="display">
+	<thead>
+	<tr class="count-hdr">
+		<th class="sort sorting_asc">Child Name</th>
+		<th class="sort sorting_asc">Birthdate</th>
+		<th class="sort sorting_asc">Screening Type</th>
+		<th class="sort sorting_asc">Screening Interval</th>
+		<th class="sort sorting_asc">Screening Score</th>
+		<th class="sort sorting_asc">Status</th>
+		<th class="sort sorting_asc">HMG Worker</th>
+	</tr>
+	</thead>
+	<tbody>
+<? $class = 'odd'; //echo "<pre>";print_r($childDetails);
+	function aasort (&$array, $key) {
+	    $sorter=array();
+	    $ret=array();
+	    reset($array);
+	    foreach ($array as $ii => $va) {
+	        $sorter[$ii]=$va[$key];
+	    }
+	    asort($sorter);
+	    foreach ($sorter as $ii => $va) {
+	        $ret[$ii]=$array[$ii];
+	    }
+	    $array=$ret;
+	}
+	aasort($childDetails,"first");
+	//print_r($childDetails);
+?>
+<? foreach($childDetails as $row): ?>
+<? $class = ($class == 'even' ? 'odd' : 'even') ?>
+	<tr class="<?= $class ?>">
+		<td><?= $row['first'].' '.$row['last'] ?></td>
+		<td class="center"><?= date('m/d/Y', strtotime($row['birth_date'])) ?></td>
+		<td class="center"><?= $row['type']; //261016 revert back ?></td>
+		<td class="center"><?= ($row['asq_month'] > 0) ? $row['asq_month'] .' months' : $row['asq_month']; ?></td>
+		<td class="center"><?= $row['score'] ?></td>
+		<td class="center">
+			<?= $row['fstatus'] ?>
+		</td>
+		<td>
+			<?= $row['hmg_worker'] ?>
+		</td>
+	</tr>
+<? endforeach ?>
+	</tbody>
+</table>
+<?php echo "<br>Total Record(s) : ".count($childDetails);?>
+</div>
+
+
+

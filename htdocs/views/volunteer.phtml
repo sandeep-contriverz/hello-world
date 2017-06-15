@@ -1,0 +1,291 @@
+<script type="text/javascript">
+$("document").ready(function(){
+	$("#hoursWrapper").on('focus', '#date', function(e){
+		$(this).datepicker({ dateFormat: "yy-mm-dd" });
+	});
+	$('#hoursWrapper').on('click', '#save-hours', function(e){
+		posting = $.post(
+			'index.php',
+			{ 
+				action : "volunteering", 
+				save : "true", 
+				date : $('#date').val(), 
+				hours : $('#hours').val(), 
+				type : $('#type').val(),
+				volunteerId : "<?=$data["id"]?>",
+				id : $('#eid').val()
+			}, 
+			function(data){
+				if(data.saved){
+					$('#hoursWrapper').load(
+						'index.php', 
+						{ 
+							action : "volunteer", 
+							id : "<?=$data["id"]?>", 
+							loadHours : "true" 
+						}
+					);
+				}
+				$('#hoursMessage').html(data.message);
+				$('#hoursMessage').show();	
+			});
+		e.preventDefault();
+	});
+	$('#hoursWrapper').on('click', '.editVHrs', function(e){
+		var cDate = $(this).closest('tr').find('td').eq(0).text();
+		var chrs  = $(this).closest('tr').find('td').eq(1).text();
+		var ctype = $(this).closest('tr').find('td').eq(2).find('span').text();
+		$('#eid').val($(this).attr('data-id'));
+		/*var dateField = '<input type="text" size="10" name="hoursData[date]" id="date" class="hasDatepicker">';
+		var hrsField  = '<input type="text" size="4" name="hoursData[hours]" id="hours">';
+		var typeField = $("select#type").clone();*/
+		var typeField = $("select#type");
+		typeField.find('option').each(function(){
+			//alert(ctype+' == '+$(this).val());
+			if($(this).text() == ctype) {
+				$(this).prop('selected', true);
+			} else {
+				$(this).prop('selected', false);
+			}
+		});
+		/*$(this).closest('tr').find('td').eq(0).html(dateField);
+		$(this).closest('tr').find('td').eq(1).html(hrsField);
+		$(this).closest('tr').find('td').eq(2).html(typeField);*/
+		var date = new Date(cDate),
+		yr      = date.getFullYear(),
+		getMnth = date.getMonth() + 1,
+	    month   = getMnth < 10 ? '0' + getMnth : getMnth,
+	    day     = date.getDate()  < 10 ? '0' + date.getDate()  : date.getDate(),
+	    newDate = yr + '-' + month + '-' + day;
+	    //console.log(date);
+		$('#date').val(newDate);
+		$('#hours').val(chrs);
+	});
+});
+</script>
+<div class="pageTitleBar">
+	<h1>Volunteers</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="volunteer" /><input type="hidden" name="id" value="new" /><input type="submit" value="Add Volunteer" class="btn-small" /></form>
+	</div>
+	
+	<form id="searchFieldForm">
+	<input type="text" id="searchField" name="searchField" style="float: left; margin-right: 4px;  height: 20px; width: 207px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+			
+</div>	
+
+<div class="infoMain">
+	
+	<div class="titleBar">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="volunteer" /><input type="hidden" name="id" value="<?=($data['id'] ? $data['id'] : '')?>" /><input type="submit" name="edit" value="Edit Volunteer" class="btn-small" /></form> <form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="volunteers" /><input type="submit" value="Volunteers List" class="btn-small" /></form>	
+		</div>
+		<div class="caption"><?=($data['first_name'] ? $data['first_name'] . ' ' . $data['last_name'] : '')?></div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+			
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px; width: 65%; border-right: 1px solid #CACBCE; float: left;">
+				
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" style="width: 30%;">
+								<h2>Contact Information</h2>
+							</td>
+							<td class="infoText" style="padding-left: 12px;margin: 20px 0;">
+								<span class="infoLabel" style="font-weight: bold;">Status:&nbsp;&nbsp;</span><?= $data['status'] ?>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px; vertical-align: top;">
+								<?= $data['last_name'] ?> <?= ($data['first_name'] ? ', ' . $data['first_name'] : '') ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Address:</span><br />
+								<?= $data['address'] ?><br />
+								<?= $data['city'] ?>, <?= $data['state'] ?>&nbsp;&nbsp;<?= $data['zip'] ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<span class="infoLabel" style="font-weight: bold;">Organization:&nbsp;&nbsp;</span><?= $data['organization'] ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Phone:&nbsp;&nbsp;</span><?= $data['phone'] ?><br />
+								<span class="infoLabel" style="font-weight: bold;">Email:&nbsp;&nbsp;</span><a href="mailto:<?= $data['email'] ?>"><?= $data['email'] ?></a><br />
+								<span class="infoLabel" style="font-weight: bold;">Languages:&nbsp;&nbsp;</span><?= $data['language'] ?><br />
+								<span class="infoLabel" style="font-weight: bold;">How Heard:&nbsp;&nbsp;</span><?= $settingOb->getSettingById($data['how_heard']); //201016 ?><br />
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" colspan="2">
+								<h2>Volunteer Areas</h2>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" colspan="2">
+							<table style="width: 80%; border: none;">
+							<tbody style="border: none;">
+							<tr>
+								<?php if(!empty($volunteering_type) && isset($volunteering_type->settings)) { //211016
+									$i = 0;
+									foreach($volunteering_type->settings as $type) {
+										$checked = '';
+										$saved_types = array();
+										if($i%2 == 0) {
+											echo '</tr><tr>';
+										}
+										if(strtolower($type['name']) == 'other') {
+											continue;
+										}
+										//$replace = str_replace(' ', '_', strtolower($type['name']));
+										if(!empty($data['volunteering_type']))
+											$saved_types = explode(',', $data['volunteering_type']);
+										//echo $data[$replace];
+										if(!empty($saved_types) 
+											&& in_array($type['id'], $saved_types)) {
+											$checked = 'checked="checked"';
+										}
+										echo '<td style="padding-left: 12px;">';
+										echo '<input type="checkbox" disabled '.$checked.'>';
+										echo '&nbsp;<span class="infoLabel" style="font-weight: bold;">'.$type['name'].'</span></td>';
+										$i++;
+									}
+								} ?>
+								</tr>
+								<?php /* 211016
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" disabled<?= ($data['family_event'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Family Event</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" disabled<?= ($data['data_entry'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Data Entry</span>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" disabled<?= ($data['parent_mentor'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Parent Mentor</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" disabled<?= ($data['care_coordination'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Care Coordination</span>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" disabled<?= ($data['special_projects'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Special Projects</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="checkbox" valign="middle" disabled<?= ($data['eagle_scout'] ? ' checked="checked"' : '') ?> /> <span class="infoLabel" style="font-weight: bold;">Potential Eagle Scout</span>
+									</td>
+								</tr>
+								*/ ?>
+							</tbody>
+							</table>
+							</td>
+						</tr>
+					</tbody></table>
+				</div>
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" colspan="2">
+								<h2>Notes</h2>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" colspan="2">
+							<div class="infoText"><?= $data['notes'] ?></div>	
+							</td>
+						</tr>
+					</tbody>
+					</table>
+				</div>
+				<br />
+			</div>
+			
+			<div class="infoColumn" style="float: left; padding-left: 12px; height: 35%; width: 310px;">
+				
+				<div class="infoPane">
+					<div class="infoTitle" style="margin-top: 10px;"><h2>Volunteer Hours</h2></div>
+					<form>
+					<div id="hoursMessage" style="color: #c00; padding: 0 5px 10px 5px; display: none;">message</div>
+					<div id="hoursWrapper">
+					<table class="display infoTable">
+						<tbody>
+							<tr>
+								<thead>
+								<th style="padding-right: 0;">Date</th>
+								<th style="padding-right: 0;">Hours</th>
+								<th style="padding-right: 0;">
+									<div style="float: right; padding: 0 3px;"><input type="button" id="save-hours" class="btn-small" value="Save" /></div>
+									Type
+								</th>
+								</thead>
+							</tr>
+							<tr class="odd">
+								<td><input type="text" id="date" name="hoursData[date]" size="10" /></td>
+								<td><input type="text" id="hours" name="hoursData[hours]" size="4" /></td>
+								<td>
+								<select id="type" name="hoursData[type]" style="width: 110px;">
+									<?php if(!empty($volunteering_type)) { //211016
+										foreach($volunteering_type->settings as $type) {
+											//$replace = str_replace(' ', '_', strtolower($type['name']));
+											if(!empty($data['volunteering_type']))
+											$saved_types = explode(',', $data['volunteering_type']);
+											if(strtolower($type['name']) != 'other') {
+												if(!empty($saved_types) 
+											&& !in_array($type['id'], $saved_types)) {
+													continue;
+												}
+											}
+											echo '<option value="'.$type['id'].'">'.$type['name'].'</option>';
+										}
+									} ?>
+								<?php /* 
+									<option value="Other">Other</option>
+									<?=($data['family_event'] ? '<option value="Family Event">Family Event</option>' : '')?>
+									<?=($data['data_entry'] ? '<option value="Data Entry">Data Entry</option>' : '')?>
+									<?=($data['parent_mentor'] ? '<option value="Parent Mentor">Parent Mentor</option>' : '')?>
+									<?=($data['care_coordination'] ? '<option value="Care Coordination">Care Coordination</option>' : '')?>
+									<?=($data['eagle_scout'] ? '<option value="Eagle Scout">Potential Eagle Scout</option>' : '')?>
+									<?=($data['special_projects'] ? '<option value="Special Projects">Special Projects</option>' : '')?>
+									*/ ?>
+								</select>
+								<input type="hidden" id="eid" value="0">
+								</td>
+							</tr>
+							<? if(is_array($hoursData)) : ?>
+								<? $class = 'odd'; ?>
+								<? foreach($hoursData as $entry) : ?>
+							<tr class="<?=$class?>">
+								<td><?= $entry['formattedDate'] ?></td>
+								<td><?= $entry['hours'] ?></td>
+								<td><span><?= $settingOb->getSettingById($entry['type']); //211016 ?></span>&nbsp;&nbsp;<a href="javascript:;" class="editVHrs" data-id="<?= $entry['id'] ?>">Edit</a></td>
+							</tr>
+								<? $class = ($class == 'odd' ? 'even' : 'odd') ?>
+								<? endforeach; ?>
+							<? endif; ?>
+						</tbody>
+					</table>
+					</div>
+					</form>
+					<div class="bottom" style="padding-bottom: 12px;"></div>
+				</div>
+				
+				<div style="clear: both;"></div>
+		</div>
+		
+		<div style="clear: both;"></div>
+		
+	</div>
+	
+	
+</div>

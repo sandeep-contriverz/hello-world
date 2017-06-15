@@ -1,0 +1,225 @@
+
+<div class="pageTitleBar">
+	<h1>Volunteers</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="volunteer" /><input type="hidden" name="id" value="new" /><input type="submit" value="Add Volunteer" class="btn-small" /></form>
+	</div>
+	
+	<form id="searchFieldForm">
+	<input type="text" id="searchField" name="searchField" style="float: left; margin-right: 4px;  height: 20px; width: 207px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+			
+</div>	
+
+<div class="infoMain">
+	
+	<div class="titleBar">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="volunteer" /><input type="hidden" name="id" value="<?=($data['id'] ? $data['id'] : '')?>" /><input type="submit" value="View Volunteer" class="btn-small" /></form> <form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="volunteers" /><input type="submit" value="Volunteers List" class="btn-small" /></form>	
+		</div>
+		<div class="caption"><?=($data['first_name'] ? $data['first_name'] . ' ' . $data['last_name'] : '')?></div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+	
+	<form id="volunteerForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="volunteer" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+			
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px;">
+				
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" style="width: 50%;" colspan="2">
+								<h2>Contact Information</h2>
+							</td>
+							<td class="infoText" style="padding-left: 28px; margin: 25px 0;">
+								<span class="infoLabel" style="font-weight: bold;">Status&nbsp;&nbsp;</span>
+							</td>
+							<td>
+							<?= $volunteer->displayEnumSelect('data[status]', 'status', $data['status'], '', '7') ?>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Last Name</td>
+							<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[last_name]" value="<?= $data['last_name'] ?>" tabindex="1"></td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Organization</td>
+							<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[organization]" value="<?= $data['organization'] ?>" tabindex="8"></td>
+						</tr>
+
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">First Name</td>
+							<td class="infoText borderRight"><input type="text" style="width: 180px;" name="data[first_name]" value="<?= $data['first_name'] ?>" tabindex="2"></td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Phone</td>
+							<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[phone]" value="<?= $data['phone'] ?>" tabindex="9"></td>
+						</tr>
+						
+						<tr>
+							<td class="infoLabel" style="padding: 4px 0px 4px 12px;">Address</td>
+							<td class="infoText borderRight" style=""><input type="text" style="width: 180px;" name="data[address]" value="<?= $data['address'] ?>" tabindex="3"></td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Email</td>
+							<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[email]" value="<?= $data['email'] ?>" tabindex="10"></td>
+						</tr>
+
+						<tr>
+							<td class="infoLabel" style="width: 96px; padding: 4px 0px 4px 12px;">City</td>
+							<td class="infoText borderRight">
+							<?= $city->displaySelect('data[city]', $data['city'], ' ', '4', false, NULL, false) ?>
+							</td>
+
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">Languages</td>
+							<td class="infoText" style=""><input type="text" style="width: 180px;" name="data[language]" value="<?= $data['language'] ?>" tabindex="11"></td>
+						</tr>
+						
+						<tr>
+							<td class="infoLabel" style="padding: 4px 0px 4px 12px;">State:</td>
+							<td class="infoText" style="">
+								<input type="text" style="width: 32px; float: left;" name="data[state]" value="<?= $data['state'] ?>" tabindex="5">
+
+								<div class="infoLabel" style="float: left; padding-left: 19px; padding-right: 7px;">Zip Code:</div>
+								<input type="text" style="width: 60px; float: left;" name="data[zip]" value="<?= $data['zip'] ?>" tabindex="6">
+								<div style="clear: both;"></div>
+							</td>
+								
+							<td class="infoLabel" style="padding: 4px 0px 4px 28px;">How Heard:</td>
+							<td class="infoText" style="">
+							<?//= $volunteer->displayEnumSelect('data[how_heard]', 'how_heard', $data['how_heard'], '', '12', true) ?>
+							<?php //echo '$data : '.$data['how_heard'];die; ?>
+								<select id="how_heard" class="how_heard" tabindex="12" name="data[how_heard]">
+									<?php //201016
+										if(!empty($volunteer_heard)) {
+											foreach ($volunteer_heard as $heard) {
+												if(!empty($heard['disabled']))
+													continue;
+
+												$selected = ($heard['id'] == $data['how_heard'])
+													? ' selected="selected" ' : ' ';
+												echo '<option value="'.$heard['id'].'" '.$selected.'>'.$heard['name'].'</option>';
+											}
+										}
+									?>
+								</select>
+							</td>
+
+						</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" colspan="2">
+								<h2>Volunteer Areas</h2>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" colspan="2">
+							<table style="width: 80%; border: none;">
+							<tbody style="border: none;">
+							<tr>
+								<?php if(!empty($volunteering_type) && isset($volunteering_type->settings)) { //211016
+									$i = 0;
+									$index = 13;
+									foreach($volunteering_type->settings as $type) {
+										$checked = '';
+										if($i%2 == 0) {
+											echo '</tr><tr>';
+										}
+										if(strtolower($type['name']) == 'other') {
+											continue;
+										}
+										//$replace = str_replace(' ', '_', strtolower($type['name']));
+										
+										if(!empty($data['volunteering_type']))
+											$saved_types = explode(',', $data['volunteering_type']);
+										//echo $data[$replace];
+										if(!empty($saved_types) 
+											&& in_array($type['id'], $saved_types)) {
+											$checked = 'checked="checked"';
+										}
+										echo '<td style="padding-left: 12px;">';
+										//echo '<input type="hidden" name="data['.$type['name'].']" value="0" />';
+										echo '<input type="checkbox" name="data[volunteering_type][]" value="'.$type['id'].'" '.$checked.' tabindex="'.$index.'">';
+										echo '&nbsp;<span class="infoLabel" style="font-weight: bold;">'.$type['name'].'</span></td>';
+										$i++; $index++;
+									}
+								} ?>
+								</tr>
+								<?php /* 211016
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[family_event]" value="0" />
+									<input type="checkbox" name="data[family_event]" value="1"<?= ($data['family_event'] ? ' checked="checked"' : '') ?> tabindex="13" /> <span class="infoLabel" style="font-weight: bold;">Family Event</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[data_entry]" value="0" />
+									<input type="checkbox" name="data[data_entry]" value="1"<?= ($data['data_entry'] ? ' checked="checked"' : '') ?> tabindex="16" /> <span class="infoLabel" style="font-weight: bold;">Data Entry</span>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[parent_mentor]" value="0" />
+									<input type="checkbox" name="data[parent_mentor]" value="1"<?= ($data['parent_mentor'] ? ' checked="checked"' : '') ?> tabindex="14" /> <span class="infoLabel" style="font-weight: bold;">Parent Mentor</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[care_coordination]" value="0" />
+									<input type="checkbox" name="data[care_coordination]" value="1"<?= ($data['care_coordination'] ? ' checked="checked"' : '') ?> tabindex="17" /> <span class="infoLabel" style="font-weight: bold;">Care Coordination</span>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[special_projects]" value="0" />
+									<input type="checkbox" name="data[special_projects]" value="1"<?= ($data['special_projects'] ? ' checked="checked"' : '') ?> tabindex="15" /> <span class="infoLabel" style="font-weight: bold;">Special Projects</span>
+									</td>
+									<td style="padding-left: 12px;">
+									<input type="hidden" name="data[eagle_scout]" value="0" />
+									<input type="checkbox" name="data[eagle_scout]" value="1"<?= ($data['eagle_scout'] ? ' checked="checked"' : '') ?> tabindex="18" /> <span class="infoLabel" style="font-weight: bold;">Potential Eagle Scout</span>
+									</td>
+								</tr>
+								*/ ?>
+							</tbody>
+							</table>
+							</td>
+						</tr>
+					</tbody></table>
+				</div>
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody>
+						<tr>
+							<td class="infoTitle borderRight" colspan="2">
+								<h2>Notes</h2>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" colspan="2">
+							<textarea name="data[notes]" cols="139" rows="10" tabindex="20"><?= $data['notes'] ?></textarea>	
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" style="text-align: right;">
+								<input type="submit" name="save" value="Save" class="btn-small" tabindex="25" />
+								<? if($data['id']) : ?>
+								<input type="submit" name="delete" value="Delete" class="btn-small" onclick="return confirm('Are you sure you want to delete this volunteer?');" />
+								<? endif; ?>
+							</td>
+						</tr>
+					</tbody>
+					</table>
+				</div>
+				<br />
+			</div>
+		
+	</div>
+	
+	
+</div>

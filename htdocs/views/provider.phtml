@@ -1,0 +1,77 @@
+
+<div class="pageTitleBar">
+	<h1>Providers</h1>
+	<div style="float: right; padding: 0px 4px 4px 0; margin-left: 30px;">
+		<form action="index.php"><input type="hidden" name="action" value="provider" /><input type="hidden" name="id" value="new" /><input type="submit" name="edit" value="Add Provider" class="btn-small" /></form>
+	</div>
+
+	<form id="searchFieldForm" action="index.php">
+	<input type="hidden" name="action" value="providers" />
+	<input type="text" id="search" name="filters[quick]" value="<?=isset($_SESSION['providers']['filters']['quick']) ? $_SESSION['providers']['filters']['quick'] : ''?>" style="float: left; margin-right: 4px;  height: 20px; width: 207px; padding: 0 2px;" />
+	<input type="submit" value="Search" class="btn-small" />
+	</form>
+
+</div>
+
+<div class="infoMain">
+
+	<div class="titleBar">
+		<div style="float: right; padding: 4px 4px 4px 0; margin-left: 30px;">
+			<form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="provider" /><input type="hidden" name="id" value="<?=($data['id'] ? $data['id'] : '')?>" /><input type="submit" name="edit" value="Edit Provider" class="btn-small" /></form> <form action="index.php" style="display: inline-block;"><input type="hidden" name="action" value="providers" /><input type="submit" value="Service Providers List" class="btn-small" /></form>
+		</div>
+		<div class="caption"><?= (!empty($data['first_name']) ? $data['first_name'] : '') . (!empty($data['last_name']) ? ' ' . $data['last_name'] : '') ?></div>
+	</div>
+
+	<?=($message ? '<div class="message' . (isset($saved) && $saved ? ' saved' : ' error') . '">' . $message . '</div>' : '')?>
+
+	<form id="providerForm" action="index.php" method="POST">
+		<input type="hidden" name="action" value="provider" />
+		<input type="hidden" name="data[id]" value="<?=($data['id'] ? $data['id'] : '')?>" />
+
+		<div class="infoBody">
+			<div class="infoColumn" style="padding: 0px 12px; width: 65%; border-right: 1px solid #CACBCE; float: left;">
+
+				<div class="infoPane" style="margin-top: 12px;">
+					<table class="" style="width: 100%;" cellpadding="0" cellspacing="0">
+						<tbody><tr>
+							<td class="infoTitle borderRight" style="width: 50%;">
+								<h2>Primary Contact</h2>
+							</td>
+							<td class="infoTitle" style="padding-left: 12px;">
+								<h2>Clinic/Organization Name</h2>
+							</td>
+						</tr>
+						<tr>
+							<td class="infoText borderRight" style="width: 50%; padding-left: 12px;">
+								<?= $data['last_name'] ?> <?= ($data['first_name'] ? ', ' . $data['first_name'] : '') ?>
+								<?= $data['title'] ? ', ' . $data['title'] : '' ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Specialty:&nbsp;&nbsp;</span><?= $data['specialty'] ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Address:</span><br />
+								<?= $data['address'] ?><br />
+								<?= $data['city'] ?>, <?= $data['state'] ?>&nbsp;&nbsp;<?= $data['zip'] ?>
+							</td>
+							<td class="infoText" style="padding-left: 24px;">
+								<?= $data['employer'] ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Provider Role:&nbsp;&nbsp;</span><?= $data['role'] ?><br />
+								<br />
+								<span class="infoLabel" style="font-weight: bold;">Phone:&nbsp;&nbsp;</span><?= $data['phone'] ?><br />
+								<span class="infoLabel" style="font-weight: bold;">Fax:&nbsp;&nbsp;</span><?= $data['fax'] ?><br />
+								<span class="infoLabel" style="font-weight: bold;">Email:&nbsp;&nbsp;</span><a href="mailto:<?= $data['email'] ?>"><?= $data['email'] ?></a><br>
+								<span class="infoLabel" style="font-weight: bold;">Notes:&nbsp;&nbsp;</span><?= $data['notes'] ?><br />
+							</td>
+						</tr>
+					</tbody></table>
+				</div>
+				<br />
+			</div>
+
+
+		<div style="clear: both;"></div>
+
+	</div>
+
+
+</div>

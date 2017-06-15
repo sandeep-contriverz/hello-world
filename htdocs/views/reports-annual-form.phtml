@@ -1,0 +1,34 @@
+<style type="text/css">
+.titleBar select, #filter-form select, #search-form-table select{max-width: 100px;}
+</style>
+<script type="text/javascript">
+
+var newChildCurrentIndex = 0;
+$("document").ready(function(){
+	($('#reportType').on('change', function(){
+		window.location.href = "index.php?action=reports&type=annual&subtype=" + $(this).val();
+	}));
+});
+
+</script>
+<form id="annual-form" action="index.php">
+<input type="hidden" name="action" value="reports" />
+<input type="hidden" name="type" value="annual" />
+<div class="pageTitleBar" style="position: relative;">
+	<a href="index.php?action=reports"><h1>Annual Reports</h1></a>
+	<div style="float: right; padding: 8px 4px 4px 0; margin-left: 10px;">
+		<input type="submit" class="btn-small" id="create-report" name="createReport" value="Annual Reports" />
+	</div>
+</div>
+
+<div id="annual-reports">
+	<div class="message"><?= $message ?></div>
+	<div class="reportTitle">Select a report</div>
+	<select id="reportType" name="report">
+		<option></option>
+		<option value="hmg-export"<?=(isset($_GET['report']) && $_GET['report'] == 'hmg-export' ? ' selected' : '')?>>Annual Report Export for HMG</option>
+		<option value="client-tracker"<?=(isset($_GET['report']) && $_GET['report'] == 'client-tracker' ? ' selected' : '')?>>Client Tracker</option>
+	</select>
+
+</div>
+</form>

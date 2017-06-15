@@ -1,0 +1,413 @@
+<link href="css/chosen.css" rel="stylesheet">
+<script type="text/javascript" src="js/chosen.jquery.js"></script>
+<?
+use Hmg\Models\Setting;
+use Hmg\Models\Zip;
+use Hmg\Models\SchoolDistrict;
+use Hmg\Models\Organization;
+use Hmg\Models\Event;
+use Hmg\Helpers\SessionHelper as FilterHelper;
+
+use Hmg\Models\EventAttachment;
+
+$organization   = new Organization();
+
+$county         = new Setting('county');
+$zip            = new zip();
+$language       = new Setting('language');
+$event_type     = new Setting('event_type');
+$outreach_type  = new Setting('outreach_type');
+$time_of_day    = new Setting('time_of_day');
+
+
+$schoolDistrict = new schoolDistrict();
+$filterHelper = new FilterHelper();
+$filters = $filterHelper->getFamilyFilters();
+
+?>
+<style type="text/css">
+.file-name{ display:block; }
+#event_zipcode_id_chosen{ width:140px !important; }
+#attachment-container-event .file-name{ display:block !important; }
+#attachment-container-event{ padding-right: 10px; max-width: 300px; }
+</style>
+<script type="text/javascript">
+$( document ).ready(function() {
+
+	$(".chosen-select").chosen();
+
+    $('.fancybox').fancybox({
+		padding : '0px', scrolling : 'no',afterClose: function(){
+	      // fancybox is closed, run custom code
+	      //$('.providerAutoCompList').hide();
+	      $('.fancybox-close').click();
+	    }
+
+	});
+	$('#event-date').click(function(){
+		$('.date').datepicker({ dateFormat: 'yy-mm-dd' });
+	});
+	//23-11
+	$('#eventDiv').on('click', '.edit-event', function(e){
+		//e.preventDefault();
+		id = $(this).attr('id').split('_')[1];
+		$('#event_id').val(id);
+		request = 'action=event&id=' + id + '&get-form=1';	
+		$.post('index.php', request, function(data){
+			if(! $.isEmptyObject(data)){
+				
+				$("#add-organization-event").html(data);
+				setTimeout(function(){
+				$.fancybox.open(
+					'#add-organization-event', 
+					{
+						padding : '0px', scrolling : 'no'
+					}
+				)},500);
+				//$('#edit_' + id).parent().trigger('click');
+
+				$('.date').datepicker();
+			}
+		});
+		return false;
+		
+	});
+    
+    $('#eventDiv').on('click', '.delete-event', function(e){
+		//e.preventDefault();
+		id = $(this).attr('id').split('_')[1];
+		var confirmDelete = confirm('Are you sure you want to delete this event?');
+		if(confirmDelete){
+            request = 'action=event&deleteevent=true&id=' + id + '&get-form=1';	
+            $.post('index.php', request, function(data){
+                $('#eventsRow_details_'+id).remove();
+                $('#eventsRow_'+id).remove();
+            });
+            return false;
+        }
+		
+	});
+	//23-11
+	
+
+	$('.enable-multi-select').on('change', function(e){
+		var checkbox = $(this);
+		var select = checkbox.prev();
+		if(checkbox.prop('checked')){
+			select.attr('multiple', true);
+			select.attr('size', 5);
+			var name = select.attr('name');
+			select.attr('name', name + '[]');
+			select.find(':first-child').remove();
+		} else {
+			select.attr('multiple', false);
+			select.attr('size', '');
+			var name = select.attr('name');
+			select.attr('name', name.replace('[]', ''));
+		}
+	});
+	$('.js-toggle-worker-select').on('change', function(e){
+		var checkbox = $(this);
+		var hiddenHmgWorkerSelect = $('.hide-hmg-worker');
+		var hmgWorkerSelect = $('.hmg_worker');
+		hmgWorkerSelect.removeClass('hmg_worker').addClass('hide-hmg-worker');
+		hmgWorkerSelect.prop('disabled', true);
+		hiddenHmgWorkerSelect.addClass('hmg_worker').removeClass('hide-hmg-worker');
+		hiddenHmgWorkerSelect.prop('disabled', false);
+	});
+	$('#event_form').submit(function(e){
+		e.preventDefault();
+		
+	 	var form = $('#event_form')[0];
+	 	
+		$.ajax({
+	    	url: 'index.php', 
+	    	type: 'POST',
+	    	//data: form.serialize(),
+	    	contentType: false,
+	    	cache:false,
+	    	data: new FormData(form),
+	    	processData: false,
+	    	success: function(result){
+	    		$('.fancybox-close').click();
+	    		location.reload();
+			},
+			error: function(result){
+				console.log("error");
+				console.log(result);
+				
+			}
+		});
+	});
+	
+	$("#attachment-container-event").on('click', '.remove-file', function(e){
+		e.preventDefault();
+		
+		
+		var event_id = $(this).attr('id');
+		
+		var confirmDelete = confirm('Are you sure you want to remove this file?');
+		if(confirmDelete){
+			$.post('index.php', "action=organization-event-attachments&attachmentId=" + $(this).data('id'), function(data){
+				if(! $.isEmptyObject(data)){
+					
+					//alert(data.event_id);
+					reloadAttachments(data.event_id, true);
+					
+				}
+			});
+		}
+	});
+	
+	
+});
+</script>
+<script>
+function reloadAttachments(id, showFiles) {
+	var request = 'action=organization-event-attachments';
+	request += '&id=' + id;
+
+	request += '&get-attachments=1';
+
+	$.post('index.php', request, function(data){
+		if(! $.isEmptyObject(data)){
+			
+			$('#attachment-container-event').html(data);
+			
+			if (showFiles) {
+			  $('.file-name').toggle();
+			}
+		} else 
+		{
+			$('#attachment-container-event').empty();
+		}
+	});
+}
+</script>
+
+
+
+<script type="text/javascript" src="js/autoCompleteProviders.js"></script>
+
+<?php
+if (isset($_REQUEST['event_id'])) {
+?>
+<script type="text/javascript">	
+	window.onload = function() 
+	{
+		
+		window.parent.reloadAttachments(<?=$_REQUEST['event_id']?>);
+		
+
+	}
+</script>
+<?php
+}
+?>
+<?php 
+$event_data =isset($event_data) ? $event_data : '';
+
+
+
+//echo "<pre>";print_r($event_data);?>
+
+<div> 
+	<div class="titleBar" style="padding-left: 10px;"><span class="caption" style="">Event Details</span></div>
+	<form class="search-form" id="event_form" action="" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="action" value="event">
+		<input type="hidden" name="organization_sites_id" value="<?= $data['organization_sites_id']?>"/>
+	
+ 		<input type="hidden" name="event_id" id="event_id" value="<?= isset($event_data['event_id']) ? $event_data['event_id'] : 'add'?>"/>
+ 	
+		<table id="add-organization-event-table">
+
+			<tbody>
+				<tr>
+					<td class="label">Event Name: </td>
+					<td>
+						<input type="text" id="event_name" name="event_name" value="<?= isset($event_data['event_name']) ? $event_data['event_name'] : ''  ?>" required/>
+					</td>
+					<td class="label">Event Contact: </td>
+					<td>
+                        <select name="event_contact_id">
+                            <option value="" disabled ></option><?php 
+
+                            if(!empty($data['contacts'])) { 
+                                foreach($data['contacts'] as $dc) { 
+                                    $selected = "";
+                                    $contact_id =0;
+                                    if(isset($event_data) && !empty($event_data)){
+                                        $contact_id = $event_data['event_contact_id'];
+                                    }
+                                    if($contact_id == $dc['id']){
+                                        $selected ="selected='selected'";
+                                    }
+
+                                    ?>
+                                <option value="<?= $dc['id']?>" <?php echo $selected;?>> <?= $dc['first'].' '.$dc['last']?> </option>
+                            <?php }}?>
+                        </select>
+						
+					</td>
+					<td class="label"># of Staff: </td>
+					<td>
+						<input type="text" id="no_of_staff" name="no_of_staff" value="<?= isset($event_data['no_of_staff']) ? $event_data['no_of_staff'] : ''  ?>" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Event Type: </td>
+					<td>
+						<?= $event_type->displaySelect('event_type_id', (isset($event_data['event_type_id']) ? $event_data['event_type_id'] : ''), ' ') ?>
+					</td>
+					<td class="label">HMG Worker: </td>
+					<td>
+						<? $hmg_worker = (!empty($event_data) && isset($event_data['hmg_worker'])) ? $event_data['hmg_worker'] : $_SESSION['user']['id']; 
+						?>
+						<?= $organization->displayHmgWorkerSelect('hmg_worker', $hmg_worker, ' ', 20, '', false, true) ?>
+					</td>
+					<td class="label"># of Volunteers: </td>
+					<td>
+						<input type="text" id="no_of_volunteers" name="no_of_volunteers" value="<?= isset($event_data['no_of_volunteers']) ? $event_data['no_of_volunteers'] : ''  ?>" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Outreach Type: </td>
+					<td>
+						<?= $outreach_type->displaySelect('outreach_type_id', (isset($event_data['outreach_type_id']) ? $event_data['outreach_type_id'] : ''), ' ') ?>
+					</td>
+					<td class="label">Event Venue: </td>
+					<td>
+						<input type="text" name="event_venue" id="event_venue" value="<?= isset($event_data['event_venue']) ? $event_data['event_venue'] : ''  ?>" />
+					</td>
+					<td class="label"># of ASQ's Completed: </td>
+					<td>
+						<input type="text" id="no_of_asq_completed" name="no_of_asq_completed" value="<?= isset($event_data['no_of_asq_completed']) ? $event_data['no_of_asq_completed'] : ''  ?>" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Event Date: </td>
+					<td>
+						<input class="date" type="text" id="event_date" name="event_date" placeholder="mm/dd/yyyy" value="<?= isset($event_data['event_date']) ? $event_data['event_date'] : ''  ?>"/>
+					</td>
+					
+					<td class="label"># of People: </td>
+					<td>
+						<input type="text" id="no_of_people" name="no_of_people" value="<?= isset($event_data['no_of_people']) ? $event_data['no_of_people'] : ''  ?>" />
+					</td>
+					<td class="label"># of Enrollment Forms: </td>
+					<td>
+						<input type="text" id="enrollment_forms" name="enrollment_forms" value="<?= isset($event_data['enrollment_forms']) ? $event_data['enrollment_forms'] : ''  ?>" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Event Zip Code: </td>
+					<td>
+						<?= $zip->displaySelect('event_zipcode_id',(isset($event_data['event_zipcode_id']) ? $event_data['event_zipcode_id']: ''), ' ', '', false, 'chosen-select') ?>
+
+						
+					</td>
+					
+					<td class="label"># of Families: </td>
+					<td>
+						<input type="text" id="no_of_families" name="no_of_families" value="<?= isset($event_data['no_of_families']) ? $event_data['no_of_families'] : ''  ?>" />
+					</td>
+
+					<td class="label">Pitches: </td>
+					<td>
+						<input type="text" id="pitches" name="pitches" value="<?= isset($event_data['pitches']) ? $event_data['pitches'] : ''  ?>" />
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Event County: </td>
+					<td>
+						
+						<?= $county->displaySelect('event_county_id', (isset($event_data['event_county_id']) ? $event_data['event_county_id'] : ''), ' ') ?>
+					</td>
+					
+					<td class="label">Duration(min): </td>
+					<td>
+						<input type="text" id="event_duration" name="event_duration" value="<?= isset($event_data['event_duration']) ? $event_data['event_duration'] : ''  ?>" />
+					</td>
+                    <td class="label">Language: </td>
+					<td>
+						<?= $language->displaySelect('event_language', (isset($event_data['event_language']) ? $event_data['event_language'] : ''), ' ') ?>
+					</td>
+				</tr>
+				<tr>
+					<td class="label">Quality Of Interactions: </td>
+					<td id="interactions">
+					<?php for($i=1;$i<=5;$i++){
+							$checked="";
+							if(isset($event_data['quality_of_interactions'])){ 
+								$value = $event_data['quality_of_interactions'];	
+							
+								if ($value == $i){
+									$checked = "checked";
+								}
+							}?>
+								<input type="radio" name="quality_of_interactions" value="<?php echo $i;?>" <?php echo $checked; ?> > 
+								<?php echo $i;	
+						}
+					?>
+					</td>
+					<td class="label">Time of Day: </td>
+					<td id="time">	
+						<?php if(!empty($time_of_day) && isset($time_of_day->settings)) { 
+							$i = 0;
+							foreach($time_of_day->settings as $type) {
+								//echo "<pre>";print_r($time_of_day);die;
+								$checked = '';
+								$saved_types = array();
+								if(strtolower($type['name']) == '') {
+									continue;
+								}
+								if(!empty($event_data['time_of_day']))
+									$saved_types = explode(',', $event_data['time_of_day']);
+
+								//	echo "<pre>";print_r($saved_types);}
+																			
+								if(!empty($saved_types) 
+									&& in_array($type['id'], $saved_types)) {
+									$checked = 'checked="checked"';
+								}
+								echo '<input type="checkbox" name="time_of_day[]" value="'.$type['id'].'" '.$checked.'>'.$type['name'].'<br>';
+								$i++;
+							}
+						} ?>
+					</td>
+					<td class="label">Attachments: </td>
+					<td>
+					<div id="attachment-container-event"></div>
+					<?= isset($event_data['attachments']) ? "<span style='margin-top:5px;display:block;font-weight:bold;'>".$event_data['attachments'] ."</span>" : ''  
+					?>
+					
+					<? if(isset($event_data['event_id']) && !empty($event_data['event_id']))
+					{
+						  
+					?>
+					<iframe id="screening-attachment-frame" scrolling="no" src="index.php?action=event-file-attachment&id=<?= isset($event_data['event_id']) ? $event_data['event_id'] : 'add'?>&type=event<?= (isset($event_data) ? '&show-button=1' : '') ?>" style="width: 200px; height: 46px; margin: 0px; overflow: hidden;"></iframe>
+					  
+					<?
+					} 
+					else
+					{
+					?>
+					<input name="file" type="file" class="choose-file-input" />
+					
+					<?
+					}
+					?>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="6" style="margin-left:10px;"><textarea rows="4" cols="180" id="event_notes" name="event_notes" placeholder="Event Notes" ><?= isset($event_data['event_notes']) ? $event_data['event_notes'] : ''?></textarea></td>
+				</tr>
+				<tr>
+					<td colspan="4" style="text-align: right"><input type="submit" id="event_submit" id="add_orgni" value="Save" class="btn-small" /> 
+					</td>
+				</tr>
+			
+			</tbody>
+		</table>
+	</form>
+</div>
